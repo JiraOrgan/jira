@@ -25,4 +25,4 @@ jwt:
 
 logging:
   level:
-    com.jira.mng: DEBUG
+    com.pch.mng: DEBUG

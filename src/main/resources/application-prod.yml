@@ -35,7 +35,7 @@ springdoc:
 
 logging:
   level:
-    com.jira.mng: INFO
+    com.pch.mng: INFO
     root: WARN
   file:
     name: /var/log/app/application.log

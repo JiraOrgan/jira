@@ -1,0 +1,12 @@
+{
+  "basePackage": "com.pch.mng",
+  "pkType": "Long",
+  "lombokStyle": "data",
+  "builderStyle": "constructor",
+  "responseWrapper": "ApiResponse",
+  "templateEngine": "none",
+  "methodNaming": "english",
+  "tableNaming": "snake_tb",
+  "dtoConversion": "static-factory",
+  "fetchType": "LAZY"
+}
