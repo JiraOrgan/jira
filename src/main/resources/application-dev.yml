@@ -37,6 +37,6 @@ springdoc:
 # 개발 로깅
 logging:
   level:
-    com.jira.mng: DEBUG
+    com.pch.mng: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql: TRACE

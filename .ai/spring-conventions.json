@@ -1,5 +1,5 @@
 {
-  "basePackage": "com.jira.mng",
+  "basePackage": "com.pch.mng",
   "pkType": "Long",
   "lombokStyle": "data",
   "builderStyle": "constructor",
