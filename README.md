@@ -141,7 +141,7 @@
 
 ```bash
 # 1. 레포지토리 클론
-git clone https://github.com/your-org/project-control-hub.git
+git clone https://github.com/Project-Control-Hub/phs.git
 cd spring-react-flutter-jira-mng
 
 # 2. 환경변수 설정
@@ -370,7 +370,7 @@ chore:       build.gradle 의존성 업데이트
 
 본 프로젝트의 기획/설계 원본 문서는 별도 레포지토리에서 관리됩니다.
 
-> [JiraOrgan/documents](https://github.com/JiraOrgan/documents)
+> [Project-Control-Hub/documents](https://github.com/Project-Control-Hub/documents)
 
 | 문서 | 설명 |
 |------|------|
