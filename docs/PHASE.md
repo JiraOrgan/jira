@@ -1,4 +1,4 @@
-# Jira 프로젝트 관리 시스템 - Phase 로드맵
+# Project Control Hub - Phase 로드맵
 
 > **버전**: v1.0
 > **작성일**: 2026-03-22

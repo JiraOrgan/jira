@@ -1,8 +1,8 @@
-# Jira 프로젝트 관리 시스템 - PRD (Product Requirements Document)
+# Project Control Hub - PRD (Product Requirements Document)
 
 > **버전**: v1.0
 > **작성일**: 2026-03-22
-> **원본 문서**: [jira-doc](https://github.com/JiraOrgan/documents) 기반 종합
+> **원본 문서**: [project-doc](https://github.com/your-org/documents) 기반 종합
 > **상태**: 초안
 
 ---

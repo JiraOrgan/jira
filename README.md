@@ -1,4 +1,4 @@
-# Jira 프로젝트 관리 시스템
+# Project Control Hub
 
 > 애자일 팀을 위한 이슈 트래킹, 스프린트 관리, 워크플로우 자동화 통합 협업 플랫폼
 
@@ -48,7 +48,7 @@
 - **스크럼/칸반 보드**: 드래그앤드롭 상태 전환, WIP 제한, 스윔레인, 스프린트 번다운 차트
 - **스프린트 관리**: 생성/시작/완료 라이프사이클, 백로그 우선순위 관리, 스토리 포인트 산정
 - **대시보드**: 역할별 가젯 구성 (번다운/속도/CFD 차트), 커스터마이징 가능
-- **JQL 검색**: Jira Query Language 검색 엔진, 자동완성, 필터 저장
+- **JQL 검색**: PCH Query Language 검색 엔진, 자동완성, 필터 저장
 - **릴리즈 관리**: Fix Version, 릴리즈 노트 자동 생성, Semantic Versioning
 - **RBAC 권한**: Admin/Developer/QA/Reporter/Viewer 5단계 역할 기반 접근 제어
 - **감사 로그**: 전체 필드 변경 추적, CSV/JSON 내보내기
@@ -141,7 +141,7 @@
 
 ```bash
 # 1. 레포지토리 클론
-git clone https://github.com/JiraOrgan/spring-react-flutter-jira-mng.git
+git clone https://github.com/your-org/project-control-hub.git
 cd spring-react-flutter-jira-mng
 
 # 2. 환경변수 설정
