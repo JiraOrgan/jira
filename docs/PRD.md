@@ -2,7 +2,7 @@
 
 > **버전**: v1.0
 > **작성일**: 2026-03-22
-> **원본 문서**: [project-doc](https://github.com/your-org/documents) 기반 종합
+> **원본 문서**: [Project-Control-Hub/documents](https://github.com/Project-Control-Hub/documents) 기반 종합
 > **상태**: 초안
 
 ---
