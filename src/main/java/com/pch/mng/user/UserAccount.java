@@ -1,5 +1,6 @@
 package com.pch.mng.user;
 
+import com.pch.mng.global.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
@@ -28,6 +29,15 @@ public class UserAccount {
     @Column(nullable = false)
     private String name;
 
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
+
+    private boolean isLocked;
+
+    private int failedLoginAttempts;
+
+    private LocalDateTime lockedUntil;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
@@ -35,9 +45,35 @@ public class UserAccount {
     private LocalDateTime updatedAt;
 
     @Builder
-    public UserAccount(String email, String password, String name) {
+    public UserAccount(String email, String password, String name, UserRole role) {
         this.email = email;
         this.password = password;
         this.name = name;
+        this.role = role != null ? role : UserRole.LEARNER;
+        this.isLocked = false;
+        this.failedLoginAttempts = 0;
+    }
+
+    public void incrementFailedAttempts() {
+        this.failedLoginAttempts++;
+        if (this.failedLoginAttempts >= 5) {
+            this.isLocked = true;
+            this.lockedUntil = LocalDateTime.now().plusMinutes(30);
+        }
+    }
+
+    public void resetFailedAttempts() {
+        this.failedLoginAttempts = 0;
+        this.isLocked = false;
+        this.lockedUntil = null;
+    }
+
+    public boolean isAccountLocked() {
+        if (!isLocked) return false;
+        if (lockedUntil != null && LocalDateTime.now().isAfter(lockedUntil)) {
+            resetFailedAttempts();
+            return false;
+        }
+        return true;
     }
 }

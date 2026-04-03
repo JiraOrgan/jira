@@ -1,0 +1,81 @@
+-- User
+CREATE TABLE IF NOT EXISTS user_account_tb (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'LEARNER',
+    is_locked BOOLEAN NOT NULL DEFAULT FALSE,
+    failed_login_attempts INT NOT NULL DEFAULT 0,
+    locked_until DATETIME NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Course
+CREATE TABLE IF NOT EXISTS course_tb (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    instructor_id BIGINT,
+    status VARCHAR(20) NOT NULL DEFAULT 'DRAFT',
+    thumbnail_url VARCHAR(500),
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (instructor_id) REFERENCES user_account_tb(id)
+);
+
+-- Section
+CREATE TABLE IF NOT EXISTS section_tb (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    course_id BIGINT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    order_index INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (course_id) REFERENCES course_tb(id)
+);
+
+-- Lesson
+CREATE TABLE IF NOT EXISTS lesson_tb (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    section_id BIGINT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    content LONGTEXT,
+    content_type VARCHAR(20) NOT NULL DEFAULT 'TEXT',
+    video_url VARCHAR(500),
+    order_index INT NOT NULL DEFAULT 0,
+    duration_minutes INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (section_id) REFERENCES section_tb(id),
+    INDEX idx_lesson_section_order (section_id, order_index)
+);
+
+-- Enrollment
+CREATE TABLE IF NOT EXISTS enrollment_tb (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    course_id BIGINT NOT NULL,
+    progress INT NOT NULL DEFAULT 0,
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user_account_tb(id),
+    FOREIGN KEY (course_id) REFERENCES course_tb(id),
+    UNIQUE KEY uk_enrollment_user_course (user_id, course_id)
+);
+
+-- Outbox Event
+CREATE TABLE IF NOT EXISTS outbox_event_tb (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    event_type VARCHAR(100) NOT NULL,
+    payload LONGTEXT NOT NULL,
+    destination_topic VARCHAR(100) NOT NULL,
+    dedup_key VARCHAR(255) NOT NULL UNIQUE,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    retry_count INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    published_at DATETIME NULL,
+    INDEX idx_outbox_status (status)
+);
