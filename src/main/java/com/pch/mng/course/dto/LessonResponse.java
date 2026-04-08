@@ -34,6 +34,7 @@ public final class LessonResponse {
             String videoUrl,
             int orderIndex,
             int durationMinutes,
+            Integer videoDuration,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
@@ -47,6 +48,7 @@ public final class LessonResponse {
                     lesson.getVideoUrl(),
                     lesson.getOrderIndex(),
                     lesson.getDurationMinutes(),
+                    lesson.getVideoDuration(),
                     lesson.getCreatedAt(),
                     lesson.getUpdatedAt()
             );

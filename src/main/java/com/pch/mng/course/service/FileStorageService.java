@@ -33,6 +33,7 @@ public class FileStorageService {
 
     private static final long MAX_IMAGE_SIZE = 10 * 1024 * 1024;   // 10MB
     private static final long MAX_DOCUMENT_SIZE = 50 * 1024 * 1024; // 50MB
+    private static final long MAX_VIDEO_SIZE = 500 * 1024 * 1024;  // 500MB
 
     private static final Set<String> ALLOWED_IMAGE_TYPES = Set.of(
             "image/jpeg", "image/png", "image/gif", "image/webp");
@@ -84,6 +85,10 @@ public class FileStorageService {
                 .build());
     }
 
+    public String getFileUrl(String objectKey) {
+        return endpoint + "/" + bucket + "/" + objectKey;
+    }
+
     private void validateFile(MultipartFile file) {
         if (file.isEmpty()) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
@@ -101,7 +106,9 @@ public class FileStorageService {
                 throw new BusinessException(ErrorCode.FILE_TOO_LARGE);
             }
         } else if (ALLOWED_VIDEO_TYPES.contains(contentType)) {
-            // Video size limits can be configured separately
+            if (size > MAX_VIDEO_SIZE) {
+                throw new BusinessException(ErrorCode.FILE_TOO_LARGE);
+            }
         } else {
             throw new BusinessException(ErrorCode.UNSUPPORTED_FILE_TYPE);
         }

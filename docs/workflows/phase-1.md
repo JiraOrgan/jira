@@ -3,7 +3,7 @@
 > **기간**: 2026-04-07 ~ 05-04
 > **마일스톤**: M1 — MVP 기반
 > **Task 수**: 21개 (T-101 ~ T-121)
-> **완료**: 12/21 (Week 1~2 완료)
+> **완료**: 14/21 (Week 1~2 완료, Week 3 Backend 완료)
 > **연결 문서**: [TASKS.md](../TASKS.md) | [PHASE.md](../PHASE.md) | [README.md](README.md)
 
 ### Week 진행 상태
@@ -12,7 +12,7 @@
 |------|------|------|------|------|
 | Week 1 | DB 설계 + 엔티티 + JWT 인증 | T-101~T-107 | 7/7 | DONE |
 | Week 2 | 강의 CRUD + 수강 + 파일 업로드 | T-108~T-112 | 5/5 | DONE |
-| Week 3 | 콘텐츠 관리 | T-113~T-115 | 0/3 | TODO |
+| Week 3 | 콘텐츠 관리 | T-113~T-115 | 2/3 | IN_PROGRESS |
 | Week 4 | React 레이아웃 + 강의 UI | T-116~T-121 | 0/6 | TODO |
 
 ---
@@ -637,16 +637,16 @@
 
 #### 완료 기준
 
-- [ ] 영상 파일 업로드 후 MinIO에 저장 확인
-- [ ] Presigned URL 또는 Range Request로 영상 스트리밍 동작
-- [ ] 레슨에 영상 URL 및 재생 시간 메타데이터 저장
-- [ ] Flyway V2 마이그레이션 정상 실행
+- [x] 영상 파일 업로드 후 MinIO에 저장 확인
+- [x] Presigned URL 또는 Range Request로 영상 스트리밍 동작
+- [x] 레슨에 영상 URL 및 재생 시간 메타데이터 저장
+- [x] Flyway V2 마이그레이션 정상 실행
 
 #### 규칙 체크리스트
 
-- [ ] Flyway 파일명 규칙 준수 (`V2__add_video_fields.sql`)
-- [ ] 기존 Flyway 마이그레이션 파일(V1) 수정 금지
-- [ ] 수동 DDL 실행 금지
+- [x] Flyway 파일명 규칙 준수 (`V2__add_video_duration.sql`)
+- [x] 기존 Flyway 마이그레이션 파일(V1) 수정 금지
+- [x] 수동 DDL 실행 금지
 
 ---
 
@@ -680,16 +680,16 @@
 
 #### 완료 기준
 
-- [ ] 비로그인 사용자가 강의 목록 조회 가능 (PUBLISHED만 노출)
-- [ ] 강의 상세에서 섹션/레슨 구조, 강사 정보, 수강생 수 표시
-- [ ] 키워드 검색 + 정렬 (최신순/인기순) 동작
-- [ ] DRAFT 상태 강의는 비로그인 사용자에게 노출되지 않음
+- [x] 비로그인 사용자가 강의 목록 조회 가능 (PUBLISHED만 노출)
+- [x] 강의 상세에서 섹션/레슨 구조, 강사 정보, 수강생 수 표시
+- [x] 키워드 검색 + 정렬 (최신순/인기순) 동작
+- [x] DRAFT 상태 강의는 비로그인 사용자에게 노출되지 않음
 
 #### 규칙 체크리스트
 
-- [ ] DTO는 Java record 사용
-- [ ] 공통 응답 `ApiResponse<T>` 래핑
-- [ ] 페이징은 `PageResponse<T>` 사용
+- [x] DTO는 Java record 사용
+- [x] 공통 응답 `ApiResponse<T>` 래핑
+- [x] 페이징은 `PageResponse<T>` 사용
 
 ---
 

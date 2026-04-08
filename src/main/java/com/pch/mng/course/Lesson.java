@@ -39,6 +39,8 @@ public class Lesson {
 
     private int durationMinutes;
 
+    private Integer videoDuration;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
@@ -47,7 +49,7 @@ public class Lesson {
 
     @Builder
     public Lesson(Section section, String title, String content, ContentType contentType,
-                  String videoUrl, int orderIndex, int durationMinutes) {
+                  String videoUrl, int orderIndex, int durationMinutes, Integer videoDuration) {
         this.section = section;
         this.title = title;
         this.content = content;
@@ -55,15 +57,18 @@ public class Lesson {
         this.videoUrl = videoUrl;
         this.orderIndex = orderIndex;
         this.durationMinutes = durationMinutes;
+        this.videoDuration = videoDuration;
     }
 
     public void update(String title, String content, ContentType contentType,
-                       String videoUrl, int orderIndex, int durationMinutes) {
+                       String videoUrl, int orderIndex, int durationMinutes,
+                       Integer videoDuration) {
         this.title = title;
         this.content = content;
         this.contentType = contentType;
         this.videoUrl = videoUrl;
         this.orderIndex = orderIndex;
         this.durationMinutes = durationMinutes;
+        this.videoDuration = videoDuration;
     }
 }
