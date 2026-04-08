@@ -1,395 +1,343 @@
-# Project Control Hub
+# LearnFlow AI
 
-> 애자일 팀을 위한 이슈 트래킹, 스프린트 관리, 워크플로우 자동화 통합 협업 플랫폼
+> LLM 기반 적응형 학습 관리 시스템 (AI-LMS)
 
 ![Java](https://img.shields.io/badge/Java-21-007396?style=flat-square&logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.3-6DB33F?style=flat-square&logo=springboot&logoColor=white)
-![Spring Security](https://img.shields.io/badge/Spring_Security-JWT-6DB33F?style=flat-square&logo=springsecurity&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0-6DB33F?style=flat-square&logo=springboot&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)
-![Flutter](https://img.shields.io/badge/Flutter-3.41-02569B?style=flat-square&logo=flutter&logoColor=white)
+![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=flat-square&logo=flutter&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat-square&logo=mysql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-7.x-DC382D?style=flat-square&logo=redis&logoColor=white)
-![Gradle](https://img.shields.io/badge/Gradle-9.4-02303A?style=flat-square&logo=gradle&logoColor=white)
+![Kafka](https://img.shields.io/badge/Kafka-3.x-231F20?style=flat-square&logo=apachekafka&logoColor=white)
+![Claude](https://img.shields.io/badge/Claude_API-Anthropic-191919?style=flat-square)
 
 ---
 
-## 📋 목차
+## 목차
 
-- [프로젝트 소개](#-프로젝트-소개)
-- [주요 기능](#-주요-기능)
-- [기술 스택](#️-기술-스택)
-- [시스템 아키텍처](#️-시스템-아키텍처)
-- [시작하기](#-시작하기)
-- [환경변수 설정](#-환경변수-설정)
-- [프로젝트 구조](#-프로젝트-구조)
-- [API 명세](#-api-명세)
-- [ERD](#️-erd)
-- [기여 가이드](#-기여-가이드)
-- [프로젝트 문서](#-프로젝트-문서)
+- [프로젝트 소개](#프로젝트-소개)
+- [주요 기능](#주요-기능)
+- [기술 스택](#기술-스택)
+- [시스템 아키텍처](#시스템-아키텍처)
+- [시작하기](#시작하기)
+- [프로젝트 구조](#프로젝트-구조)
+- [API 경로](#api-경로)
+- [ERD](#erd)
+- [프로젝트 문서](#프로젝트-문서)
+- [기여 가이드](#기여-가이드)
 
 ---
 
-## 📌 프로젝트 소개
+## 프로젝트 소개
 
-소프트웨어 개발팀의 애자일(Agile) 방법론을 지원하는 이슈 트래킹 및 프로젝트 관리 시스템입니다. 이슈 관리, 워크플로우 엔진, 스크럼/칸반 보드, 스프린트 관리, JQL 검색, 대시보드, REST API를 포함하는 통합 협업 플랫폼을 목표로 합니다.
+기존 LMS의 일방향 학습 구조를 넘어, AI/LLM 기술로 학습자 개개인에게 맞춤형 학습 경험을 제공하는 차세대 학습 관리 시스템입니다.
 
 | 항목 | 내용 |
 |------|------|
-| 개발 기간 | 2026-04-01 ~ 2026-07-31 (18주) |
-| 팀 구성 | PM, 백엔드, 프론트엔드, QA, 디자이너 |
-| 문서 | [PRD](docs/PRD.md) &#124; [Phase 로드맵](docs/PHASE.md) &#124; [Task 목록](docs/TASKS.md) |
+| 개발 기간 | 2026-04-07 ~ 2026-09-27 (24주) |
+| Phase | 6개 Phase, 116개 Task |
+| 역할 | 학습자 (Learner), 강사 (Instructor), 관리자 (Admin) |
+| 문서 | [PRD](docs/PRD.md) · [Phase 로드맵](docs/PHASE.md) · [Task 목록](docs/TASKS.md) · [ERD](docs/erd/learnflow-erd.md) |
 
 ---
 
-## ✨ 주요 기능
+## 주요 기능
 
-- **이슈 관리**: Epic/Story/Task/Bug/Sub-task 5가지 타입 CRUD, 이슈 간 링크, 레이블/컴포넌트 분류
-- **워크플로우**: 6단계 표준 워크플로우 (Backlog → Selected → In Progress → Code Review → QA → Done), 조건부 전환 규칙
-- **스크럼/칸반 보드**: 드래그앤드롭 상태 전환, WIP 제한, 스윔레인, 스프린트 번다운 차트
-- **스프린트 관리**: 생성/시작/완료 라이프사이클, 백로그 우선순위 관리, 스토리 포인트 산정
-- **대시보드**: 역할별 가젯 구성 (번다운/속도/CFD 차트), 커스터마이징 가능
-- **JQL 검색**: PCH Query Language 검색 엔진, 자동완성, 필터 저장
-- **릴리즈 관리**: Fix Version, 릴리즈 노트 자동 생성, Semantic Versioning
-- **RBAC 권한**: Admin/Developer/QA/Reporter/Viewer 5단계 역할 기반 접근 제어
-- **감사 로그**: 전체 필드 변경 추적, CSV/JSON 내보내기
+- **AI 튜터**: Claude API 기반 실시간 질의응답 (SSE 스트리밍), 학습자 수준별 3단계 레벨링, 이중 메모리 (Short-term Redis + Long-term MySQL)
+- **RAG 파이프라인**: Semantic Chunking, Hybrid Search (pgvector + ES BM25, RRF 융합), CrossEncoder Re-ranking, Context Compression
+- **AI 자동 평가**: AI 퀴즈 생성, AI 채점 + Confidence Score 기반 Human-in-the-Loop (>= 0.8 자동 확정, < 0.8 강사 검토)
+- **적응형 학습**: 온보딩 진단 테스트, 개념별 숙련도 추적, 취약점 분석, AI 추천
+- **강의 관리**: 3계층 구조 (Course > Section > Lesson), 텍스트/영상/첨부 레슨 타입, 수강 진도 추적
+- **AI 품질 관리**: 3층 평가 (사용자 피드백 + RAGAS/DeepEval + 전문가 리뷰), A/B 테스트, 프롬프트 버전 관리
+- **FinOps**: Unit Economics 추적, 동적 모델 라우팅 (Haiku/Sonnet/Opus), Semantic Cache, Kill-switch
+- **PII 보호**: Input + Output 양방향 마스킹 (Presidio + KoNLPy), Redis session-scoped
+- **이벤트 아키텍처**: Transactional Outbox + Kafka, Consumer 멱등성, DLQ
+- **커뮤니티**: 토론, Q&A, 피어 리뷰
 
 ---
 
-## 🛠️ 기술 스택
+## 기술 스택
 
 ### Backend
 
 | 분류 | 기술 | 버전 |
 |------|------|------|
-| Language | Java | 21 |
-| Framework | Spring Boot | 4.0.3 |
-| Security | Spring Security + JWT (jjwt) | 0.12.6 |
-| ORM | Spring Data JPA, Hibernate, QueryDSL | 5.1.0 |
-| Database | MySQL | 8.0 |
+| Language | Java (Virtual Threads) | 21+ |
+| Framework | Spring Boot | 4.x |
+| Security | Spring Security + JWT | jjwt 0.12.6 |
+| ORM | Spring Data JPA + QueryDSL | 5.x |
+| Database | MySQL | 8.x |
 | Cache | Redis | 7.x |
-| API 문서 | springdoc-openapi (Swagger) | 3.0.0 |
-| Build | Gradle | 9.4 |
+| Messaging | Apache Kafka | 3.x |
+| CDC | Debezium | 2.x |
+| Search | Elasticsearch | 8.x |
+| Storage | MinIO (S3 호환) | - |
+| Resilience | Resilience4j | - |
+| Tracing | Micrometer + OpenTelemetry + Zipkin | - |
+| Migration | Flyway | - |
+| API Docs | springdoc-openapi (Swagger) | 3.x |
+| Build | Gradle (Kotlin DSL) | 9.x |
 
-### Frontend (Web)
+### AI / LLM
+
+| 분류 | 기술 | 용도 |
+|------|------|------|
+| LLM (Primary) | Claude API (Anthropic) | 튜터, 퀴즈 생성, 채점 |
+| LLM (Fallback) | OpenAI GPT API | Circuit Breaker Fallback |
+| Embedding | text-embedding-3-small | 콘텐츠 벡터화 |
+| Vector DB | pgvector (Phase 1) → Qdrant (Phase 2) | RAG 벡터 검색 |
+| Re-ranking | CrossEncoder (ms-marco-MiniLM) | 검색 결과 재정렬 |
+| RAG 평가 | RAGAS + DeepEval | 품질 자동 평가 |
+| PII | Presidio + KoNLPy | 개인정보 마스킹 |
+
+### Frontend
 
 | 분류 | 기술 | 버전 |
 |------|------|------|
-| Framework | React | 18.x |
-| 상태관리 | Zustand | 최신 |
-| 스타일링 | Tailwind CSS | 최신 |
-| 빌드 | Vite | 최신 |
-| 차트 | Recharts | 최신 |
-
-### Frontend (Mobile)
-
-| 분류 | 기술 | 버전 |
-|------|------|------|
-| Framework | Flutter | 3.41.x |
-| 언어 | Dart | 3.11.x |
-| 상태관리 | Riverpod | 최신 |
-| HTTP | Dio | 최신 |
+| Web | React + TypeScript | 18.x / 5.x |
+| 상태관리 | Zustand (클라이언트) + TanStack Query (서버) | - |
+| UI | shadcn/ui + Tailwind CSS | - |
+| 에디터 | TipTap | 2.x |
+| 차트 | Recharts | 2.x |
+| Mobile | Flutter + Dart (Riverpod) | 3.x / 3.x |
+| Build | Vite / pnpm | - |
 
 ### Infra
 
-| 분류 | 기술 |
-|------|------|
-| Cloud | AWS (ECS Fargate, RDS, ElastiCache, S3, SQS) |
-| CI/CD | GitHub Actions |
-| CDN | CloudFront |
-| 모니터링 | CloudWatch + Grafana |
+| 분류 | 기술 | 포트 |
+|------|------|------|
+| API Server | Spring Boot | 8080 |
+| Web Dev Server | React (Vite) | 3000 |
+| MySQL | 메인 DB | 3306 |
+| Redis | 캐시/세션 | 6379 |
+| Kafka + Zookeeper | 메시징 | 9092 |
+| Debezium | CDC | 8083 |
+| pgvector | 벡터 DB | 5433 |
+| Elasticsearch | 검색 | 9200 |
+| MinIO | 파일 스토리지 | 9000/9001 |
+| Zipkin | 분산 추적 | 9411 |
+| Prometheus | 메트릭 | 9090 |
+| Grafana | 대시보드 | 3001 |
 
 ---
 
-## 🏗️ 시스템 아키텍처
+## 시스템 아키텍처
 
 ```
-[Browser / React SPA]     [Flutter Mobile App]
-          │                       │
-          └───────┬───────────────┘
-                  ▼
-        [Route 53 → CloudFront / WAF]
-                  │
-                  ▼
-       [ALB (HTTPS, Health Check)]
-                  │
-      ┌───────────┼───────────┐
-      ▼           ▼           ▼
- [ECS Task 1] [ECS Task 2] [ECS Task N]
- Spring Boot   Spring Boot   Auto Scaling
-      │           │           │
-      ├───────────┼───────────┤
-      ▼           ▼           ▼
-   [RDS MySQL]  [Redis]    [S3]
-   Multi-AZ     Cluster    첨부파일
-      │
-   [SQS]
-   알림/자동화 큐
+[React SPA]           [Flutter Mobile]
+     │                       │
+     └───────┬───────────────┘
+             ▼
+    [Spring Boot API Server]
+             │
+     ┌───────┼──────────────────────────────┐
+     │       │                              │
+     ▼       ▼                              ▼
+  [MySQL]  [Redis]                    [AI Gateway]
+  Source    Cache/Session              PII Masking
+  of Truth  PII Mapping               Model Router
+     │       │                     FinOps Guard
+     │       │                         │
+     │       │              ┌──────────┼──────────┐
+     │       │              ▼          ▼          ▼
+     │       │         [Claude]   [OpenAI]   [CrossEncoder]
+     │       │          Primary    Fallback    Re-ranking
+     │       │
+     ▼       ▼
+  [Outbox] → [Kafka] → [Workers]
+  Events     Relay      Embedding / Grading / Analytics / Notification
+                              │
+                    ┌─────────┼─────────┐
+                    ▼         ▼         ▼
+               [pgvector] [Elasticsearch] [MinIO]
+                Vector     BM25 Search    Files
 ```
+
+### 핵심 아키텍처 원칙
+
+1. **AI Gateway 패턴** -- 모든 AI 호출은 Gateway 경유 (PII Masking + FinOps + Circuit Breaker)
+2. **Transactional Outbox** -- Kafka 직접 발행 금지, OutboxPublisher.publish()로 원자적 이벤트 발행
+3. **PII 양방향 보호** -- Input + Output 모두 스캔, Redis session-scoped 매핑
+4. **RAG course_id 격리** -- 수강 강의 콘텐츠 내에서만 검색, 다른 강의 데이터 노출 금지
+5. **Confidence 기반 HITL** -- AI 채점 Confidence >= 0.8 자동 확정, < 0.8 강사 검토
 
 ---
 
-## 🚀 시작하기
+## 시작하기
 
 ### 사전 요구사항
 
-- Java 21 이상
-- MySQL 8.0
-- Redis 7.x
-- Gradle 9.x
+- Java 21+, Docker & Docker Compose, pnpm 8+, Flutter 3.x
 
-### 백엔드 실행
+### 빠른 시작
 
 ```bash
-# 1. 레포지토리 클론
+# 1. 클론
 git clone https://github.com/Project-Control-Hub/phs.git
-cd spring-react-flutter-jira-mng
+cd phs
 
 # 2. 환경변수 설정
 cp .env.example .env
-# .env 파일 편집 (DB, Redis, JWT 설정)
+# .env 파일에 DB, JWT, AI API Key 설정
 
-# 3. 데이터베이스 생성
-mysql -u root -p -e "CREATE DATABASE mng_dev CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+# 3. 인프라 서비스 실행
+docker compose up -d
 
-# 4. 빌드 및 실행
-./gradlew bootRun --args='--spring.profiles.active=dev'
+# 4. Backend 실행
+cd learnflow-api
+./gradlew bootRun
 
-# 5. 접속 확인
-# API:     http://localhost:8080
-# Swagger: http://localhost:8080/swagger-ui.html
+# 5. Web 실행
+cd learnflow-web
+pnpm install && pnpm dev
+```
+
+> 상세한 환경 구성 방법은 [SETUP.md](docs/SETUP.md) 참조
+
+---
+
+## 프로젝트 구조
+
+```
+learnflow-api/src/main/java/com/learnflow/
+├── global/               # 횡단 관심사
+│   ├── config/           # Security, JPA, Redis, Kafka, Swagger, Resilience
+│   ├── security/         # JWT, Filter, UserDetails
+│   ├── common/           # ApiResponse, PageResponse, BaseTimeEntity
+│   ├── exception/        # GlobalHandler, ErrorCode, BusinessException
+│   ├── event/
+│   │   ├── outbox/       # OutboxEvent, OutboxPublisher
+│   │   └── events/       # 도메인 이벤트 클래스
+│   ├── audit/            # AuditLog, AuditAspect
+│   └── tracing/          # OTel TraceContextPropagator
+│
+├── domain/               # 핵심 도메인
+│   ├── user/             # 사용자 + 프로필 + 학습 선호
+│   ├── course/           # 강의 + 섹션 + 레슨 + 수강
+│   ├── quiz/             # 퀴즈 + 문제 + 시도 + Appeal
+│   ├── assignment/       # 과제 + 제출 + Appeal
+│   └── community/        # 토론, Q&A
+│
+├── ai/                   # AI 전체 (이 패키지 안에서만 LLM 코드 작성)
+│   ├── gateway/          # AI Gateway, Model Router, PII, FinOps Guard
+│   ├── tutor/            # AI 튜터, 레벨링, 메모리
+│   ├── rag/              # RAG 파이프라인
+│   ├── evaluation/       # AI 퀴즈 생성, 채점, Confidence
+│   ├── quality/          # 피드백, A/B 테스트, 프롬프트 버전
+│   ├── finops/           # 비용 추적, Kill-switch
+│   ├── client/           # LLM API 클라이언트
+│   ├── prompt/           # 프롬프트 템플릿 엔진
+│   └── cache/            # Embedding, RAG, Semantic 캐시
+│
+├── worker/               # Kafka Consumer
+├── onboarding/           # 진단 테스트
+└── analytics/            # 학습 분석
+
+learnflow-web/src/         # React
+├── components/            # shadcn/ui 기반 공통 컴포넌트
+├── pages/                 # 강의, 학습, AI 튜터, 퀴즈, 분석, 관리자
+├── hooks/                 # TanStack Query 커스텀 훅
+├── stores/                # Zustand 스토어
+└── lib/                   # API 클라이언트, SSE 핸들러, utils
 ```
 
 ---
 
-## 🔐 환경변수 설정
+## API 경로
 
-```dotenv
-# Database
-DB_NAME=mng_dev
-DB_USERNAME=root
-DB_PASSWORD=root
+> Swagger UI: http://localhost:8080/swagger-ui.html
 
-# Redis
-REDIS_PASSWORD=
-
-# JWT
-JWT_SECRET=dev-secret-key-must-be-at-least-32-characters-long
-
-# Spring
-SPRING_PROFILES_ACTIVE=dev
+```
+인증:        /api/v1/auth/*                    → PUBLIC
+사용자:      /api/v1/users/*                   → AUTHENTICATED
+강의:        /api/v1/courses/*                 → PUBLIC(조회) / INSTRUCTOR(쓰기)
+             /api/v1/courses/{id}/sections/*
+             /api/v1/courses/{id}/sections/{id}/lessons/*
+AI 튜터:     /api/v1/ai/chat/*                 → LEARNER (SSE 스트리밍)
+퀴즈:        /api/v1/quizzes/*                 → LEARNER(제출) / INSTRUCTOR(출제)
+과제:        /api/v1/assignments/*             → LEARNER(제출) / INSTRUCTOR(출제)
+학습 분석:   /api/v1/analytics/*               → LEARNER / INSTRUCTOR
+온보딩:      /api/v1/onboarding/*              → LEARNER
+AI 품질:     /api/v1/admin/ai/quality/*        → ADMIN
+FinOps:      /api/v1/admin/finops/*            → ADMIN
+강사 검토:   /api/v1/instructor/review-queue/* → INSTRUCTOR
 ```
 
 ---
 
-## 📁 프로젝트 구조
+## ERD
+
+주요 테이블 20+개로 구성됩니다. 상세 ERD는 [learnflow-erd.md](docs/erd/learnflow-erd.md) 참조.
 
 ```
-spring-react-flutter-jira-mng/
-├── src/main/java/com/jira/mng/
-│   ├── global/                    # 공통 인프라
-│   │   ├── config/                #   Security, Redis, Swagger, Gson
-│   │   ├── exception/             #   BusinessException, ErrorCode, Handler
-│   │   ├── response/              #   ApiResponse<T>
-│   │   ├── enums/                 #   9개 공유 Enum
-│   │   ├── filter/                #   MDC Logging Filter
-│   │   └── aop/                   #   Logging, ExecutionTime
-│   ├── user/                      # 사용자 도메인
-│   ├── project/                   # 프로젝트 + 멤버 + 컴포넌트 + WIP
-│   ├── issue/                     # 이슈 (핵심) + N:M 관계 테이블
-│   ├── sprint/                    # 스프린트 lifecycle
-│   ├── release/                   # 릴리즈 버전 관리
-│   ├── comment/                   # 댓글
-│   ├── attachment/                # 첨부파일
-│   ├── workflow/                  # 워크플로우 전환 이력
-│   ├── audit/                     # 감사 로그
-│   ├── dashboard/                 # 대시보드 + 가젯
-│   └── label/                     # 레이블
-├── src/main/resources/
-│   ├── application.yml            # 공통 설정
-│   ├── application-dev.yml        # 개발 환경
-│   └── application-prod.yml       # 운영 환경
-├── docs/                          # 프로젝트 문서
-│   ├── PRD.md                     #   제품 요구사항
-│   ├── PHASE.md                   #   Phase 로드맵
-│   ├── TASKS.md                   #   Task 목록 (89개)
-│   └── WORKFLOW.md                #   개발 워크플로우
-├── rules/                         # 개발 규칙
-│   ├── human/                     #   사람용 상세 규칙 (7개)
-│   └── ai/                        #   AI용 간결 규칙 (7개)
-├── .ai/spring-conventions.json    # 코드 생성 컨벤션
-├── build.gradle
-└── README.md
+users ──1:N── courses (instructs)
+users ──1:N── enrollments ──N:1── courses
+courses ──1:N── sections ──1:N── lessons
+users ──1:N── ai_chat_sessions ──1:N── ai_chat_messages
+courses ──1:N── quizzes ──1:N── quiz_questions
+quizzes ──1:N── quiz_attempts ──N:1── users
+assignments ──1:N── assignment_submissions ──N:1── users
+users ──1:N── concept_mastery ──N:1── courses
+lessons ──1:N── content_embeddings (RAG vector)
+outbox_events (Transactional Outbox → Kafka)
+ai_cost_logs / cost_thresholds (FinOps)
+prompt_versions / ragas_evaluations (AI 품질)
+posts ──1:N── comments (커뮤니티)
 ```
 
 ---
 
-## 📡 API 명세
+## 프로젝트 문서
 
-> Swagger UI: `http://localhost:8080/swagger-ui.html`
-
-### 인증 API
-
-| Method | URL | 설명 | 인증 |
-|--------|-----|------|:----:|
-| `POST` | `/auth/login` | 로그인 (JWT 발급) | - |
-| `POST` | `/auth/refresh` | 토큰 갱신 | - |
-
-### 사용자 API
-
-| Method | URL | 설명 | 인증 |
-|--------|-----|------|:----:|
-| `GET` | `/api/v1/users` | 사용자 목록 | ✅ |
-| `GET` | `/api/v1/users/{id}` | 사용자 상세 | ✅ |
-| `POST` | `/api/v1/users` | 회원가입 | - |
-| `PUT` | `/api/v1/users/{id}` | 사용자 수정 | ✅ |
-| `DELETE` | `/api/v1/users/{id}` | 사용자 삭제 | ✅ |
-
-### 프로젝트 API
-
-| Method | URL | 설명 | 인증 |
-|--------|-----|------|:----:|
-| `GET` | `/api/v1/projects` | 프로젝트 목록 | ✅ |
-| `POST` | `/api/v1/projects` | 프로젝트 생성 | ✅ |
-| `GET` | `/api/v1/projects/{id}` | 프로젝트 상세 | ✅ |
-| `PUT` | `/api/v1/projects/{id}` | 프로젝트 수정 | ✅ |
-| `DELETE` | `/api/v1/projects/{id}` | 프로젝트 삭제 | ✅ |
-| `GET` | `/api/v1/projects/{id}/members` | 멤버 목록 | ✅ |
-| `POST` | `/api/v1/projects/{id}/members` | 멤버 추가 | ✅ |
-| `DELETE` | `/api/v1/projects/{id}/members/{memberId}` | 멤버 제거 | ✅ |
-
-### 이슈 API
-
-| Method | URL | 설명 | 인증 |
-|--------|-----|------|:----:|
-| `GET` | `/api/v1/issues/project/{projectId}` | 이슈 목록 (페이징) | ✅ |
-| `GET` | `/api/v1/issues/project/{projectId}/backlog` | 백로그 | ✅ |
-| `GET` | `/api/v1/issues/{issueKey}` | 이슈 상세 | ✅ |
-| `POST` | `/api/v1/issues` | 이슈 생성 | ✅ |
-| `PUT` | `/api/v1/issues/{issueKey}` | 이슈 수정 | ✅ |
-| `DELETE` | `/api/v1/issues/{issueKey}` | 이슈 삭제 | ✅ |
-| `POST` | `/api/v1/issues/{issueKey}/transitions` | 상태 전환 | ✅ |
-
-### 스프린트 API
-
-| Method | URL | 설명 | 인증 |
-|--------|-----|------|:----:|
-| `GET` | `/api/v1/sprints/project/{projectId}` | 스프린트 목록 | ✅ |
-| `GET` | `/api/v1/sprints/{id}` | 스프린트 상세 | ✅ |
-| `POST` | `/api/v1/sprints` | 스프린트 생성 | ✅ |
-| `POST` | `/api/v1/sprints/{id}/start` | 스프린트 시작 | ✅ |
-| `POST` | `/api/v1/sprints/{id}/complete` | 스프린트 완료 | ✅ |
-
-### 릴리즈/댓글/대시보드/감사 API
-
-| Method | URL | 설명 | 인증 |
-|--------|-----|------|:----:|
-| `POST` | `/api/v1/versions` | 버전 생성 | ✅ |
-| `POST` | `/api/v1/versions/{id}/release` | 릴리즈 | ✅ |
-| `GET` | `/api/v1/comments/issue/{issueId}` | 댓글 목록 | ✅ |
-| `POST` | `/api/v1/comments` | 댓글 작성 | ✅ |
-| `GET` | `/api/v1/dashboards` | 대시보드 목록 | ✅ |
-| `GET` | `/api/v1/audit-logs/issue/{issueId}` | 감사 로그 | ✅ |
+| 문서 | 설명 |
+|------|------|
+| [PRD.md](docs/PRD.md) | 제품 요구사항 (76 FR + 27 NFR) |
+| [PHASE.md](docs/PHASE.md) | 6 Phase 24주 로드맵 |
+| [TASKS.md](docs/TASKS.md) | 116개 세부 Task 목록 |
+| [SETUP.md](docs/SETUP.md) | 개발 환경 구성 가이드 |
+| [ERD](docs/erd/learnflow-erd.md) | 데이터베이스 ERD (Mermaid) |
+| [WORKFLOW.md](docs/WORKFLOW.md) | 개발 워크플로우 |
+| [workflows/](docs/workflows/) | Phase별 세부 워크플로우 |
+| [rules/human/](rules/human/) | 개발 규칙 (상세, 7개) |
+| [rules/ai/](rules/ai/) | 개발 규칙 (AI 최적화, 7개) |
 
 ---
 
-## 🗃️ ERD
-
-주요 엔티티 20개, N:M 중간 테이블 4개로 구성됩니다.
-
-```
-PROJECT ──1:N── PROJECT_MEMBER ──N:1── USER_ACCOUNT
-   │                                       │
-   ├──1:N── SPRINT                         │
-   ├──1:N── RELEASE_VERSION                │
-   ├──1:N── COMPONENT                      │
-   └──1:N── WIP_LIMIT                     │
-                                           │
-ISSUE ──N:1── PROJECT          ISSUE ──N:1── USER_ACCOUNT (assignee/reporter)
-  │                               │
-  ├──1:N── COMMENT               ├──N:1── SPRINT
-  ├──1:N── ATTACHMENT            ├──N:1── ISSUE (parent, 자기참조)
-  ├──1:N── WORKFLOW_TRANSITION   │
-  ├──1:N── AUDIT_LOG             ├──N:M── LABEL (via ISSUE_LABEL)
-  ├──1:N── ISSUE_LINK            ├──N:M── COMPONENT (via ISSUE_COMPONENT)
-  └──1:N── ISSUE_WATCHER         └──N:M── RELEASE_VERSION (via ISSUE_FIX_VERSION)
-
-DASHBOARD ──N:1── USER_ACCOUNT
-  └──1:N── DASHBOARD_GADGET
-```
-
----
-
-## 🤝 기여 가이드
+## 기여 가이드
 
 ### 브랜치 전략
 
 ```
-master        ← 운영 배포 (직접 push 금지)
-  └── dev     ← 개발 통합
-       ├── feat/T-{id}-{설명}   ← 기능 개발
-       ├── fix/T-{id}-{설명}    ← 버그 수정
-       └── docs/{설명}          ← 문서 작업
+master           ← 운영 배포 (직접 push 금지)
+  └── develop    ← 개발 통합
+       ├── feature/T-{id}-{설명}   ← 기능 개발
+       ├── fix/T-{id}-{설명}       ← 버그 수정
+       └── docs/{설명}             ← 문서 작업
 ```
 
 ### 커밋 컨벤션
 
 ```
-feat(issue): 이슈 CRUD API 구현
-fix(auth):   토큰 갱신 실패 수정
-docs:        PRD 문서 작성
-refactor:    서비스 로직 분리
-test:        회원가입 단위 테스트
-chore:       build.gradle 의존성 업데이트
+feat(course): 강의 CRUD API 구현
+fix(auth): 토큰 갱신 실패 수정
+refactor(rag): SemanticChunking 분리
+test(grading): Confidence 계산 단위 테스트
+docs: API 스펙 문서 갱신
+perf: Semantic Cache 히트율 개선
+chore: Gradle 의존성 업데이트
 ```
 
 ### PR 규칙
 
-1. `dev` 브랜치로 PR 생성
-2. 제목: `[T-{id}] {요약}` 형식
-3. 리뷰어 1명 이상 승인 후 Squash Merge
+1. PR 제목: `[LF-{이슈번호}] {타입}: {설명}`
+2. 변경 사유, 테스트 방법, AI 관련 변경 시 비용 영향 여부 포함
+3. 최소 서비스 레이어 단위 테스트 포함
 4. CI (빌드 + 테스트) 통과 필수
 
 자세한 내용은 [WORKFLOW.md](docs/WORKFLOW.md) 참조
 
 ---
 
-## 📚 프로젝트 문서
-
-### 내부 문서
-
-| 문서 | 설명 |
-|------|------|
-| [PRD.md](docs/PRD.md) | 제품 요구사항 (기능/비기능, 데이터 모델, API) |
-| [PHASE.md](docs/PHASE.md) | Phase 0~8 개발 로드맵 |
-| [TASKS.md](docs/TASKS.md) | 89개 세부 Task 목록 (Phase별 분류) |
-| [WORKFLOW.md](docs/WORKFLOW.md) | Git, Sprint, CI/CD, 코드 리뷰 프로세스 |
-| [rules/human/](rules/human/) | 사람용 Spring 개발 규칙 (7개) |
-| [rules/ai/](rules/ai/) | AI용 간결 개발 규칙 (7개) |
-
-### 외부 참고 문서
-
-본 프로젝트의 기획/설계 원본 문서는 별도 레포지토리에서 관리됩니다.
-
-> [Project-Control-Hub/documents](https://github.com/Project-Control-Hub/documents)
-
-| 문서 | 설명 |
-|------|------|
-| 00-스케줄 | 프로젝트 마일스톤 및 주차별 일정 (Gantt) |
-| 01-프로젝트계획서 | 배경, 목표, 팀 구성, 기술 스택, 리스크 관리 |
-| 02-ERD | 데이터베이스 ERD 및 테이블 명세 (20개 엔티티) |
-| 03-아키텍처정의서 | 레이어드/물리 배포/데이터 흐름 아키텍처 |
-| 04-API정의서 | REST API 엔드포인트 상세 스펙 (18개 도메인) |
-| 05-화면흐름시퀀스 | 로그인, 이슈 생성, 워크플로우 전환 시퀀스 다이어그램 |
-| 06-화면기능정의서 | 14개 화면 UI 요소, 기능 정의, 상태 처리 |
-| 07-요구사항정의서 | 기능(FR-001~033) / 비기능(NFR-001~009) 요구사항 |
-| 08-Git규칙정의서 | 브랜치 전략, 커밋 컨벤션, PR 규칙 |
-| 09-스토리보드 | 화면별 사용자 시나리오 스토리보드 |
-| 10-테스트전략서 | 단위/통합/E2E/성능/보안 테스트 전략 |
-| 11-코드리뷰규칙 | 리뷰 체크리스트, 응답 규칙 |
-| 12-배포가이드 | AWS 인프라, CI/CD, 모니터링 배포 절차 |
-
----
-
-## 📄 라이선스
+## 라이선스
 
 This project is licensed under the MIT License.

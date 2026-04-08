@@ -26,14 +26,14 @@ public class AuthService {
 
     @Transactional
     public AuthResponse.TokenDTO signup(AuthRequest.SignupDTO reqDTO) {
-        if (userAccountRepository.existsByEmail(reqDTO.getEmail())) {
+        if (userAccountRepository.existsByEmail(reqDTO.email())) {
             throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         UserAccount user = UserAccount.builder()
-                .email(reqDTO.getEmail())
-                .password(passwordEncoder.encode(reqDTO.getPassword()))
-                .name(reqDTO.getName())
+                .email(reqDTO.email())
+                .password(passwordEncoder.encode(reqDTO.password()))
+                .name(reqDTO.name())
                 .role(UserRole.LEARNER)
                 .build();
 
@@ -44,14 +44,14 @@ public class AuthService {
 
     @Transactional
     public AuthResponse.TokenDTO login(AuthRequest.LoginDTO reqDTO) {
-        UserAccount user = userAccountRepository.findByEmail(reqDTO.getEmail())
+        UserAccount user = userAccountRepository.findByEmail(reqDTO.email())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         if (user.isAccountLocked()) {
             throw new BusinessException(ErrorCode.ACCOUNT_LOCKED);
         }
 
-        if (!passwordEncoder.matches(reqDTO.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(reqDTO.password(), user.getPassword())) {
             user.incrementFailedAttempts();
             userAccountRepository.save(user);
             throw new BusinessException(ErrorCode.PASSWORD_MISMATCH);
@@ -64,7 +64,7 @@ public class AuthService {
     }
 
     public AuthResponse.TokenDTO refresh(AuthRequest.RefreshDTO reqDTO) {
-        String refreshToken = reqDTO.getRefreshToken();
+        String refreshToken = reqDTO.refreshToken();
 
         if (!jwtTokenProvider.validateToken(refreshToken)) {
             throw new BusinessException(ErrorCode.REFRESH_TOKEN_EXPIRED);

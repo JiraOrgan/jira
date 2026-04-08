@@ -2,11 +2,11 @@
 
 ## Entity Class Template
 ```java
-@NoArgsConstructor
-@Data
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 @Entity
-@Table(name = "{snake_case}_tb")
-public class {Domain} {
+@Table(name = "{snake_case}")
+public class {Domain} extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,31 +14,49 @@ public class {Domain} {
 
     // fields...
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
-
     @Builder
     public {Domain}(Long id, ...) {  // 컬렉션 필드 제외
         this.id = id;
     }
+
+    // 비즈니스 메서드로 상태 변경
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+}
+```
+
+## BaseTimeEntity
+```java
+@Getter
+@MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
+public abstract class BaseTimeEntity {
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
 }
 ```
 
 ## Annotation Order
-1. @NoArgsConstructor
-2. @Data
+1. @NoArgsConstructor(access = AccessLevel.PROTECTED)
+2. @Getter
 3. @Entity
-4. @Table(name = "xxx_tb")
+4. @Table(name = "xxx")
 
 ## Table Naming
-- snake_case + _tb suffix: UserAccount → user_account_tb
+- snake_case (suffix 없음): UserAccount → user_accounts, Course → courses
 
 ## PK
 - Type: Long
 - Strategy: GenerationType.IDENTITY
+
+## Setter Policy
+- **@Setter 사용 금지** — 비즈니스 메서드로 상태 변경
+- 예: `submission.applyAiGrade(score, confidence)`, `enrollment.updateProgress(percent)`
 
 ## Builder
 - @Builder는 생성자에 선언 (클래스 레벨 금지)
@@ -54,5 +72,5 @@ public class {Domain} {
 - 중간 엔티티로 분리 (Long id PK 부여)
 
 ## Timestamps
-- 생성일: @CreationTimestamp LocalDateTime createdAt
-- 수정일: @UpdateTimestamp LocalDateTime updatedAt
+- BaseTimeEntity 상속으로 자동 관리 (@CreatedDate, @LastModifiedDate)
+- JPA Auditing 활성화 필수 (@EnableJpaAuditing)

@@ -27,13 +27,13 @@
 
 | ID | Task | 담당 | 상태 | 관련 FR | 선행 |
 |----|------|------|------|---------|------|
-| T-101 | DB 설계 (ERD 확정, Outbox 테이블 포함) | Backend | TODO | - | - |
-| T-102 | 엔티티 구현 (users, courses, sections, lessons, enrollments, outbox_events) | Backend | TODO | - | T-101 |
-| T-103 | JWT 인증 구현 (로그인/회원가입/토큰 갱신) | Backend | TODO | FR-AUTH-01~03 | T-102 |
-| T-104 | CustomUserDetails + Security Filter Chain | Backend | TODO | FR-AUTH-04 | T-103 |
-| T-105 | 비밀번호 BCrypt 암호화 + 로그인 실패 잠금 | Backend | TODO | NFR-SEC-02 | T-103 |
-| T-106 | Refresh Token Redis 저장 | Backend | TODO | FR-AUTH-03 | T-103 |
-| T-107 | Flyway 마이그레이션 V1 (초기 스키마) | Backend | TODO | NFR-MAINT-02 | T-101 |
+| T-101 | DB 설계 (ERD 확정, Outbox 테이블 포함) | Backend | DONE | - | - |
+| T-102 | 엔티티 구현 (users, courses, sections, lessons, enrollments, outbox_events) | Backend | DONE | - | T-101 |
+| T-103 | JWT 인증 구현 (로그인/회원가입/토큰 갱신) | Backend | DONE | FR-AUTH-01~03 | T-102 |
+| T-104 | CustomUserDetails + Security Filter Chain | Backend | DONE | FR-AUTH-04 | T-103 |
+| T-105 | 비밀번호 BCrypt 암호화 + 로그인 실패 잠금 | Backend | DONE | NFR-SEC-02 | T-103 |
+| T-106 | Refresh Token Redis 저장 | Backend | DONE | FR-AUTH-03 | T-103 |
+| T-107 | Flyway 마이그레이션 V1 (초기 스키마) | Backend | DONE | NFR-MAINT-02 | T-101 |
 
 ### Week 2: 강의 CRUD + 수강 + 파일 업로드
 
