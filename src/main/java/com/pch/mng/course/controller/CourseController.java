@@ -1,5 +1,6 @@
 package com.pch.mng.course.controller;
 
+import com.pch.mng.course.dto.CourseDetailResponse;
 import com.pch.mng.course.dto.CourseRequest;
 import com.pch.mng.course.dto.CourseResponse;
 import com.pch.mng.course.dto.LessonRequest;
@@ -36,13 +37,14 @@ public class CourseController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<CourseResponse.Summary>>> getCourses(
+            @RequestParam(required = false) String keyword,
             @PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.ok(courseService.getCourses(pageable)));
+        return ResponseEntity.ok(ApiResponse.ok(courseService.getPublishedCourses(keyword, pageable)));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<CourseResponse.Detail>> getCourse(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.ok(courseService.getCourse(id)));
+    public ResponseEntity<ApiResponse<CourseDetailResponse>> getCourse(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.ok(courseService.getPublicCourseDetail(id)));
     }
 
     @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")

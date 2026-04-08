@@ -49,9 +49,9 @@
 
 | ID | Task | 담당 | 상태 | 관련 FR | 선행 |
 |----|------|------|------|---------|------|
-| T-113 | TipTap 에디터 기반 레슨 편집 UI | Frontend | TODO | FR-COURSE-02 | - |
-| T-114 | 영상 업로드/스트리밍 API | Backend | TODO | FR-COURSE-02 | T-110 |
-| T-115 | 비로그인 강의 목록/상세 조회 API | Backend | TODO | FR-COURSE-06 | T-108 |
+| T-113 | TipTap 에디터 기반 레슨 편집 UI | Frontend | BLOCKED | FR-COURSE-02 | T-116 |
+| T-114 | 영상 업로드/스트리밍 API | Backend | DONE | FR-COURSE-02 | T-110 |
+| T-115 | 비로그인 강의 목록/상세 조회 API | Backend | DONE | FR-COURSE-06 | T-108 |
 
 ### Week 4: React 레이아웃 + 강의 UI
 

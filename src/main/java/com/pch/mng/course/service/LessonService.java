@@ -51,6 +51,7 @@ public class LessonService {
                 .videoUrl(request.videoUrl())
                 .orderIndex(request.orderIndex())
                 .durationMinutes(request.durationMinutes())
+                .videoDuration(request.videoDuration())
                 .build();
 
         lessonRepository.save(lesson);
@@ -68,7 +69,8 @@ public class LessonService {
 
         lesson.update(
                 request.title(), request.content(), request.contentType(),
-                request.videoUrl(), request.orderIndex(), request.durationMinutes()
+                request.videoUrl(), request.orderIndex(), request.durationMinutes(),
+                request.videoDuration()
         );
         return new LessonResponse.Detail(lesson);
     }

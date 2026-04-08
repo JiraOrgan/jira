@@ -12,7 +12,8 @@ public final class LessonRequest {
             ContentType contentType,
             String videoUrl,
             int orderIndex,
-            int durationMinutes
+            int durationMinutes,
+            Integer videoDuration
     ) {}
 
     public record Update(
@@ -21,7 +22,8 @@ public final class LessonRequest {
             ContentType contentType,
             String videoUrl,
             int orderIndex,
-            int durationMinutes
+            int durationMinutes,
+            Integer videoDuration
     ) {}
 
     private LessonRequest() {}
