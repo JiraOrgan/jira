@@ -277,6 +277,26 @@ FinOps:      /api/v1/admin/finops/*            → ADMIN
 
 ---
 
+## Workflow 확인 필수 규칙
+
+> **Phase/Week 단위 작업 진행 시 반드시 `docs/workflows/` 문서를 먼저 읽고 따라야 한다.**
+
+```
+[Task 착수 전 필수 절차]
+
+1. 해당 Phase의 workflow 문서 읽기: docs/workflows/phase-{N}.md
+2. 대상 Task의 서브 스텝, 완료 기준, 규칙 체크리스트 확인
+3. TASKS.md에서 해당 Task 상태를 IN_PROGRESS로 변경
+4. 서브 스텝 순서대로 구현 진행
+5. 완료 기준 체크박스를 하나씩 체크 (phase-{N}.md 갱신)
+6. 모든 완료 기준 충족 시 TASKS.md 상태를 DONE으로 변경
+```
+
+**위반 시**: workflow 문서를 읽지 않고 구현을 시작하면 누락/불일치 발생 위험.
+에이전트는 **코드 작성 전에 반드시 workflow 문서를 참조**하고, 완료 후 체크박스를 갱신해야 한다.
+
+---
+
 ## 주의사항 (에이전트가 흔히 실수하는 것)
 
 1. **LLM API 직접 호출 금지** — 반드시 AI Gateway 경유 (PII + FinOps + Circuit Breaker 필수)

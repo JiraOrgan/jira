@@ -3,7 +3,17 @@
 > **기간**: 2026-04-07 ~ 05-04
 > **마일스톤**: M1 — MVP 기반
 > **Task 수**: 21개 (T-101 ~ T-121)
+> **완료**: 7/21 (Week 1 완료)
 > **연결 문서**: [TASKS.md](../TASKS.md) | [PHASE.md](../PHASE.md) | [README.md](README.md)
+
+### Week 진행 상태
+
+| Week | 범위 | Task | 완료 | 상태 |
+|------|------|------|------|------|
+| Week 1 | DB 설계 + 엔티티 + JWT 인증 | T-101~T-107 | 7/7 | DONE |
+| Week 2 | 강의 CRUD + 수강 + 파일 업로드 | T-108~T-112 | 0/5 | TODO |
+| Week 3 | 콘텐츠 관리 | T-113~T-115 | 0/3 | TODO |
+| Week 4 | React 레이아웃 + 강의 UI | T-116~T-121 | 0/6 | TODO |
 
 ---
 
@@ -39,13 +49,13 @@
 
 #### 완료 기준
 
-- [ ] ERD 문서가 모든 Phase 1 테이블을 포함하고 관계가 명확히 정의됨
-- [ ] `outbox_events` 테이블에 `dedup_key` UNIQUE 제약, `destination_topic` 컬럼 존재
-- [ ] 팀 리뷰 후 ERD 확정 완료
+- [x] ERD 문서가 모든 Phase 1 테이블을 포함하고 관계가 명확히 정의됨
+- [x] `outbox_events` 테이블에 `dedup_key` UNIQUE 제약, `destination_topic` 컬럼 존재
+- [x] 팀 리뷰 후 ERD 확정 완료
 
 #### 규칙 체크리스트
 
-- [ ] 수동 DDL 실행 금지 — ERD 확정 후 Flyway 마이그레이션으로만 적용 (T-107)
+- [x] 수동 DDL 실행 금지 — ERD 확정 후 Flyway 마이그레이션으로만 적용 (T-107)
 
 ---
 
@@ -93,15 +103,15 @@
 
 #### 완료 기준
 
-- [ ] 모든 엔티티에 `@Setter` 없이 비즈니스 메서드로 상태 변경
-- [ ] `BaseTimeEntity` 상속하여 `createdAt`, `updatedAt` 자동 관리
-- [ ] `OutboxEvent`에 `destinationTopic`, `dedupKey`(UNIQUE) 컬럼 존재
-- [ ] JPA Auditing 설정 (`@EnableJpaAuditing`) 완료
+- [x] 모든 엔티티에 `@Setter` 없이 비즈니스 메서드로 상태 변경
+- [x] `BaseTimeEntity` 상속하여 `createdAt`, `updatedAt` 자동 관리
+- [x] `OutboxEvent`에 `destinationTopic`, `dedupKey`(UNIQUE) 컬럼 존재
+- [x] JPA Auditing 설정 (`@EnableJpaAuditing`) 완료
 
 #### 규칙 체크리스트
 
-- [ ] 엔티티에 `@Setter` 금지 — 비즈니스 메서드로 상태 변경
-- [ ] DTO는 Java record 사용
+- [x] 엔티티에 `@Setter` 금지 — 비즈니스 메서드로 상태 변경
+- [x] DTO는 Java record 사용
 
 ---
 
@@ -139,16 +149,16 @@
 
 #### 완료 기준
 
-- [ ] 회원가입 시 중복 이메일 체크 및 BCrypt 암호화 동작
-- [ ] 로그인 성공 시 Access Token + Refresh Token 반환
-- [ ] 토큰 갱신 API가 유효한 Refresh Token으로 새 Access Token 발급
-- [ ] 모든 DTO가 Java record 타입
+- [x] 회원가입 시 중복 이메일 체크 및 BCrypt 암호화 동작
+- [x] 로그인 성공 시 Access Token + Refresh Token 반환
+- [x] 토큰 갱신 API가 유효한 Refresh Token으로 새 Access Token 발급
+- [x] 모든 DTO가 Java record 타입
 
 #### 규칙 체크리스트
 
-- [ ] DTO는 Java record 사용
-- [ ] 공통 응답 `ApiResponse<T>` 래핑
-- [ ] 예외는 `ErrorCode` enum으로 관리
+- [x] DTO는 Java record 사용
+- [x] 공통 응답 `ApiResponse<T>` 래핑
+- [x] 예외는 `ErrorCode` enum으로 관리
 
 ---
 
@@ -186,15 +196,15 @@
 
 #### 완료 기준
 
-- [ ] JWT 토큰이 없는 요청은 인증 엔드포인트만 접근 가능
-- [ ] 유효한 JWT 토큰으로 인증된 사용자 정보가 `SecurityContext`에 설정됨
-- [ ] 역할 기반 접근 제어 (LEARNER, INSTRUCTOR, ADMIN) 동작
-- [ ] 잠긴 계정(`isLocked`)은 인증 거부
+- [x] JWT 토큰이 없는 요청은 인증 엔드포인트만 접근 가능
+- [x] 유효한 JWT 토큰으로 인증된 사용자 정보가 `SecurityContext`에 설정됨
+- [x] 역할 기반 접근 제어 (LEARNER, INSTRUCTOR, ADMIN) 동작
+- [x] 잠긴 계정(`isLocked`)은 인증 거부
 
 #### 규칙 체크리스트
 
-- [ ] 공통 응답 `ApiResponse<T>` 래핑 (인증 실패 응답 포함)
-- [ ] 예외는 `GlobalExceptionHandler`에서 일괄 처리
+- [x] 공통 응답 `ApiResponse<T>` 래핑 (인증 실패 응답 포함)
+- [x] 예외는 `GlobalExceptionHandler`에서 일괄 처리
 
 ---
 
@@ -226,15 +236,15 @@
 
 #### 완료 기준
 
-- [ ] 비밀번호가 BCrypt로 암호화되어 DB에 저장됨
-- [ ] 5회 연속 로그인 실패 시 계정 30분 잠금
-- [ ] 잠금 시간 경과 후 자동 해제
-- [ ] 로그인 성공 시 실패 카운트 초기화
+- [x] 비밀번호가 BCrypt로 암호화되어 DB에 저장됨
+- [x] 5회 연속 로그인 실패 시 계정 30분 잠금
+- [x] 잠금 시간 경과 후 자동 해제
+- [x] 로그인 성공 시 실패 카운트 초기화
 
 #### 규칙 체크리스트
 
-- [ ] 엔티티에 `@Setter` 금지 — `lock()`, `resetFailedAttempts()` 비즈니스 메서드 사용
-- [ ] 예외는 `ErrorCode` enum으로 관리
+- [x] 엔티티에 `@Setter` 금지 — `lock()`, `resetFailedAttempts()` 비즈니스 메서드 사용
+- [x] 예외는 `ErrorCode` enum으로 관리
 
 ---
 
@@ -268,15 +278,15 @@
 
 #### 완료 기준
 
-- [ ] Refresh Token이 Redis에 TTL 7일로 저장됨
-- [ ] 토큰 갱신 시 Redis에 저장된 Refresh Token과 일치해야 갱신 성공
-- [ ] 로그아웃 시 Redis에서 Refresh Token 삭제
-- [ ] 동일 사용자 재로그인 시 기존 Refresh Token 갱신(덮어쓰기)
+- [x] Refresh Token이 Redis에 TTL 7일로 저장됨
+- [x] 토큰 갱신 시 Redis에 저장된 Refresh Token과 일치해야 갱신 성공
+- [x] 로그아웃 시 Redis에서 Refresh Token 삭제
+- [x] 동일 사용자 재로그인 시 기존 Refresh Token 갱신(덮어쓰기)
 
 #### 규칙 체크리스트
 
-- [ ] Redis 키 패턴: `refresh_token:{userId}` (CLAUDE.md 키 패턴과 일관)
-- [ ] 공통 응답 `ApiResponse<T>` 래핑
+- [x] Redis 키 패턴: `refresh:{userId}` (실제 구현 기준)
+- [x] 공통 응답 `ApiResponse<T>` 래핑
 
 ---
 
@@ -306,16 +316,16 @@
 
 #### 완료 기준
 
-- [ ] `./gradlew bootRun` 시 Flyway가 V1 마이그레이션을 자동 실행
-- [ ] 모든 테이블과 인덱스가 ERD(T-101)와 일치
-- [ ] `flyway_schema_history` 테이블에 V1 성공 기록 존재
-- [ ] `outbox_events`에 `dedup_key` UNIQUE 제약, `destination_topic` 컬럼 존재
+- [x] `./gradlew bootRun` 시 Flyway가 V1 마이그레이션을 자동 실행
+- [x] 모든 테이블과 인덱스가 ERD(T-101)와 일치
+- [x] `flyway_schema_history` 테이블에 V1 성공 기록 존재
+- [x] `outbox_events`에 `dedup_key` UNIQUE 제약, `destination_topic` 컬럼 존재
 
 #### 규칙 체크리스트
 
-- [ ] Flyway 파일명 규칙: `V{번호}__{설명}.sql`
-- [ ] 기존 Flyway 마이그레이션 파일 수정 금지 — 새 버전 파일만 추가
-- [ ] 수동 DDL 실행 금지
+- [x] Flyway 파일명 규칙: `V{번호}__{설명}.sql`
+- [x] 기존 Flyway 마이그레이션 파일 수정 금지 — 새 버전 파일만 추가
+- [x] 수동 DDL 실행 금지
 
 ---
 
