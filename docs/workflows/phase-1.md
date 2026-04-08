@@ -3,7 +3,7 @@
 > **기간**: 2026-04-07 ~ 05-04
 > **마일스톤**: M1 — MVP 기반
 > **Task 수**: 21개 (T-101 ~ T-121)
-> **완료**: 7/21 (Week 1 완료)
+> **완료**: 12/21 (Week 1~2 완료)
 > **연결 문서**: [TASKS.md](../TASKS.md) | [PHASE.md](../PHASE.md) | [README.md](README.md)
 
 ### Week 진행 상태
@@ -11,7 +11,7 @@
 | Week | 범위 | Task | 완료 | 상태 |
 |------|------|------|------|------|
 | Week 1 | DB 설계 + 엔티티 + JWT 인증 | T-101~T-107 | 7/7 | DONE |
-| Week 2 | 강의 CRUD + 수강 + 파일 업로드 | T-108~T-112 | 0/5 | TODO |
+| Week 2 | 강의 CRUD + 수강 + 파일 업로드 | T-108~T-112 | 5/5 | DONE |
 | Week 3 | 콘텐츠 관리 | T-113~T-115 | 0/3 | TODO |
 | Week 4 | React 레이아웃 + 강의 UI | T-116~T-121 | 0/6 | TODO |
 
@@ -375,18 +375,18 @@
 
 #### 완료 기준
 
-- [ ] 강의/섹션/레슨 CRUD API가 정상 동작
-- [ ] INSTRUCTOR 역할만 생성/수정/삭제 가능
-- [ ] 강의 소유자만 자신의 강의 수정/삭제 가능
-- [ ] 목록 조회 시 페이징 응답 (`PageResponse`) 반환
-- [ ] 모든 응답이 `ApiResponse<T>`로 래핑
+- [x] 강의/섹션/레슨 CRUD API가 정상 동작
+- [x] INSTRUCTOR 역할만 생성/수정/삭제 가능
+- [x] 강의 소유자만 자신의 강의 수정/삭제 가능
+- [x] 목록 조회 시 페이징 응답 (`PageResponse`) 반환
+- [x] 모든 응답이 `ApiResponse<T>`로 래핑
 
 #### 규칙 체크리스트
 
-- [ ] DTO는 Java record 사용
-- [ ] 엔티티에 `@Setter` 금지
-- [ ] 공통 응답 `ApiResponse<T>` 래핑
-- [ ] 예외는 `ErrorCode` enum + `GlobalExceptionHandler` 처리
+- [x] DTO는 Java record 사용
+- [x] 엔티티에 `@Setter` 금지
+- [x] 공통 응답 `ApiResponse<T>` 래핑
+- [x] 예외는 `ErrorCode` enum + `GlobalExceptionHandler` 처리
 
 ---
 
@@ -421,16 +421,16 @@
 
 #### 완료 기준
 
-- [ ] 수강 신청 시 중복 수강 방지
-- [ ] 진도율 업데이트 시 0~100 범위 검증
-- [ ] 진도율 100% 도달 시 자동 COMPLETED 상태 변경
-- [ ] 내 수강 목록 조회 정상 동작
+- [x] 수강 신청 시 중복 수강 방지
+- [x] 진도율 업데이트 시 0~100 범위 검증
+- [x] 진도율 100% 도달 시 자동 COMPLETED 상태 변경
+- [x] 내 수강 목록 조회 정상 동작
 
 #### 규칙 체크리스트
 
-- [ ] DTO는 Java record 사용
-- [ ] 엔티티에 `@Setter` 금지 — `Enrollment.updateProgress(int)` 비즈니스 메서드
-- [ ] 공통 응답 `ApiResponse<T>` 래핑
+- [x] DTO는 Java record 사용
+- [x] 엔티티에 `@Setter` 금지 — `Enrollment.updateProgress(int)` 비즈니스 메서드
+- [x] 공통 응답 `ApiResponse<T>` 래핑
 
 ---
 
@@ -464,16 +464,16 @@
 
 #### 완료 기준
 
-- [ ] MinIO에 파일 업로드 및 Presigned URL 발급 정상 동작
-- [ ] 파일 타입/크기 제한 동작 (초과 시 에러 응답)
-- [ ] UUID 기반 파일명으로 충돌 방지
+- [x] MinIO에 파일 업로드 및 Presigned URL 발급 정상 동작
+- [x] 파일 타입/크기 제한 동작 (초과 시 에러 응답)
+- [x] UUID 기반 파일명으로 충돌 방지
 - [ ] Docker Compose MinIO 서비스와 연동 확인
 
 #### 규칙 체크리스트
 
-- [ ] DTO는 Java record 사용
-- [ ] 공통 응답 `ApiResponse<T>` 래핑
-- [ ] 예외는 `ErrorCode` enum으로 관리 (FILE_TOO_LARGE, UNSUPPORTED_FILE_TYPE 등)
+- [x] DTO는 Java record 사용
+- [x] 공통 응답 `ApiResponse<T>` 래핑
+- [x] 예외는 `ErrorCode` enum으로 관리 (FILE_TOO_LARGE, UNSUPPORTED_FILE_TYPE 등)
 
 ---
 
@@ -508,16 +508,16 @@
 
 #### 완료 기준
 
-- [ ] 모든 API 성공 응답이 `{ success: true, data: {...}, error: null }` 형식
-- [ ] 모든 API 에러 응답이 `{ success: false, data: null, error: { code, message } }` 형식
-- [ ] Validation 실패 시 필드별 에러 메시지 반환
-- [ ] 처리되지 않은 예외도 `ApiResponse` 형태로 래핑
+- [x] 모든 API 성공 응답이 `{ success: true, data: {...}, error: null }` 형식
+- [x] 모든 API 에러 응답이 `{ success: false, data: null, error: { code, message } }` 형식
+- [x] Validation 실패 시 필드별 에러 메시지 반환
+- [x] 처리되지 않은 예외도 `ApiResponse` 형태로 래핑
 
 #### 규칙 체크리스트
 
-- [ ] `ApiResponse<T>` — 모든 컨트롤러에서 이 형식만 반환
-- [ ] 예외는 `GlobalExceptionHandler`에서 일괄 처리
-- [ ] `ErrorCode` enum에 HTTP 상태, 코드, 메시지 포함
+- [x] `ApiResponse<T>` — 모든 컨트롤러에서 이 형식만 반환
+- [x] 예외는 `GlobalExceptionHandler`에서 일괄 처리
+- [x] `ErrorCode` enum에 HTTP 상태, 코드, 메시지 포함
 
 ---
 
@@ -550,9 +550,9 @@
 
 #### 완료 기준
 
-- [ ] `http://localhost:8080/swagger-ui.html` 접속 시 Swagger UI 표시
-- [ ] JWT Bearer 토큰 입력 후 인증 필요 API 호출 가능
-- [ ] API 그룹별로 분류되어 표시
+- [x] `http://localhost:8080/swagger-ui.html` 접속 시 Swagger UI 표시
+- [x] JWT Bearer 토큰 입력 후 인증 필요 API 호출 가능
+- [x] API 그룹별로 분류되어 표시
 
 #### 규칙 체크리스트
 

@@ -40,4 +40,9 @@ public class Section {
         this.title = title;
         this.orderIndex = orderIndex;
     }
+
+    public void update(String title, int orderIndex) {
+        this.title = title;
+        this.orderIndex = orderIndex;
+    }
 }

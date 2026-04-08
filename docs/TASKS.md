@@ -39,11 +39,11 @@
 
 | ID | Task | 담당 | 상태 | 관련 FR | 선행 |
 |----|------|------|------|---------|------|
-| T-108 | 강의/섹션/레슨 CRUD API | Backend | TODO | FR-COURSE-01 | T-104 |
-| T-109 | 수강 신청 + 진도율 API | Backend | TODO | FR-COURSE-04 | T-108 |
-| T-110 | 파일 업로드 (MinIO/S3 연동) | Backend | TODO | FR-COURSE-02 | T-108 |
-| T-111 | 공통 응답 ApiResponse + GlobalExceptionHandler | Backend | TODO | - | T-102 |
-| T-112 | Swagger/OpenAPI 설정 | Backend | TODO | NFR-MAINT-01 | T-108 |
+| T-108 | 강의/섹션/레슨 CRUD API | Backend | DONE | FR-COURSE-01 | T-104 |
+| T-109 | 수강 신청 + 진도율 API | Backend | DONE | FR-COURSE-04 | T-108 |
+| T-110 | 파일 업로드 (MinIO/S3 연동) | Backend | DONE | FR-COURSE-02 | T-108 |
+| T-111 | 공통 응답 ApiResponse + GlobalExceptionHandler | Backend | DONE | - | T-102 |
+| T-112 | Swagger/OpenAPI 설정 | Backend | DONE | NFR-MAINT-01 | T-108 |
 
 ### Week 3: 콘텐츠 관리
 
