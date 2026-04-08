@@ -3,7 +3,7 @@
 > **기간**: 2026-04-07 ~ 05-04
 > **마일스톤**: M1 — MVP 기반
 > **Task 수**: 21개 (T-101 ~ T-121)
-> **완료**: 14/21 (Week 1~2 완료, Week 3 Backend 완료)
+> **완료**: 21/21 (Phase 1 전체 완료)
 > **연결 문서**: [TASKS.md](../TASKS.md) | [PHASE.md](../PHASE.md) | [README.md](README.md)
 
 ### Week 진행 상태
@@ -12,8 +12,8 @@
 |------|------|------|------|------|
 | Week 1 | DB 설계 + 엔티티 + JWT 인증 | T-101~T-107 | 7/7 | DONE |
 | Week 2 | 강의 CRUD + 수강 + 파일 업로드 | T-108~T-112 | 5/5 | DONE |
-| Week 3 | 콘텐츠 관리 | T-113~T-115 | 2/3 | IN_PROGRESS |
-| Week 4 | React 레이아웃 + 강의 UI | T-116~T-121 | 0/6 | TODO |
+| Week 3 | 콘텐츠 관리 | T-113~T-115 | 3/3 | DONE |
+| Week 4 | React 레이아웃 + 강의 UI | T-116~T-121 | 6/6 | DONE |
 
 ---
 

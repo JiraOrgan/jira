@@ -49,7 +49,7 @@
 
 | ID | Task | 담당 | 상태 | 관련 FR | 선행 |
 |----|------|------|------|---------|------|
-| T-113 | TipTap 에디터 기반 레슨 편집 UI | Frontend | BLOCKED | FR-COURSE-02 | T-116 |
+| T-113 | TipTap 에디터 기반 레슨 편집 UI | Frontend | DONE | FR-COURSE-02 | T-116 |
 | T-114 | 영상 업로드/스트리밍 API | Backend | DONE | FR-COURSE-02 | T-110 |
 | T-115 | 비로그인 강의 목록/상세 조회 API | Backend | DONE | FR-COURSE-06 | T-108 |
 
@@ -57,12 +57,12 @@
 
 | ID | Task | 담당 | 상태 | 관련 FR | 선행 |
 |----|------|------|------|---------|------|
-| T-116 | React 프로젝트 초기 설정 (Vite + Zustand + TanStack Query + Tailwind + shadcn/ui) | Frontend | TODO | - | - |
-| T-117 | 공통 레이아웃 (GNB, 사이드바, 라우팅) | Frontend | TODO | - | T-116 |
-| T-118 | 로그인/회원가입 화면 | Frontend | TODO | FR-AUTH-01~02 | T-117 |
-| T-119 | 강의 목록/상세 페이지 | Frontend | TODO | FR-COURSE-06 | T-117 |
-| T-120 | 토큰 관리 (Axios Interceptor) | Frontend | TODO | FR-AUTH-03 | T-118 |
-| T-121 | 단위 테스트 (Auth, Course, Enrollment) | Backend | TODO | NFR-MAINT-03 | T-109 |
+| T-116 | React 프로젝트 초기 설정 (Vite + Zustand + TanStack Query + Tailwind + shadcn/ui) | Frontend | DONE | - | - |
+| T-117 | 공통 레이아웃 (GNB, 사이드바, 라우팅) | Frontend | DONE | - | T-116 |
+| T-118 | 로그인/회원가입 화면 | Frontend | DONE | FR-AUTH-01~02 | T-117 |
+| T-119 | 강의 목록/상세 페이지 | Frontend | DONE | FR-COURSE-06 | T-117 |
+| T-120 | 토큰 관리 (Axios Interceptor) | Frontend | DONE | FR-AUTH-03 | T-118 |
+| T-121 | 단위 테스트 (Auth, Course, Enrollment) | Backend | DONE | NFR-MAINT-03 | T-109 |
 
 ---
 
