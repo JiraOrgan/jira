@@ -24,6 +24,14 @@ RuntimeException
 | Auth | INVALID_TOKEN | 401 | 유효하지 않은 토큰입니다 |
 | User | USER_NOT_FOUND | 404 | 사용자를 찾을 수 없습니다 |
 | User | EMAIL_ALREADY_EXISTS | 409 | 이미 사용 중인 이메일입니다 |
+| Course | COURSE_NOT_FOUND | 404 | 강의를 찾을 수 없습니다 |
+| Course | ENROLLMENT_NOT_FOUND | 404 | 수강 정보를 찾을 수 없습니다 |
+| Quiz | QUIZ_NOT_FOUND | 404 | 퀴즈를 찾을 수 없습니다 |
+| Assignment | SUBMISSION_NOT_FOUND | 404 | 제출물을 찾을 수 없습니다 |
+| AI | CONFIDENCE_TOO_LOW | 422 | AI 채점 신뢰도가 기준 미달입니다 |
+| AI | PII_LEAK_DETECTED | 500 | PII 유출이 감지되었습니다 |
+| AI | AI_GATEWAY_ERROR | 502 | AI Gateway 호출 실패 |
+| AI | AI_BUDGET_EXCEEDED | 429 | AI 비용 한도를 초과했습니다 |
 
 도메인별 ErrorCode 추가 시 카테고리를 주석으로 구분한다.
 
@@ -31,11 +39,11 @@ RuntimeException
 
 ```java
 // Good
-throw new BusinessException(ErrorCode.ENTITY_NOT_FOUND);
-throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
+throw new BusinessException(ErrorCode.COURSE_NOT_FOUND);
+throw new BusinessException(ErrorCode.CONFIDENCE_TOO_LOW);
 
 // Bad -- RuntimeException 직접 사용
-throw new RuntimeException("사용자를 찾을 수 없습니다");
+throw new RuntimeException("강의를 찾을 수 없습니다");
 throw new IllegalArgumentException("잘못된 입력");
 ```
 

@@ -10,18 +10,18 @@ public class {Domain}Service {
     private final {Domain}Repository {domain}Repository;
 
     // 조회 -- readOnly 상속
-    public {Domain}Response.DetailDTO findById(Long id) {
+    public {Domain}Response.Detail findById(Long id) {
         {Domain} entity = {domain}Repository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
-        return {Domain}Response.DetailDTO.of(entity);
+        return new {Domain}Response.Detail(entity);
     }
 
     // 쓰기 -- @Transactional 개별 선언
     @Transactional
-    public {Domain}Response.DetailDTO save({Domain}Request.SaveDTO reqDTO) {
+    public {Domain}Response.Detail save({Domain}Request.Save request) {
         {Domain} entity = {Domain}.builder()...build();
         {domain}Repository.save(entity);
-        return {Domain}Response.DetailDTO.of(entity);
+        return new {Domain}Response.Detail(entity);
     }
 }
 ```
@@ -35,6 +35,18 @@ public class {Domain}Service {
 - 클래스: @Transactional(readOnly = true) 필수
 - 쓰기 메서드만: @Transactional 개별 선언
 
+## Outbox Pattern (이벤트 발행)
+```java
+@Transactional
+public void submitAssignment(Long assignmentId, SubmitRequest request) {
+    // 1. 비즈니스 데이터 저장
+    Submission submission = submissionRepository.save(...);
+    // 2. 같은 트랜잭션에서 Outbox 이벤트 발행
+    outboxPublisher.publish(new AssignmentSubmitted(submission.getId()), "assignment-grading");
+    // KafkaTemplate 직접 호출 금지!
+}
+```
+
 ## Exception Pattern
 ```java
 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND))
@@ -43,12 +55,12 @@ public class {Domain}Service {
 - null 반환 후 null 체크 금지
 
 ## Return Type
-- Service는 DTO 반환 (Entity 반환 금지)
-- 변환: {Domain}Response.DetailDTO.of(entity)
+- Service는 DTO(record) 반환 (Entity 반환 금지)
+- 변환: `new {Domain}Response.Detail(entity)` (record 생성자)
 
 ## Method Naming
 - findAll, findById, findByKey -- 조회
 - save -- 생성
 - update -- 수정
 - delete -- 삭제
-- start, complete, release, transition -- 상태 변경
+- submit, enroll, grade, appeal -- 도메인 동사

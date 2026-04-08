@@ -24,12 +24,26 @@ INVALID_TOKEN(401, "유효하지 않은 토큰입니다"),
 // User
 USER_NOT_FOUND(404, "사용자를 찾을 수 없습니다"),
 EMAIL_ALREADY_EXISTS(409, "이미 사용 중인 이메일입니다"),
+
+// Course
+COURSE_NOT_FOUND(404, "강의를 찾을 수 없습니다"),
+ENROLLMENT_NOT_FOUND(404, "수강 정보를 찾을 수 없습니다"),
+
+// Quiz / Assignment
+QUIZ_NOT_FOUND(404, "퀴즈를 찾을 수 없습니다"),
+SUBMISSION_NOT_FOUND(404, "제출물을 찾을 수 없습니다"),
+
+// AI
+CONFIDENCE_TOO_LOW(422, "AI 채점 신뢰도가 기준 미달입니다"),
+PII_LEAK_DETECTED(500, "PII 유출이 감지되었습니다"),
+AI_GATEWAY_ERROR(502, "AI Gateway 호출 실패"),
+AI_BUDGET_EXCEEDED(429, "AI 비용 한도를 초과했습니다"),
 ```
 
 ## Usage
 ```java
 throw new BusinessException(ErrorCode.ENTITY_NOT_FOUND);
-throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE);
+throw new BusinessException(ErrorCode.CONFIDENCE_TOO_LOW);
 ```
 
 ## Forbidden

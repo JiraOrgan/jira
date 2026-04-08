@@ -15,18 +15,12 @@
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
-public class IssueService {
+public class CourseService {
 
-    public IssueResponse.DetailDTO findByKey(String issueKey) { ... }  // readOnly 상속
+    public CourseResponse.Detail findById(Long id) { ... }  // readOnly 상속
 
     @Transactional  // 쓰기 메서드 - 개별 선언
-    public IssueResponse.DetailDTO save(IssueRequest.SaveDTO reqDTO) { ... }
-}
-
-// Bad -- 클래스 레벨 @Transactional 없음
-@Service
-public class IssueService {
-    public IssueResponse.DetailDTO findByKey(String issueKey) { ... }  // 트랜잭션 없음
+    public CourseResponse.Detail save(CourseRequest.Save request) { ... }
 }
 ```
 
@@ -39,6 +33,35 @@ public class IssueService {
 public class {Domain}Service {
 ```
 
+#### 5.1.3 Transactional Outbox 패턴 [MUST]
+
+이벤트 발행이 필요한 쓰기 작업에서는 비즈니스 데이터와 Outbox 이벤트를 **같은 트랜잭션**에서 처리한다:
+
+```java
+// Good -- Outbox 패턴
+@Transactional
+public void submitAssignment(Long assignmentId, SubmitRequest request) {
+    Submission submission = submissionRepository.save(
+        Submission.builder()
+            .assignment(assignment)
+            .content(request.content())
+            .build()
+    );
+    // 같은 @Transactional 안에서 Outbox 발행
+    outboxPublisher.publish(
+        new AssignmentSubmitted(submission.getId()),
+        "assignment-grading"
+    );
+}
+
+// Bad -- KafkaTemplate 직접 호출
+@Transactional
+public void submitAssignment(...) {
+    submissionRepository.save(submission);
+    kafkaTemplate.send("assignment-grading", event);  // 금지!
+}
+```
+
 ### 5.2 예외 처리 [MUST]
 
 - Repository에서 Optional을 반환받아 **orElseThrow**로 처리
@@ -46,30 +69,30 @@ public class {Domain}Service {
 
 ```java
 // Good
-Issue issue = issueRepository.findByIssueKey(issueKey)
-        .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+Course course = courseRepository.findById(courseId)
+        .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND));
 
 // Bad -- null 체크
-Issue issue = issueRepository.findByIssueKey(issueKey).orElse(null);
-if (issue == null) throw new RuntimeException("not found");
+Course course = courseRepository.findById(courseId).orElse(null);
+if (course == null) throw new RuntimeException("not found");
 ```
 
 ### 5.3 DTO 반환 원칙 [MUST]
 
-- Service는 **DTO를 생성하여 반환**한다
+- Service는 **DTO(Java record)를 생성하여 반환**한다
 - Entity를 Controller로 직접 전달하지 않는다
 
 ```java
-// Good
-public IssueResponse.DetailDTO findByKey(String issueKey) {
-    Issue issue = issueRepository.findByIssueKeyWithDetails(issueKey)
-            .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
-    return IssueResponse.DetailDTO.of(issue);
+// Good -- record 생성자 사용
+public CourseResponse.Detail findById(Long id) {
+    Course course = courseRepository.findByIdWithInstructor(id)
+            .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND));
+    return new CourseResponse.Detail(course);
 }
 
 // Bad -- Entity 직접 반환
-public Issue findByKey(String issueKey) {
-    return issueRepository.findByIssueKey(issueKey).orElseThrow();
+public Course findById(Long id) {
+    return courseRepository.findById(id).orElseThrow();
 }
 ```
 
@@ -77,12 +100,12 @@ public Issue findByKey(String issueKey) {
 
 | 기능 | 메서드명 | 비고 |
 |------|---------|------|
-| 목록 조회 | findAll, findByProject | 접두사: find |
-| 단건 조회 | findById, findByKey | |
+| 목록 조회 | findAll, findByCourse | 접두사: find |
+| 단건 조회 | findById | |
 | 생성 | save | |
 | 수정 | update | |
 | 삭제 | delete | |
-| 상태 변경 | start, complete, release, transition | 도메인 동사 사용 |
+| 도메인 동사 | submit, enroll, grade, appeal, diagnose | LearnFlow 도메인 동사 |
 
 ### 5.5 금지 사항
 
@@ -90,6 +113,7 @@ public Issue findByKey(String issueKey) {
 - Entity를 Controller에 직접 반환 금지
 - RuntimeException 직접 throw 금지 (BusinessException 사용)
 - 트랜잭션 없이 쓰기 작업 금지
+- KafkaTemplate 직접 호출 금지 (OutboxPublisher.publish() 사용)
 
 ---
 

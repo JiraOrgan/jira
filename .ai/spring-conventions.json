@@ -1,12 +1,14 @@
 {
-  "basePackage": "com.pch.mng",
+  "basePackage": "com.learnflow",
   "pkType": "Long",
-  "lombokStyle": "data",
+  "lombokStyle": "getter-only",
   "builderStyle": "constructor",
   "responseWrapper": "ApiResponse",
+  "dtoStyle": "java-record",
   "templateEngine": "none",
   "methodNaming": "english",
-  "tableNaming": "snake_tb",
-  "dtoConversion": "static-factory",
-  "fetchType": "LAZY"
+  "tableNaming": "snake_case",
+  "dtoConversion": "record-constructor",
+  "fetchType": "LAZY",
+  "setterPolicy": "forbidden"
 }
