@@ -50,4 +50,22 @@ public class Course {
         this.status = status != null ? status : CourseStatus.DRAFT;
         this.thumbnailUrl = thumbnailUrl;
     }
+
+    public void update(String title, String description, String thumbnailUrl) {
+        this.title = title;
+        this.description = description;
+        this.thumbnailUrl = thumbnailUrl;
+    }
+
+    public void publish() {
+        this.status = CourseStatus.PUBLISHED;
+    }
+
+    public void archive() {
+        this.status = CourseStatus.ARCHIVED;
+    }
+
+    public boolean isOwnedBy(Long userId) {
+        return this.instructor != null && this.instructor.getId().equals(userId);
+    }
 }

@@ -56,4 +56,14 @@ public class Lesson {
         this.orderIndex = orderIndex;
         this.durationMinutes = durationMinutes;
     }
+
+    public void update(String title, String content, ContentType contentType,
+                       String videoUrl, int orderIndex, int durationMinutes) {
+        this.title = title;
+        this.content = content;
+        this.contentType = contentType;
+        this.videoUrl = videoUrl;
+        this.orderIndex = orderIndex;
+        this.durationMinutes = durationMinutes;
+    }
 }

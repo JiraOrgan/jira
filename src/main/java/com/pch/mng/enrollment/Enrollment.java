@@ -50,4 +50,11 @@ public class Enrollment {
         this.progress = progress;
         this.status = status != null ? status : EnrollmentStatus.ACTIVE;
     }
+
+    public void updateProgress(int progress) {
+        this.progress = progress;
+        if (progress >= 100) {
+            this.status = EnrollmentStatus.COMPLETED;
+        }
+    }
 }
