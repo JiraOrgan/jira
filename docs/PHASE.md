@@ -2,7 +2,7 @@
 
 > **버전**: v1.1
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-09 (Phase 0 완료 확정, Phase 1 진행 중)
+> **최종수정일**: 2026-04-09 (Phase 1 산출물 완료, Phase 2 대기)
 > **기준 문서**: [PRD.md](PRD.md) · `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md` (스프린트·FR 매핑 정본)
 > **연결 문서**: [TASKS.md](TASKS.md) | [WORKFLOW.md](WORKFLOW.md)
 
@@ -13,7 +13,7 @@
 | Phase | 구분 | 기간 | 상태 |
 |-------|------|------|------|
 | Phase 0 | 프로젝트 초기 설정 | 2026-03-22 | **완료** |
-| Phase 1 | 기획 | 2026-04-01 ~ 04-14 (2주) | **진행 중** |
+| Phase 1 | 기획 | 2026-04-01 ~ 04-14 (2주) | **완료** |
 | Phase 2 | 설계 | 2026-04-15 ~ 05-05 (3주) | 대기 |
 | Phase 3 | 개발 Sprint 1 — 이슈·워크플로우 (FR-001~007, 013~014) | 2026-05-06 ~ 05-19 (2주) | 대기 |
 | Phase 4 | 개발 Sprint 2 — 보드·스프린트·백로그·JQL·모바일 이슈 (FR-008~012, 016, FR-MOBILE-001) | 2026-05-20 ~ 06-02 (2주) | 대기 |
@@ -61,13 +61,24 @@ com.pch.mng/
 
 ---
 
-## Phase 1 — 기획 [진행 중]
+## Phase 1 — 기획 [완료]
 
 > **기간**: 2026-04-01 ~ 04-14 (2주)
-> **마일스톤**: M1. 기획 완료 · **M1.1. DoR/DoD 확정 (2026-04-21)** — `00-스케줄_v3.1`
-> **산출물**: 요구사항 정의서, 화면 설계서, UI/UX 디자인 시안
+> **마일스톤**: M1. 기획 완료 · **M1.1. DoR/DoD** — [DOR-DOD.md](DOR-DOD.md)
+> **완료일(저장소)**: 2026-04-09
 > **Task**: [TASKS.md - Phase 1](TASKS.md#phase-1--기획-tasks)
-> **착수**: 2026-04-09 — T-100·T-101·T-105·T-106 병렬 착수 (선행 없음)
+
+### 반영된 산출물 (저장소)
+
+| 문서 | 설명 |
+|------|------|
+| [REQUIREMENTS-v2.md](REQUIREMENTS-v2.md) | FR 상세·페이즈 RTM |
+| [NFR-VERIFICATION.md](NFR-VERIFICATION.md) | NFR-001~011 검증 |
+| [STORY-MAP.md](STORY-MAP.md) | Epic·사용자 스토리 |
+| [WIREFRAME-SPEC.md](WIREFRAME-SPEC.md) | 웹 14·모바일 흐름 사양 (Figma는 별도 링크 예정) |
+| [SPRINT-BACKLOG-DRAFT.md](SPRINT-BACKLOG-DRAFT.md) | FR ↔ Phase 백로그 초안 |
+| [spikes/SPIKE-JQL-PARSER.md](spikes/SPIKE-JQL-PARSER.md) | JQL 파서 권장안 |
+| [spikes/SPIKE-WORKFLOW-ENGINE.md](spikes/SPIKE-WORKFLOW-ENGINE.md) | 워크플로 FSM 설계 |
 
 ### 목표
 
