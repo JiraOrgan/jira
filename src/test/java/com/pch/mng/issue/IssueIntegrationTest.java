@@ -18,6 +18,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -70,6 +71,92 @@ class IssueIntegrationTest {
                 .andReturn();
         return objectMapper.readTree(res.getResponse().getContentAsString())
                 .path("data").path("id").asLong();
+    }
+
+    private String createTaskAndGetKey(String token, long projectId) throws Exception {
+        MvcResult res = mockMvc.perform(post("/api/v1/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"projectId":%d,"issueType":"TASK","summary":"T","priority":"MEDIUM"}
+                                """.formatted(projectId)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        return objectMapper.readTree(res.getResponse().getContentAsString())
+                .path("data").path("issueKey").asText();
+    }
+
+    private void transitionOk(String token, String issueKey, String toStatus) throws Exception {
+        mockMvc.perform(post("/api/v1/issues/%s/transitions".formatted(issueKey))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"toStatus\":\"" + toStatus + "\"}"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("허용되지 않는 워크플로 전환은 409")
+    void workflowRejectsIllegalTransition() throws Exception {
+        String email = "wf-bad-" + System.nanoTime() + "@ex.com";
+        String token = registerAndLogin(email);
+        long projectId = createProject(token, "WF" + (System.nanoTime() % 100000));
+        String issueKey = createTaskAndGetKey(token, projectId);
+
+        mockMvc.perform(post("/api/v1/issues/%s/transitions".formatted(issueKey))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"toStatus\":\"DONE\"}"))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    @DisplayName("표준 전환 체인과 전환 이력 조회")
+    void workflowHappyPathAndTransitionHistory() throws Exception {
+        String email = "wf-ok-" + System.nanoTime() + "@ex.com";
+        String token = registerAndLogin(email);
+        long projectId = createProject(token, "WH" + (System.nanoTime() % 100000));
+        String issueKey = createTaskAndGetKey(token, projectId);
+
+        transitionOk(token, issueKey, "SELECTED");
+        transitionOk(token, issueKey, "IN_PROGRESS");
+        transitionOk(token, issueKey, "CODE_REVIEW");
+        transitionOk(token, issueKey, "QA");
+        transitionOk(token, issueKey, "DONE");
+
+        mockMvc.perform(get("/api/v1/issues/%s/transitions".formatted(issueKey))
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    JsonNode arr = objectMapper.readTree(result.getResponse().getContentAsString())
+                            .path("data");
+                    assertThat(arr.isArray()).isTrue();
+                    assertThat(arr.size()).isEqualTo(5);
+                });
+    }
+
+    @Test
+    @DisplayName("동일 상태로의 전환 요청은 멱등(이력 추가 없음)")
+    void workflowIdempotentWhenAlreadyAtTargetStatus() throws Exception {
+        String email = "wf-idem-" + System.nanoTime() + "@ex.com";
+        String token = registerAndLogin(email);
+        long projectId = createProject(token, "WI" + (System.nanoTime() % 100000));
+        String issueKey = createTaskAndGetKey(token, projectId);
+
+        transitionOk(token, issueKey, "SELECTED");
+        mockMvc.perform(post("/api/v1/issues/%s/transitions".formatted(issueKey))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"toStatus\":\"SELECTED\"}"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/v1/issues/%s/transitions".formatted(issueKey))
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    JsonNode arr = objectMapper.readTree(result.getResponse().getContentAsString())
+                            .path("data");
+                    assertThat(arr.size()).isEqualTo(1);
+                });
     }
 
     @Test

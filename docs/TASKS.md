@@ -2,7 +2,7 @@
 
 > **버전**: v1.1
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-09 (Phase 3 이슈 키·검증)
+> **최종수정일**: 2026-04-09 (Phase 3 워크플로 FSM·전환 이력)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -85,8 +85,8 @@
 | T-308 | 단위 테스트 (Auth, User, Project) | Backend | TODO | - | T-307 |
 | T-400 | 이슈 CRUD API 완성 (5 타입; 키·계층·스프린트 검증) | Backend | IN_PROGRESS | FR-001, FR-002 | T-306 |
 | T-401 | 이슈 키 자동 생성 로직 (PROJ-N) | Backend | DONE | FR-001 | T-400 |
-| T-402 | 워크플로우 전환 규칙 엔진 구현 | Backend | TODO | FR-013, FR-014 | T-400 |
-| T-403 | WorkflowTransition 자동 기록 | Backend | TODO | FR-013 | T-402 |
+| T-402 | 워크플로우 전환 규칙 엔진 구현 (`IssueWorkflowPolicy`) | Backend | DONE | FR-013, FR-014 | T-400 |
+| T-403 | WorkflowTransition 자동 기록 | Backend | DONE | FR-013 | T-402 |
 | T-404 | 이슈 링크 CRUD | Backend | TODO | FR-007 | T-400 |
 | T-406 | 첨부파일 업로드 (S3 연동) | Backend | TODO | - | T-400 |
 | T-408 | 이슈 레이블/컴포넌트 연결 | Backend | TODO | FR-006 | T-400 |
