@@ -9,9 +9,17 @@
 
 | 항목 | 값 |
 |------|-----|
-| Base path (현재) | `/api/v1` |
+| Base path (현재) | `/api/v1` (인증은 `/api/auth`) |
 | 성공 래퍼 | `ApiResponse<T>` (`success`, `data`, `error`) |
-| 인증 | Spring Security (JWT는 Phase 3 T-300 이후 본격 적용) |
+| 인증 | Bearer JWT (`JwtAuthenticationFilter`) |
+
+## 인증 `AuthController`
+
+| Method | Path | 설명 |
+|--------|------|------|
+| POST | `/api/auth/register` | `UserAccountRequest.JoinDTO` → 사용자 생성 (비밀번호 BCrypt) |
+| POST | `/api/auth/login` | `AuthRequest.LoginDTO` → `TokenDTO` |
+| POST | `/api/auth/refresh` | `AuthRequest.RefreshDTO` → 새 Access+Refresh (리프레시 로테이션) |
 
 ## 엔드포인트 요약
 
