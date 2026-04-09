@@ -142,7 +142,7 @@
 ```bash
 # 1. 레포지토리 클론
 git clone https://github.com/Project-Control-Hub/phs.git
-cd spring-react-flutter-jira-mng
+cd phs
 
 # 2. 환경변수 설정
 cp .env.example .env
@@ -184,8 +184,8 @@ SPRING_PROFILES_ACTIVE=dev
 ## 📁 프로젝트 구조
 
 ```
-spring-react-flutter-jira-mng/
-├── src/main/java/com/jira/mng/
+phs/
+├── src/main/java/com/pch/mng/
 │   ├── global/                    # 공통 인프라
 │   │   ├── config/                #   Security, Redis, Swagger, Gson
 │   │   ├── exception/             #   BusinessException, ErrorCode, Handler

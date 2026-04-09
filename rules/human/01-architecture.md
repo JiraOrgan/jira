@@ -10,7 +10,7 @@
 도메인 단위로 패키지를 구성한다. 기술 레이어(controller/, service/, repository/)가 아닌 비즈니스 도메인(user/, issue/, project/)으로 분류한다.
 
 ```text
-com.jira.mng/
+com.pch.mng/
 ├── global/               # 공통 인프라
 │   ├── config/           # 설정 (Security, Redis, Swagger, Gson)
 │   ├── exception/        # 예외 (BusinessException, ErrorCode, GlobalExceptionHandler)
@@ -33,14 +33,14 @@ com.jira.mng/
 
 ```java
 // Good -- 도메인별 패키지
-com.jira.mng.issue.Issue
-com.jira.mng.issue.IssueService
-com.jira.mng.issue.IssueApiController
+com.pch.mng.issue.Issue
+com.pch.mng.issue.IssueService
+com.pch.mng.issue.IssueApiController
 
 // Bad -- 기술 레이어별 패키지
-com.jira.mng.entity.Issue
-com.jira.mng.service.IssueService
-com.jira.mng.controller.IssueApiController
+com.pch.mng.entity.Issue
+com.pch.mng.service.IssueService
+com.pch.mng.controller.IssueApiController
 ```
 
 #### 1.1.2 금지
