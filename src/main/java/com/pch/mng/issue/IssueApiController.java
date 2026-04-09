@@ -1,5 +1,8 @@
 package com.pch.mng.issue;
 
+import com.pch.mng.auth.CustomUserDetails;
+import com.pch.mng.global.exception.BusinessException;
+import com.pch.mng.global.exception.ErrorCode;
 import com.pch.mng.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,10 +43,12 @@ public class IssueApiController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<IssueResponse.DetailDTO>> save(
+            @AuthenticationPrincipal CustomUserDetails principal,
             @Valid @RequestBody IssueRequest.SaveDTO reqDTO) {
-        // TODO: @AuthenticationPrincipal에서 reporterId 추출
-        Long reporterId = 1L;
-        return ResponseEntity.status(201).body(ApiResponse.created(issueService.save(reqDTO, reporterId)));
+        if (principal == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+        return ResponseEntity.status(201).body(ApiResponse.created(issueService.save(reqDTO, principal.getId())));
     }
 
     @PutMapping("/{issueKey}")

@@ -74,11 +74,11 @@
 
 | ID | Task | 담당 | 상태 | 관련 FR | 선행 |
 |----|------|------|------|---------|------|
-| T-300 | JWT 인증 구현 (로그인/회원가입/토큰 갱신) | Backend | IN_PROGRESS | - | T-200 |
-| T-301 | CustomUserDetails + Security Filter Chain | Backend | TODO | - | T-300 |
-| T-302 | 비밀번호 BCrypt 암호화 적용 | Backend | TODO | NFR-005 | T-300 |
-| T-303 | 로그인 실패 잠금 (5회/30분) | Backend | TODO | NFR-007 | T-301 |
-| T-304 | Refresh Token Redis 저장 | Backend | TODO | - | T-300 |
+| T-300 | JWT 인증 구현 (로그인/회원가입/토큰 갱신) | Backend | DONE | `AuthController` `/api/auth/*` | T-200 |
+| T-301 | CustomUserDetails + Security Filter Chain | Backend | DONE | `CustomUserDetails`, `JwtAuthenticationFilter` | T-300 |
+| T-302 | 비밀번호 BCrypt 암호화 적용 | Backend | DONE | `BCryptPasswordEncoder(12)`, 가입 시 encode | T-300 |
+| T-303 | 로그인 실패 잠금 (5회/30분) | Backend | DONE | `RedisLoginAttemptService` (`app.security.login.*`) | T-301 |
+| T-304 | Refresh Token Redis 저장 | Backend | DONE | `RedisRefreshTokenStore` / 테스트 `InMemoryRefreshTokenStore` | T-300 |
 | T-305 | RBAC 권한 검증 (@PreAuthorize) | Backend | TODO | FR-030 | T-301 |
 | T-306 | 프로젝트 CRUD API 완성 | Backend | TODO | - | T-305 |
 | T-307 | 프로젝트 멤버 관리 API 완성 | Backend | TODO | FR-030 | T-306 |
