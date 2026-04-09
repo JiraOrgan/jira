@@ -1,0 +1,105 @@
+# API 정의서 v4 — 현재 구현 매핑
+
+> **작성일**: 2026-04-09  
+> **Task**: T-201  
+> **OpenAPI**: 앱 기동 후 `/v3/api-docs`, Swagger UI `/swagger-ui.html`  
+> **외부 정본**: `04-API정의서_v4.0.md` (Jira 스타일 `/rest/api/3` 등) — 점진 정렬 예정
+
+## 공통
+
+| 항목 | 값 |
+|------|-----|
+| Base path (현재) | `/api/v1` |
+| 성공 래퍼 | `ApiResponse<T>` (`success`, `data`, `error`) |
+| 인증 | Spring Security (JWT는 Phase 3 T-300 이후 본격 적용) |
+
+## 엔드포인트 요약
+
+### 사용자 `UserAccountApiController`
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | `/api/v1/users` | 목록 |
+| GET | `/api/v1/users/{id}` | 단건 |
+| POST | `/api/v1/users` | 생성 (`UserAccountRequest`) |
+| PUT | `/api/v1/users/{id}` | 수정 |
+| DELETE | `/api/v1/users/{id}` | 삭제 |
+
+### 프로젝트 `ProjectApiController`
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | `/api/v1/projects` | 목록 |
+| GET | `/api/v1/projects/{id}` | 단건 |
+| POST | `/api/v1/projects` | 생성 |
+| PUT | `/api/v1/projects/{id}` | 수정 |
+| DELETE | `/api/v1/projects/{id}` | 삭제 |
+| GET | `/api/v1/projects/{projectId}/members` | 멤버 목록 |
+| POST | `/api/v1/projects/{projectId}/members` | 멤버 추가 |
+| DELETE | `/api/v1/projects/{projectId}/members/{memberId}` | 멤버 제거 |
+
+### 이슈 `IssueApiController`
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | `/api/v1/issues/project/{projectId}` | 페이징 목록 |
+| GET | `/api/v1/issues/project/{projectId}/backlog` | 백로그 |
+| GET | `/api/v1/issues/{issueKey}` | 상세 |
+| POST | `/api/v1/issues` | 생성 (`IssueRequest.SaveDTO`) |
+| PUT | `/api/v1/issues/{issueKey}` | 수정 (`IssueRequest.UpdateDTO`) |
+| DELETE | `/api/v1/issues/{issueKey}` | 삭제 |
+| POST | `/api/v1/issues/{issueKey}/transitions` | 상태 전환 (`IssueRequest.TransitionDTO`) |
+
+### 스프린트 `SprintApiController`
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | `/api/v1/sprints/project/{projectId}` | 프로젝트별 목록 |
+| GET | `/api/v1/sprints/{id}` | 단건 |
+| POST | `/api/v1/sprints` | 생성 |
+| POST | `/api/v1/sprints/{id}/start` | 시작 |
+| POST | `/api/v1/sprints/{id}/complete` | 완료 |
+| DELETE | `/api/v1/sprints/{id}` | 삭제 |
+
+### 릴리즈 버전 `ReleaseVersionApiController`
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | `/api/v1/versions/project/{projectId}` | 목록 |
+| GET | `/api/v1/versions/{id}` | 단건 |
+| POST | `/api/v1/versions` | 생성 |
+| POST | `/api/v1/versions/{id}/release` | 릴리즈 처리 |
+| DELETE | `/api/v1/versions/{id}` | 삭제 |
+
+### 댓글 `CommentApiController`
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | `/api/v1/comments/issue/{issueId}` | 이슈별 목록 |
+| POST | `/api/v1/comments` | 생성 |
+| PUT | `/api/v1/comments/{id}` | 수정 |
+| DELETE | `/api/v1/comments/{id}` | 삭제 |
+
+### 감사 로그 `AuditLogApiController`
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | `/api/v1/audit-logs/issue/{issueId}` | 이슈별 로그 |
+
+### 대시보드 `DashboardApiController`
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | `/api/v1/dashboards` | (소유자 기준) 목록 |
+| GET | `/api/v1/dashboards/{id}` | 단건 |
+| POST | `/api/v1/dashboards` | 생성 |
+| PUT | `/api/v1/dashboards/{id}` | 수정 |
+| DELETE | `/api/v1/dashboards/{id}` | 삭제 |
+| POST | `/api/v1/dashboards/{dashboardId}/gadgets` | 가젯 추가 |
+| DELETE | `/api/v1/dashboards/{dashboardId}/gadgets/{gadgetId}` | 가젯 삭제 |
+
+## 다음 작업 (구현 대비)
+
+- DTO 필드·검증 어노테이션을 OpenAPI `description`/`example`과 동기화.  
+- `/auth/login`, `/auth/refresh` 문서화 (Phase 3).  
+- 표준 오류 코드(PR드 §6.4)와 `GlobalExceptionHandler` 응답 스키마 통일.
