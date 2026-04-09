@@ -2,7 +2,7 @@
 
 > **버전**: v1.1
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-09
+> **최종수정일**: 2026-04-09 (Phase 0 완료 확정, Phase 1 진행 중)
 > **기준 문서**: [PRD.md](PRD.md) · `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md` (스프린트·FR 매핑 정본)
 > **연결 문서**: [TASKS.md](TASKS.md) | [WORKFLOW.md](WORKFLOW.md)
 
@@ -12,8 +12,8 @@
 
 | Phase | 구분 | 기간 | 상태 |
 |-------|------|------|------|
-| Phase 0 | 프로젝트 초기 설정 | 2026-03-22 | **진행 중** |
-| Phase 1 | 기획 | 2026-04-01 ~ 04-14 (2주) | 대기 |
+| Phase 0 | 프로젝트 초기 설정 | 2026-03-22 | **완료** |
+| Phase 1 | 기획 | 2026-04-01 ~ 04-14 (2주) | **진행 중** |
 | Phase 2 | 설계 | 2026-04-15 ~ 05-05 (3주) | 대기 |
 | Phase 3 | 개발 Sprint 1 — 이슈·워크플로우 (FR-001~007, 013~014) | 2026-05-06 ~ 05-19 (2주) | 대기 |
 | Phase 4 | 개발 Sprint 2 — 보드·스프린트·백로그·JQL·모바일 이슈 (FR-008~012, 016, FR-MOBILE-001) | 2026-05-20 ~ 06-02 (2주) | 대기 |
@@ -24,21 +24,22 @@
 
 ---
 
-## Phase 0 — 프로젝트 초기 설정 [진행 중]
+## Phase 0 — 프로젝트 초기 설정 [완료]
 
 > **기간**: 2026-03-22
 > **산출물**: 프로젝트 scaffolding, Entity, Repository, DTO, Service, Controller
+> **검증**: 2026-04-09 코드·문서 대조 (Enum 9, Entity 20, Repository 20, DTO 17, Service 7, Controller 8, PRD·규칙 14)
 
-### 체크리스트 (재진행)
+### 완료 항목
 
-- [ ] Spring Boot 4.0.3 프로젝트 초기화 (Java 21, Gradle)
-- [ ] 공통 인프라 구성 (SecurityConfig, RedisConfig, SwaggerConfig, GlobalExceptionHandler)
-- [ ] PRD 문서 작성 (jira-doc 기반 종합 → `documents`와 주기적 정합)
-- [ ] 컨벤션 정의 (.ai/spring-conventions.json)
-- [ ] 공유 Enum 9개 생성
-- [ ] Entity 20개 생성 (Phase A~E)
-- [ ] Repository 20개 + DTO 17개 + Service 7개 + Controller 8개 생성
-- [ ] Spring 개발 규칙 문서 14개 작성 (human/ai)
+- [x] Spring Boot 4.0.3 프로젝트 초기화 (Java 21, Gradle)
+- [x] 공통 인프라 구성 (SecurityConfig, RedisConfig, SwaggerConfig, GlobalExceptionHandler)
+- [x] PRD 문서 작성 (jira-doc 기반 종합 → `documents`와 주기적 정합)
+- [x] 컨벤션 정의 (.ai/spring-conventions.json)
+- [x] 공유 Enum 9개 생성
+- [x] Entity 20개 생성 (Phase A~E)
+- [x] Repository 20개 + DTO 17개 + Service 7개 + Controller 8개 생성
+- [x] Spring 개발 규칙 문서 14개 작성 (human/ai)
 
 ### 생성된 도메인 구조
 
@@ -60,12 +61,13 @@ com.pch.mng/
 
 ---
 
-## Phase 1 — 기획 [대기]
+## Phase 1 — 기획 [진행 중]
 
 > **기간**: 2026-04-01 ~ 04-14 (2주)
 > **마일스톤**: M1. 기획 완료 · **M1.1. DoR/DoD 확정 (2026-04-21)** — `00-스케줄_v3.1`
 > **산출물**: 요구사항 정의서, 화면 설계서, UI/UX 디자인 시안
 > **Task**: [TASKS.md - Phase 1](TASKS.md#phase-1--기획-tasks)
+> **착수**: 2026-04-09 — T-100·T-101·T-105·T-106 병렬 착수 (선행 없음)
 
 ### 목표
 

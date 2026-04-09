@@ -2,7 +2,7 @@
 
 > **버전**: v1.1
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-09
+> **최종수정일**: 2026-04-09 (Phase 0 검증 완료 → Phase 1 착수)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -20,35 +20,35 @@
 
 ---
 
-## Phase 0 — 초기 설정 Tasks [진행 중]
+## Phase 0 — 초기 설정 Tasks [완료]
 
 | ID | Task | 담당 | 상태 | 비고 |
 |----|------|------|------|------|
-| T-000 | Spring Boot 4.0.3 프로젝트 초기화 | Backend | IN_PROGRESS | Java 21, Gradle |
-| T-001 | 공통 인프라 구성 | Backend | TODO | Security, Redis, Swagger, Exception |
-| T-002 | PRD 문서 작성 | PM | TODO | jira-doc 기반 |
-| T-003 | 공유 Enum 9개 생성 | Backend | TODO | global/enums/ |
-| T-004 | Entity 20개 생성 | Backend | TODO | Phase A~E |
-| T-005 | Repository 20개 생성 | Backend | TODO | Spring Data JPA |
-| T-006 | DTO 17개 생성 | Backend | TODO | Request/Response |
-| T-007 | Service 7개 생성 | Backend | TODO | 비즈니스 로직 |
-| T-008 | Controller 8개 생성 | Backend | TODO | REST API |
-| T-009 | Spring 규칙 문서 작성 | Backend | TODO | human/ai 14개 |
+| T-000 | Spring Boot 4.0.3 프로젝트 초기화 | Backend | DONE | Java 21, Gradle (`build.gradle` 검증) |
+| T-001 | 공통 인프라 구성 | Backend | DONE | Security, Redis, Swagger, Exception |
+| T-002 | PRD 문서 작성 | PM | DONE | `docs/PRD.md` |
+| T-003 | 공유 Enum 9개 생성 | Backend | DONE | `global/enums/` 9파일 |
+| T-004 | Entity 20개 생성 | Backend | DONE | `@Entity` 20 |
+| T-005 | Repository 20개 생성 | Backend | DONE | Spring Data JPA |
+| T-006 | DTO 17개 생성 | Backend | DONE | Request 7 + 도메인 Response 10 |
+| T-007 | Service 7개 생성 | Backend | DONE | 도메인 Service 7 |
+| T-008 | Controller 8개 생성 | Backend | DONE | `*ApiController` 8 |
+| T-009 | Spring 규칙 문서 작성 | Backend | DONE | `rules/human`·`rules/ai` 각 7개 |
 
 ---
 
-## Phase 1 — 기획 Tasks
+## Phase 1 — 기획 Tasks [진행 중]
 
 | ID | Task | 담당 | 상태 | 산출물 | 선행 |
 |----|------|------|------|--------|------|
-| T-100 | 요구사항 상세 분석 (FR-001~033) | PM | TODO | 요구사항 정의서 v2.0 | - |
-| T-101 | 비기능 요구사항 검증 (NFR-001~009) | PM | TODO | NFR 검증 보고서 | - |
+| T-100 | 요구사항 상세 분석 (FR-001~033) | PM | IN_PROGRESS | 요구사항 정의서 v2.0 | - |
+| T-101 | 비기능 요구사항 검증 (NFR-001~009) | PM | IN_PROGRESS | NFR 검증 보고서 | - |
 | T-102 | 사용자 스토리 매핑 | PM + 전체 | TODO | 스토리 맵 | T-100 |
 | T-103 | 화면 와이어프레임 작성 (웹 14 + 모바일 흐름) | 디자이너 | TODO | Figma 와이어프레임 | T-100 |
 | T-104 | Sprint Backlog 초안 작성 (`00-스케줄` FR 매핑) | PM | TODO | Sprint 계획서 | T-102 |
 | T-107 | DoR/DoD 체크리스트 확정 (M1.1) | PM + 전체 | TODO | DoR/DoD 문서 | T-104 |
-| T-105 | 기술 스파이크: JQL 파서 설계 | Backend | TODO | 기술 조사 보고서 | - |
-| T-106 | 기술 스파이크: 워크플로우 엔진 설계 | Backend | TODO | 기술 조사 보고서 | - |
+| T-105 | 기술 스파이크: JQL 파서 설계 | Backend | IN_PROGRESS | 기술 조사 보고서 | - |
+| T-106 | 기술 스파이크: 워크플로우 엔진 설계 | Backend | IN_PROGRESS | 기술 조사 보고서 | - |
 
 ---
 
