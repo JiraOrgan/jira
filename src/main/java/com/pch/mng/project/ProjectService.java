@@ -1,10 +1,13 @@
 package com.pch.mng.project;
 
+import com.pch.mng.auth.CustomUserDetails;
+import com.pch.mng.global.enums.ProjectRole;
 import com.pch.mng.global.exception.BusinessException;
 import com.pch.mng.global.exception.ErrorCode;
 import com.pch.mng.user.UserAccount;
 import com.pch.mng.user.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,9 +22,12 @@ public class ProjectService {
     private final ProjectMemberRepository projectMemberRepository;
     private final UserAccountRepository userAccountRepository;
 
-    public List<ProjectResponse.MinDTO> findAll() {
-        return projectRepository.findByArchivedFalseOrderByCreatedAtDesc().stream()
+    public List<ProjectResponse.MinDTO> findAllForUser(Long userId) {
+        return projectMemberRepository.findByUser_Id(userId).stream()
+                .map(ProjectMember::getProject)
+                .filter(p -> !p.isArchived())
                 .map(ProjectResponse.MinDTO::of)
+                .distinct()
                 .toList();
     }
 
@@ -36,11 +42,18 @@ public class ProjectService {
         if (projectRepository.existsByKey(reqDTO.getKey())) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE);
         }
-        UserAccount lead = null;
+        CustomUserDetails principal = currentUserDetails();
+        UserAccount creator = userAccountRepository.findById(principal.getId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        UserAccount lead;
         if (reqDTO.getLeadId() != null) {
             lead = userAccountRepository.findById(reqDTO.getLeadId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        } else {
+            lead = creator;
         }
+
         Project project = Project.builder()
                 .key(reqDTO.getKey())
                 .name(reqDTO.getName())
@@ -49,6 +62,22 @@ public class ProjectService {
                 .lead(lead)
                 .build();
         projectRepository.save(project);
+
+        projectMemberRepository.save(ProjectMember.builder()
+                .project(project)
+                .user(creator)
+                .role(ProjectRole.ADMIN)
+                .build());
+
+        if (!lead.getId().equals(creator.getId())
+                && !projectMemberRepository.existsByProjectIdAndUserId(project.getId(), lead.getId())) {
+            projectMemberRepository.save(ProjectMember.builder()
+                    .project(project)
+                    .user(lead)
+                    .role(ProjectRole.DEVELOPER)
+                    .build());
+        }
+
         return ProjectResponse.DetailDTO.of(project);
     }
 
@@ -59,9 +88,9 @@ public class ProjectService {
         project.setName(reqDTO.getName());
         project.setDescription(reqDTO.getDescription());
         if (reqDTO.getLeadId() != null) {
-            UserAccount lead = userAccountRepository.findById(reqDTO.getLeadId())
+            UserAccount newLead = userAccountRepository.findById(reqDTO.getLeadId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-            project.setLead(lead);
+            project.setLead(newLead);
         }
         return ProjectResponse.DetailDTO.of(project);
     }
@@ -103,6 +132,17 @@ public class ProjectService {
     public void removeMember(Long projectId, Long memberId) {
         ProjectMember member = projectMemberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        if (!member.getProject().getId().equals(projectId)) {
+            throw new BusinessException(ErrorCode.ENTITY_NOT_FOUND);
+        }
         projectMemberRepository.delete(member);
+    }
+
+    private static CustomUserDetails currentUserDetails() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getPrincipal() instanceof CustomUserDetails cd)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+        return cd;
     }
 }

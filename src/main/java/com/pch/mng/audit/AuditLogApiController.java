@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -16,6 +17,7 @@ public class AuditLogApiController {
     private final AuditLogRepository auditLogRepository;
 
     @GetMapping("/issue/{issueId}")
+    @PreAuthorize("@projectSecurity.canViewAuditForIssue(#issueId)")
     public ResponseEntity<ApiResponse<Page<AuditLogResponse.DetailDTO>>> findByIssue(
             @PathVariable Long issueId,
             @PageableDefault(size = 20) Pageable pageable) {

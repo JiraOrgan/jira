@@ -259,7 +259,7 @@ phs/
 
 | Method | URL | 설명 | 인증 |
 |--------|-----|------|:----:|
-| `GET` | `/api/v1/projects` | 프로젝트 목록 | ✅ |
+| `GET` | `/api/v1/projects` | 내가 멤버인 프로젝트 목록 | ✅ |
 | `POST` | `/api/v1/projects` | 프로젝트 생성 | ✅ |
 | `GET` | `/api/v1/projects/{id}` | 프로젝트 상세 | ✅ |
 | `PUT` | `/api/v1/projects/{id}` | 프로젝트 수정 | ✅ |

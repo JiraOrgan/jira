@@ -4,6 +4,7 @@ import com.pch.mng.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,11 +17,13 @@ public class UserAccountApiController {
     private final UserAccountService userAccountService;
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<UserAccountResponse.MinDTO>>> findAll() {
         return ResponseEntity.ok(ApiResponse.ok(userAccountService.findAll()));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<UserAccountResponse.DetailDTO>> findById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.ok(userAccountService.findById(id)));
     }
@@ -32,6 +35,7 @@ public class UserAccountApiController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<UserAccountResponse.DetailDTO>> update(
             @PathVariable Long id,
             @Valid @RequestBody UserAccountRequest.UpdateDTO reqDTO) {
@@ -39,6 +43,7 @@ public class UserAccountApiController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         userAccountService.delete(id);
         return ResponseEntity.ok(ApiResponse.noContent());

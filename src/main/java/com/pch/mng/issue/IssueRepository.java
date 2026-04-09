@@ -21,4 +21,10 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 
     @Query("SELECT i FROM Issue i JOIN FETCH i.project LEFT JOIN FETCH i.assignee LEFT JOIN FETCH i.reporter WHERE i.issueKey = :key")
     Optional<Issue> findByIssueKeyWithDetails(@Param("key") String issueKey);
+
+    @Query("SELECT i FROM Issue i JOIN FETCH i.project JOIN FETCH i.reporter LEFT JOIN FETCH i.assignee WHERE i.issueKey = :key")
+    Optional<Issue> findByIssueKeyWithProject(@Param("key") String issueKey);
+
+    @Query("SELECT i FROM Issue i JOIN FETCH i.project WHERE i.id = :id")
+    Optional<Issue> findByIdWithProject(@Param("id") Long id);
 }
