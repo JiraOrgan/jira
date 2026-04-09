@@ -24,7 +24,12 @@ public enum ErrorCode {
 
     // User
     USER_NOT_FOUND(404, "사용자를 찾을 수 없습니다"),
-    EMAIL_ALREADY_EXISTS(409, "이미 사용 중인 이메일입니다");
+    EMAIL_ALREADY_EXISTS(409, "이미 사용 중인 이메일입니다"),
+
+    // Issue
+    INVALID_ISSUE_HIERARCHY(400, "이슈 계층이 올바르지 않습니다. 서브태스크는 부모 이슈가 필요합니다"),
+    ISSUE_PARENT_PROJECT_MISMATCH(400, "부모 이슈가 같은 프로젝트에 있어야 합니다"),
+    SPRINT_PROJECT_MISMATCH(400, "스프린트가 해당 프로젝트에 속하지 않습니다");
 
     private final int status;
     private final String message;

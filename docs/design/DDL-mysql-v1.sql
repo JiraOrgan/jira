@@ -50,6 +50,7 @@ CREATE TABLE project_tb (
     board_type VARCHAR(50) NOT NULL,
     lead_id BIGINT NULL,
     archived TINYINT(1) NOT NULL DEFAULT 0,
+    issue_sequence BIGINT NOT NULL DEFAULT 0,
     created_at DATETIME(6) NULL,
     updated_at DATETIME(6) NULL,
     CONSTRAINT fk_project_lead FOREIGN KEY (lead_id) REFERENCES user_account_tb (id)
