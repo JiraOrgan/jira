@@ -41,6 +41,10 @@ public class Project {
     @Column(nullable = false)
     private boolean archived = false;
 
+    /** 프로젝트 키 접미 이슈 번호(PROJ-42)용 단조 증가 시퀀스 */
+    @Column(name = "issue_sequence", nullable = false)
+    private long issueSequence = 0L;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

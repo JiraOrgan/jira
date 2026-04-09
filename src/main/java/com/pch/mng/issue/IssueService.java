@@ -1,6 +1,7 @@
 package com.pch.mng.issue;
 
 import com.pch.mng.global.enums.IssueStatus;
+import com.pch.mng.global.enums.IssueType;
 import com.pch.mng.global.exception.BusinessException;
 import com.pch.mng.global.exception.ErrorCode;
 import com.pch.mng.project.Project;
@@ -46,14 +47,25 @@ public class IssueService {
 
     @Transactional
     public IssueResponse.DetailDTO save(IssueRequest.SaveDTO reqDTO, Long reporterId) {
-        Project project = projectRepository.findById(reqDTO.getProjectId())
+        Project project = projectRepository.findByIdForUpdate(reqDTO.getProjectId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
         UserAccount reporter = userAccountRepository.findById(reporterId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        // 이슈 키 생성: 프로젝트 키 + 시퀀스
-        long count = issueRepository.findByProjectIdOrderByCreatedAtDesc(project.getId(), Pageable.unpaged()).getTotalElements();
-        String issueKey = project.getKey() + "-" + (count + 1);
+        Issue parent = resolveAndValidateParent(reqDTO.getIssueType(), reqDTO.getParentId(), project);
+
+        Sprint sprint = null;
+        if (reqDTO.getSprintId() != null) {
+            sprint = sprintRepository.findByIdWithProject(reqDTO.getSprintId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+            if (!sprint.getProject().getId().equals(project.getId())) {
+                throw new BusinessException(ErrorCode.SPRINT_PROJECT_MISMATCH);
+            }
+        }
+
+        long nextSeq = project.getIssueSequence() + 1;
+        project.setIssueSequence(nextSeq);
+        String issueKey = project.getKey() + "-" + nextSeq;
 
         Issue.IssueBuilder builder = Issue.builder()
                 .issueKey(issueKey)
@@ -72,20 +84,33 @@ public class IssueService {
                     .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
             builder.assignee(assignee);
         }
-        if (reqDTO.getParentId() != null) {
-            Issue parent = issueRepository.findById(reqDTO.getParentId())
-                    .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        if (parent != null) {
             builder.parent(parent);
         }
-        if (reqDTO.getSprintId() != null) {
-            Sprint sprint = sprintRepository.findById(reqDTO.getSprintId())
-                    .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        if (sprint != null) {
             builder.sprint(sprint);
         }
 
         Issue issue = builder.build();
         issueRepository.save(issue);
         return IssueResponse.DetailDTO.of(issue);
+    }
+
+    private Issue resolveAndValidateParent(IssueType issueType, Long parentId, Project project) {
+        if (issueType == IssueType.SUBTASK) {
+            if (parentId == null) {
+                throw new BusinessException(ErrorCode.INVALID_ISSUE_HIERARCHY);
+            }
+        }
+        if (parentId == null) {
+            return null;
+        }
+        Issue p = issueRepository.findByIdWithProject(parentId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        if (!p.getProject().getId().equals(project.getId())) {
+            throw new BusinessException(ErrorCode.ISSUE_PARENT_PROJECT_MISMATCH);
+        }
+        return p;
     }
 
     @Transactional
@@ -104,8 +129,11 @@ public class IssueService {
             issue.setAssignee(assignee);
         }
         if (reqDTO.getSprintId() != null) {
-            Sprint sprint = sprintRepository.findById(reqDTO.getSprintId())
+            Sprint sprint = sprintRepository.findByIdWithProject(reqDTO.getSprintId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+            if (!sprint.getProject().getId().equals(issue.getProject().getId())) {
+                throw new BusinessException(ErrorCode.SPRINT_PROJECT_MISMATCH);
+            }
             issue.setSprint(sprint);
         }
 
