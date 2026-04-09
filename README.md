@@ -220,6 +220,7 @@ phs/
 │   ├── SPRINT-BACKLOG-DRAFT.md    #   스프린트 백로그 초안
 │   ├── DOR-DOD.md                 #   DoR/DoD
 │   └── spikes/                    #   기술 스파이크 (JQL, 워크플로)
+│   └── design/                    #   Phase 2 설계 (ERD, DDL, API, 인프라, CI/CD)
 ├── rules/                         # 개발 규칙
 │   ├── human/                     #   사람용 상세 규칙 (7개)
 │   └── ai/                        #   AI용 간결 규칙 (7개)
@@ -377,6 +378,7 @@ chore:       build.gradle 의존성 업데이트
 | [SPRINT-BACKLOG-DRAFT.md](docs/SPRINT-BACKLOG-DRAFT.md) | FR ↔ 개발 Phase 백로그 초안 |
 | [DOR-DOD.md](docs/DOR-DOD.md) | Definition of Ready / Done |
 | [docs/spikes/](docs/spikes/) | JQL·워크플로 기술 스파이크 |
+| [docs/design/](docs/design/) | Phase 2: ERD, DDL, API, 시퀀스, 인프라, CI/CD, UI 시스템 |
 | [rules/human/](rules/human/) | 사람용 Spring 개발 규칙 (7개) |
 | [rules/ai/](rules/ai/) | AI용 간결 개발 규칙 (7개) |
 

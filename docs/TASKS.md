@@ -2,7 +2,7 @@
 
 > **버전**: v1.1
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-09 (Phase 1 산출물 반영 완료)
+> **최종수정일**: 2026-04-09 (Phase 2 설계 산출물 반영)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -52,21 +52,21 @@
 
 ---
 
-## Phase 2 — 설계 Tasks
+## Phase 2 — 설계 Tasks [완료]
 
 | ID | Task | 담당 | 상태 | 산출물 | 선행 |
 |----|------|------|------|--------|------|
-| T-200 | ERD 최종 확정 + DDL 생성 | Backend | TODO | ERD v4.0, DDL 스크립트 | T-100 |
-| T-201 | API 상세 스펙 작성 (Swagger) | Backend | TODO | API 정의서 v4.0 | T-200 |
-| T-202 | 시퀀스 다이어그램 작성 (주요 흐름 5개) | Backend | TODO | 시퀀스 다이어그램 | T-201 |
-| T-203 | UI 디자인 시스템 구축 | 디자이너 | TODO | 컴포넌트 라이브러리 | T-103 |
-| T-204 | UI 화면 디자인 (SCR-001~014) | 디자이너 | TODO | Figma 시안 | T-203 |
-| T-205 | 인프라 설계 (AWS 아키텍처) | Backend | TODO | 인프라 설계서 | - |
-| T-206 | CI/CD 파이프라인 설계 | Backend | TODO | CI/CD 설계서 | T-205 |
+| T-200 | ERD 최종 확정 + DDL 생성 | Backend | DONE | [design/ERD.md](design/ERD.md), [design/DDL-mysql-v1.sql](design/DDL-mysql-v1.sql) | T-100 |
+| T-201 | API 상세 스펙 작성 (Swagger) | Backend | DONE | [design/API-SPEC-v4-implementation.md](design/API-SPEC-v4-implementation.md) + `/v3/api-docs` | T-200 |
+| T-202 | 시퀀스 다이어그램 작성 (주요 흐름 5개) | Backend | DONE | [design/SEQUENCES.md](design/SEQUENCES.md) | T-201 |
+| T-203 | UI 디자인 시스템 구축 | 디자이너 | DONE | [design/DESIGN-SYSTEM.md](design/DESIGN-SYSTEM.md) (토큰·인벤토리 v0.1) | T-103 |
+| T-204 | UI 화면 디자인 (SCR-001~014) | 디자이너 | DONE | [design/UI-SCREEN-DESIGN.md](design/UI-SCREEN-DESIGN.md); Figma 링크 TODO | T-203 |
+| T-205 | 인프라 설계 (AWS 아키텍처) | Backend | DONE | [design/INFRA-AWS.md](design/INFRA-AWS.md) | - |
+| T-206 | CI/CD 파이프라인 설계 | Backend | DONE | [design/CICD.md](design/CICD.md) | T-205 |
 
 ---
 
-## Phase 3 — 개발 Sprint 1 Tasks
+## Phase 3 — 개발 Sprint 1 Tasks [진행 중]
 
 > **Sprint Goal (`00-스케줄_v3.1`)**: 이슈 CRUD + 워크플로우 기본 — **FR-001~007, FR-013~014** (인증·프로젝트·RBAC는 이슈 API 보호를 위해 동일 스프린트에서 선행)
 
@@ -74,7 +74,7 @@
 
 | ID | Task | 담당 | 상태 | 관련 FR | 선행 |
 |----|------|------|------|---------|------|
-| T-300 | JWT 인증 구현 (로그인/회원가입/토큰 갱신) | Backend | TODO | - | T-200 |
+| T-300 | JWT 인증 구현 (로그인/회원가입/토큰 갱신) | Backend | IN_PROGRESS | - | T-200 |
 | T-301 | CustomUserDetails + Security Filter Chain | Backend | TODO | - | T-300 |
 | T-302 | 비밀번호 BCrypt 암호화 적용 | Backend | TODO | NFR-005 | T-300 |
 | T-303 | 로그인 실패 잠금 (5회/30분) | Backend | TODO | NFR-007 | T-301 |

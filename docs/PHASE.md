@@ -2,7 +2,7 @@
 
 > **버전**: v1.1
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-09 (Phase 1 산출물 완료, Phase 2 대기)
+> **최종수정일**: 2026-04-09 (Phase 2 설계 산출물 완료)
 > **기준 문서**: [PRD.md](PRD.md) · `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md` (스프린트·FR 매핑 정본)
 > **연결 문서**: [TASKS.md](TASKS.md) | [WORKFLOW.md](WORKFLOW.md)
 
@@ -14,8 +14,8 @@
 |-------|------|------|------|
 | Phase 0 | 프로젝트 초기 설정 | 2026-03-22 | **완료** |
 | Phase 1 | 기획 | 2026-04-01 ~ 04-14 (2주) | **완료** |
-| Phase 2 | 설계 | 2026-04-15 ~ 05-05 (3주) | 대기 |
-| Phase 3 | 개발 Sprint 1 — 이슈·워크플로우 (FR-001~007, 013~014) | 2026-05-06 ~ 05-19 (2주) | 대기 |
+| Phase 2 | 설계 | 2026-04-15 ~ 05-05 (3주) | **완료** |
+| Phase 3 | 개발 Sprint 1 — 이슈·워크플로우 (FR-001~007, 013~014) | 2026-05-06 ~ 05-19 (2주) | **진행 중** |
 | Phase 4 | 개발 Sprint 2 — 보드·스프린트·백로그·JQL·모바일 이슈 (FR-008~012, 016, FR-MOBILE-001) | 2026-05-20 ~ 06-02 (2주) | 대기 |
 | Phase 5 | 개발 Sprint 3 — 대시보드·산정·권한·Audit·릴리즈·워치·모바일 보드/푸시 | 2026-06-03 ~ 06-16 (2주) | 대기 |
 | Phase 6 | 개발 Sprint 4 — 자동화·협업·아카이브·API·외부연동·모바일 오프라인 | 2026-06-17 ~ 06-30 (2주) | 대기 |
@@ -99,32 +99,36 @@ com.pch.mng/
 
 ---
 
-## Phase 2 — 설계 [대기]
+## Phase 2 — 설계 [완료]
 
 > **기간**: 2026-04-15 ~ 05-05 (3주)
 > **마일스톤**: M2. 설계 완료
-> **산출물**: ERD, API 정의서, 아키텍처 정의서
-> **Task**: [TASKS.md - Phase 2](TASKS.md#phase-2--설계-tasks)
+> **완료일(저장소)**: 2026-04-09
+> **Task**: [TASKS.md](TASKS.md) (Phase 2 섹션)
 
-### 목표
+### 저장소 산출물
 
-- ERD 최종 확정 및 DDL 생성
-- REST API 상세 스펙 확정 (Request/Response 스키마)
-- 아키텍처 상세 설계 (시퀀스 다이어그램, 컴포넌트 다이어그램)
-- UI/UX 디자인 시스템 확정
+| 문서 | 설명 |
+|------|------|
+| [design/ERD.md](design/ERD.md) | Mermaid 논리 ERD |
+| [design/DDL-mysql-v1.sql](design/DDL-mysql-v1.sql) | MySQL 8 DDL (JPA 정합) |
+| [design/API-SPEC-v4-implementation.md](design/API-SPEC-v4-implementation.md) | 구현 API 매핑 + OpenAPI 안내 |
+| [design/SEQUENCES.md](design/SEQUENCES.md) | 시퀀스 5종 |
+| [design/DESIGN-SYSTEM.md](design/DESIGN-SYSTEM.md) | 토큰·컴포넌트 인벤토리 v0.1 |
+| [design/UI-SCREEN-DESIGN.md](design/UI-SCREEN-DESIGN.md) | SCR별 Figma 브리지 |
+| [design/INFRA-AWS.md](design/INFRA-AWS.md) | AWS 아키텍처 |
+| [design/CICD.md](design/CICD.md) | GitHub Actions 초안 |
 
-### 주요 산출물
+### 목표 (달성)
 
-| 산출물 | 설명 | 담당 |
-|--------|------|------|
-| ERD v4.0 | BOARD 등 33 테이블 정본 | 백엔드 |
-| API 정의서 v4.0 | 엔드포인트·스키마 정본 | 백엔드 |
-| 아키텍처 정의서 v4.0 | 웹+모바일(Flutter) 포함 | 백엔드 |
-| UI 디자인 시스템 | 컴포넌트 라이브러리, 스타일 가이드 | 디자이너 |
+- ERD·DDL: 현재 엔티티 20기준 확정 (외부 ERD v4.0 diff 별도 추적)
+- API: 구현 경로 문서화, Swagger 연동
+- 시퀀스: 로그인·이슈·전환·스프린트·댓글
+- UI: 디자인 시스템 v0.1 + 화면 매핑 (Figma 시안은 링크 TODO)
 
 ---
 
-## Phase 3 — 개발 Sprint 1: 이슈·워크플로우 [대기]
+## Phase 3 — 개발 Sprint 1: 이슈·워크플로우 [진행 중]
 
 > **기간**: 2026-05-06 ~ 05-19 (2주)
 > **Sprint Goal (`00-스케줄_v3.1`)**: 이슈 CRUD + 워크플로우 기본 — **FR-001~007, FR-013~014**
