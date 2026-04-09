@@ -212,7 +212,14 @@ phs/
 │   ├── PRD.md                     #   제품 요구사항
 │   ├── PHASE.md                   #   Phase 로드맵
 │   ├── TASKS.md                   #   Task 목록 (89개)
-│   └── WORKFLOW.md                #   개발 워크플로우
+│   ├── WORKFLOW.md                #   개발 워크플로우
+│   ├── REQUIREMENTS-v2.md         #   FR 상세·RTM (Phase 1)
+│   ├── NFR-VERIFICATION.md        #   NFR 검증
+│   ├── STORY-MAP.md               #   스토리 맵
+│   ├── WIREFRAME-SPEC.md          #   화면 와이어 사양
+│   ├── SPRINT-BACKLOG-DRAFT.md    #   스프린트 백로그 초안
+│   ├── DOR-DOD.md                 #   DoR/DoD
+│   └── spikes/                    #   기술 스파이크 (JQL, 워크플로)
 ├── rules/                         # 개발 규칙
 │   ├── human/                     #   사람용 상세 규칙 (7개)
 │   └── ai/                        #   AI용 간결 규칙 (7개)
@@ -363,6 +370,13 @@ chore:       build.gradle 의존성 업데이트
 | [PHASE.md](docs/PHASE.md) | Phase 0~8 개발 로드맵 |
 | [TASKS.md](docs/TASKS.md) | 89개 세부 Task 목록 (Phase별 분류) |
 | [WORKFLOW.md](docs/WORKFLOW.md) | Git, Sprint, CI/CD, 코드 리뷰 프로세스 |
+| [REQUIREMENTS-v2.md](docs/REQUIREMENTS-v2.md) | FR-001~033·모바일 RTM (Phase 1) |
+| [NFR-VERIFICATION.md](docs/NFR-VERIFICATION.md) | NFR-001~011 검증 보고 |
+| [STORY-MAP.md](docs/STORY-MAP.md) | Epic·사용자 스토리 맵 |
+| [WIREFRAME-SPEC.md](docs/WIREFRAME-SPEC.md) | 웹 14화면·모바일 흐름 사양 |
+| [SPRINT-BACKLOG-DRAFT.md](docs/SPRINT-BACKLOG-DRAFT.md) | FR ↔ 개발 Phase 백로그 초안 |
+| [DOR-DOD.md](docs/DOR-DOD.md) | Definition of Ready / Done |
+| [docs/spikes/](docs/spikes/) | JQL·워크플로 기술 스파이크 |
 | [rules/human/](rules/human/) | 사람용 Spring 개발 규칙 (7개) |
 | [rules/ai/](rules/ai/) | AI용 간결 개발 규칙 (7개) |
 

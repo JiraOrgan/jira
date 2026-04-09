@@ -2,7 +2,7 @@
 
 > **버전**: v1.1
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-09 (Phase 0 검증 완료 → Phase 1 착수)
+> **최종수정일**: 2026-04-09 (Phase 1 산출물 반영 완료)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -37,18 +37,18 @@
 
 ---
 
-## Phase 1 — 기획 Tasks [진행 중]
+## Phase 1 — 기획 Tasks [완료]
 
 | ID | Task | 담당 | 상태 | 산출물 | 선행 |
 |----|------|------|------|--------|------|
-| T-100 | 요구사항 상세 분석 (FR-001~033) | PM | IN_PROGRESS | 요구사항 정의서 v2.0 | - |
-| T-101 | 비기능 요구사항 검증 (NFR-001~009) | PM | IN_PROGRESS | NFR 검증 보고서 | - |
-| T-102 | 사용자 스토리 매핑 | PM + 전체 | TODO | 스토리 맵 | T-100 |
-| T-103 | 화면 와이어프레임 작성 (웹 14 + 모바일 흐름) | 디자이너 | TODO | Figma 와이어프레임 | T-100 |
-| T-104 | Sprint Backlog 초안 작성 (`00-스케줄` FR 매핑) | PM | TODO | Sprint 계획서 | T-102 |
-| T-107 | DoR/DoD 체크리스트 확정 (M1.1) | PM + 전체 | TODO | DoR/DoD 문서 | T-104 |
-| T-105 | 기술 스파이크: JQL 파서 설계 | Backend | IN_PROGRESS | 기술 조사 보고서 | - |
-| T-106 | 기술 스파이크: 워크플로우 엔진 설계 | Backend | IN_PROGRESS | 기술 조사 보고서 | - |
+| T-100 | 요구사항 상세 분석 (FR-001~033) | PM | DONE | [REQUIREMENTS-v2.md](REQUIREMENTS-v2.md) | - |
+| T-101 | 비기능 요구사항 검증 (NFR-001~011) | PM | DONE | [NFR-VERIFICATION.md](NFR-VERIFICATION.md) | - |
+| T-102 | 사용자 스토리 매핑 | PM + 전체 | DONE | [STORY-MAP.md](STORY-MAP.md) | T-100 |
+| T-103 | 화면 와이어프레임 작성 (웹 14 + 모바일 흐름) | 디자이너 | DONE | [WIREFRAME-SPEC.md](WIREFRAME-SPEC.md); Figma 링크 합의 후 추가 | T-100 |
+| T-104 | Sprint Backlog 초안 작성 (`00-스케줄` FR 매핑) | PM | DONE | [SPRINT-BACKLOG-DRAFT.md](SPRINT-BACKLOG-DRAFT.md) | T-102 |
+| T-107 | DoR/DoD 체크리스트 확정 (M1.1) | PM + 전체 | DONE | [DOR-DOD.md](DOR-DOD.md) | T-104 |
+| T-105 | 기술 스파이크: JQL 파서 설계 | Backend | DONE | [spikes/SPIKE-JQL-PARSER.md](spikes/SPIKE-JQL-PARSER.md) | - |
+| T-106 | 기술 스파이크: 워크플로우 엔진 설계 | Backend | DONE | [spikes/SPIKE-WORKFLOW-ENGINE.md](spikes/SPIKE-WORKFLOW-ENGINE.md) | - |
 
 ---
 
