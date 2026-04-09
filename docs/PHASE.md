@@ -2,7 +2,7 @@
 
 > **버전**: v1.1
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-09 (Phase 3 이슈 키·검증)
+> **최종수정일**: 2026-04-09 (Phase 3 워크플로 FSM·전환 이력)
 > **기준 문서**: [PRD.md](PRD.md) · `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md` (스프린트·FR 매핑 정본)
 > **연결 문서**: [TASKS.md](TASKS.md) | [WORKFLOW.md](WORKFLOW.md)
 

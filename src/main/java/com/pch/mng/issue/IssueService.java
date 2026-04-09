@@ -10,6 +10,10 @@ import com.pch.mng.sprint.Sprint;
 import com.pch.mng.sprint.SprintRepository;
 import com.pch.mng.user.UserAccount;
 import com.pch.mng.user.UserAccountRepository;
+import com.pch.mng.workflow.IssueWorkflowPolicy;
+import com.pch.mng.workflow.WorkflowTransition;
+import com.pch.mng.workflow.WorkflowTransitionRepository;
+import com.pch.mng.workflow.WorkflowTransitionResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +31,8 @@ public class IssueService {
     private final ProjectRepository projectRepository;
     private final UserAccountRepository userAccountRepository;
     private final SprintRepository sprintRepository;
+    private final IssueWorkflowPolicy issueWorkflowPolicy;
+    private final WorkflowTransitionRepository workflowTransitionRepository;
 
     public Page<IssueResponse.MinDTO> findByProject(Long projectId, Pageable pageable) {
         return issueRepository.findByProjectIdOrderByCreatedAtDesc(projectId, pageable)
@@ -43,6 +49,14 @@ public class IssueService {
         Issue issue = issueRepository.findByIssueKeyWithDetails(issueKey)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
         return IssueResponse.DetailDTO.of(issue);
+    }
+
+    public List<WorkflowTransitionResponse.DetailDTO> findTransitionsByIssueKey(String issueKey) {
+        Issue issue = issueRepository.findByIssueKey(issueKey)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        return workflowTransitionRepository.findByIssueIdWithActorOrderByTransitionedAtDesc(issue.getId()).stream()
+                .map(WorkflowTransitionResponse.DetailDTO::of)
+                .toList();
     }
 
     @Transactional
@@ -148,11 +162,29 @@ public class IssueService {
     }
 
     @Transactional
-    public IssueResponse.DetailDTO transition(String issueKey, IssueRequest.TransitionDTO reqDTO) {
+    public IssueResponse.DetailDTO transition(String issueKey, IssueRequest.TransitionDTO reqDTO, Long actorUserId) {
         Issue issue = issueRepository.findByIssueKey(issueKey)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
-        // TODO: 워크플로우 전환 규칙 검증 로직 추가
-        issue.setStatus(reqDTO.getToStatus());
+        IssueStatus from = issue.getStatus();
+        IssueStatus to = reqDTO.getToStatus();
+        if (from == to) {
+            return IssueResponse.DetailDTO.of(issue);
+        }
+        issueWorkflowPolicy.assertTransition(from, to);
+        UserAccount actor = userAccountRepository.findById(actorUserId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        issue.setStatus(to);
+        issueRepository.save(issue);
+
+        WorkflowTransition log = new WorkflowTransition();
+        log.setIssue(issue);
+        log.setFromStatus(from);
+        log.setToStatus(to);
+        log.setChangedBy(actor);
+        log.setConditionNote(reqDTO.getConditionNote());
+        workflowTransitionRepository.save(log);
+
         return IssueResponse.DetailDTO.of(issue);
     }
 }

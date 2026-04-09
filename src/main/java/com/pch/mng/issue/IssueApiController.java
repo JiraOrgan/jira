@@ -4,6 +4,7 @@ import com.pch.mng.auth.CustomUserDetails;
 import com.pch.mng.global.exception.BusinessException;
 import com.pch.mng.global.exception.ErrorCode;
 import com.pch.mng.global.response.ApiResponse;
+import com.pch.mng.workflow.WorkflowTransitionResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -71,11 +72,22 @@ public class IssueApiController {
         return ResponseEntity.ok(ApiResponse.noContent());
     }
 
+    @GetMapping("/{issueKey}/transitions")
+    @PreAuthorize("@projectSecurity.canReadIssue(#issueKey)")
+    public ResponseEntity<ApiResponse<List<WorkflowTransitionResponse.DetailDTO>>> listTransitions(
+            @PathVariable String issueKey) {
+        return ResponseEntity.ok(ApiResponse.ok(issueService.findTransitionsByIssueKey(issueKey)));
+    }
+
     @PostMapping("/{issueKey}/transitions")
     @PreAuthorize("@projectSecurity.canTransitionIssue(#issueKey)")
     public ResponseEntity<ApiResponse<IssueResponse.DetailDTO>> transition(
+            @AuthenticationPrincipal CustomUserDetails principal,
             @PathVariable String issueKey,
             @Valid @RequestBody IssueRequest.TransitionDTO reqDTO) {
-        return ResponseEntity.ok(ApiResponse.ok(issueService.transition(issueKey, reqDTO)));
+        if (principal == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+        return ResponseEntity.ok(ApiResponse.ok(issueService.transition(issueKey, reqDTO, principal.getId())));
     }
 }
