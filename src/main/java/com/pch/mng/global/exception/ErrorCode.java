@@ -18,6 +18,9 @@ public enum ErrorCode {
     FORBIDDEN(403, "접근 권한이 없습니다"),
     EXPIRED_TOKEN(401, "토큰이 만료되었습니다"),
     INVALID_TOKEN(401, "유효하지 않은 토큰입니다"),
+    INVALID_CREDENTIALS(401, "이메일 또는 비밀번호가 올바르지 않습니다"),
+    INVALID_REFRESH_TOKEN(401, "유효하지 않은 리프레시 토큰입니다"),
+    ACCOUNT_LOCKED(423, "로그인 시도 횟수 초과로 일시 잠금되었습니다. 30분 후 다시 시도해 주세요"),
 
     // User
     USER_NOT_FOUND(404, "사용자를 찾을 수 없습니다"),

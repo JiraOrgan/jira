@@ -239,8 +239,11 @@ phs/
 
 | Method | URL | 설명 | 인증 |
 |--------|-----|------|:----:|
-| `POST` | `/auth/login` | 로그인 (JWT 발급) | - |
-| `POST` | `/auth/refresh` | 토큰 갱신 | - |
+| `POST` | `/api/auth/register` | 회원가입 (JWT 없음) | - |
+| `POST` | `/api/auth/login` | 로그인 (Access + Refresh JWT) | - |
+| `POST` | `/api/auth/refresh` | 리프레시 토큰으로 재발급 (로테이션) | - |
+
+이후 API는 헤더 `Authorization: Bearer {accessToken}` 필요.
 
 ### 사용자 API
 
@@ -248,7 +251,7 @@ phs/
 |--------|-----|------|:----:|
 | `GET` | `/api/v1/users` | 사용자 목록 | ✅ |
 | `GET` | `/api/v1/users/{id}` | 사용자 상세 | ✅ |
-| `POST` | `/api/v1/users` | 회원가입 | - |
+| `POST` | `/api/v1/users` | 회원가입 (레거시, `register`와 동일) | - |
 | `PUT` | `/api/v1/users/{id}` | 사용자 수정 | ✅ |
 | `DELETE` | `/api/v1/users/{id}` | 사용자 삭제 | ✅ |
 
@@ -256,7 +259,7 @@ phs/
 
 | Method | URL | 설명 | 인증 |
 |--------|-----|------|:----:|
-| `GET` | `/api/v1/projects` | 프로젝트 목록 | ✅ |
+| `GET` | `/api/v1/projects` | 내가 멤버인 프로젝트 목록 | ✅ |
 | `POST` | `/api/v1/projects` | 프로젝트 생성 | ✅ |
 | `GET` | `/api/v1/projects/{id}` | 프로젝트 상세 | ✅ |
 | `PUT` | `/api/v1/projects/{id}` | 프로젝트 수정 | ✅ |
