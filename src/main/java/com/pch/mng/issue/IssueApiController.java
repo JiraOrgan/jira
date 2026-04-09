@@ -23,6 +23,7 @@ import java.util.List;
 public class IssueApiController {
 
     private final IssueService issueService;
+    private final IssueLinkService issueLinkService;
 
     @GetMapping("/project/{projectId}")
     @PreAuthorize("@projectSecurity.isMember(#projectId)")
@@ -89,5 +90,19 @@ public class IssueApiController {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
         return ResponseEntity.ok(ApiResponse.ok(issueService.transition(issueKey, reqDTO, principal.getId())));
+    }
+
+    @GetMapping("/{issueKey}/links")
+    @PreAuthorize("@projectSecurity.canReadIssue(#issueKey)")
+    public ResponseEntity<ApiResponse<List<IssueLinkResponse.DetailDTO>>> listLinks(@PathVariable String issueKey) {
+        return ResponseEntity.ok(ApiResponse.ok(issueLinkService.findByIssueKey(issueKey)));
+    }
+
+    @PostMapping("/{issueKey}/links")
+    @PreAuthorize("@projectSecurity.canUpdateIssue(#issueKey)")
+    public ResponseEntity<ApiResponse<IssueLinkResponse.DetailDTO>> createLink(
+            @PathVariable String issueKey,
+            @Valid @RequestBody IssueLinkRequest.SaveDTO reqDTO) {
+        return ResponseEntity.status(201).body(ApiResponse.created(issueLinkService.create(issueKey, reqDTO)));
     }
 }
