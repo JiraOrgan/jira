@@ -1,9 +1,10 @@
 # Project Control Hub - PRD (Product Requirements Document)
 
-> **버전**: v1.0
+> **버전**: v1.1
 > **작성일**: 2026-03-22
-> **원본 문서**: [Project-Control-Hub/documents](https://github.com/Project-Control-Hub/documents) 기반 종합
-> **상태**: 초안
+> **최종수정일**: 2026-04-09
+> **원본 문서**: 로컬 `C:\workspace\phs-prj\documents` — `Project_Control_Hub.md` v3.5.0, `07-요구사항정의서_v2.3.md`, `01-프로젝트계획서_v3.0.md`, `02-ERD_v4.0.md`, `04-API정의서_v4.0.md` 정합
+> **상태**: 검토중
 
 ---
 
@@ -15,10 +16,13 @@
 
 ### 1.2 프로젝트 범위
 
+> FR ID 정본은 `07-요구사항정의서_v2.3`의 **FR-001~033**, **FR-MOBILE-001~004** 와 동일하다.
+
 | 구분 | 내용 |
 |------|------|
-| **In-Scope** | 이슈(Issue) CRUD, 워크플로우 엔진, 스크럼/칸반 보드, 백로그, 스프린트 관리, 대시보드, JQL 검색, REST API, RBAC 권한 관리, Audit Log, 릴리즈/버전 관리 |
-| **Out-of-Scope** | Confluence 연동, Marketplace 앱 개발, 온프레미스 Data Center 배포 |
+| **In-Scope** | 이슈 CRUD·타입·상태·우선순위·담당·레이블·컴포넌트·링크, 표준 6단계 워크플로우·전환 규칙·자동화, 스크럼/칸반 보드·WIP, 백로그·스프린트·로드맵, JQL, 스토리 포인트·Planning Poker, Fix Version·릴리즈 노트, 대시보드·차트, 댓글·@멘션·알림·워치, 아카이브, Audit Log, RBAC·이슈 보안 레벨, REST API, **Flutter 모바일 앱**(FR-MOBILE-001~004) |
+| **In-Scope (부분)** | GitHub/GitLab 커밋·PR 연동 (**FR-033**, 부분 구현) |
+| **Out-of-Scope** | Confluence 문서 연동, Marketplace 앱, 온프레미스 Data Center, AI 자동 이슈 분류·SP 추천(후속 검토) |
 
 ### 1.3 성공 기준
 
@@ -37,10 +41,10 @@
 
 | 항목 | 기술 | 버전 |
 |------|------|------|
-| Framework | React | 18.x |
+| Framework | React | 19.x |
 | 상태 관리 | Zustand | 최신 |
 | 스타일링 | Tailwind CSS | 최신 |
-| 빌드 도구 | Vite | 최신 |
+| 빌드 도구 | Vite | 8.x |
 | 차트 | Recharts | 최신 |
 
 ### 2.2 Frontend (Mobile)
@@ -65,12 +69,13 @@
 
 | 항목 | 기술 | 비고 |
 |------|------|------|
-| Database | PostgreSQL | 16.x, Multi-AZ |
-| Cache | Redis (ElastiCache) | 7.x, Cluster Mode |
+| Database | PostgreSQL | 18.x, Multi-AZ |
+| Cache | Redis (ElastiCache) | 8.x, Cluster Mode |
 | Storage | AWS S3 | 첨부파일, 정적 리소스 |
 | Message Queue | AWS SQS | 알림/자동화 큐 + DLQ |
-| Container | ECS Fargate | Auto Scaling |
+| Container | Docker / ECS Fargate | Docker 29.x, Auto Scaling |
 | CI/CD | GitHub Actions | - |
+| IaC | Terraform | 1.14.x |
 | CDN | CloudFront | 정적 리소스 |
 | Monitoring | CloudWatch + Grafana | APM 대시보드 |
 
@@ -203,6 +208,17 @@ Backlog → Selected for Sprint → In Progress → Code Review → QA → Done
 | FR-032 | REST API (Issue CRUD, Search, Transition) | 필수 |
 | FR-033 | GitHub/GitLab 커밋/PR 연결 | 선택 |
 
+### 3.11 모바일 앱 (Flutter)
+
+| ID | 요구사항 | 우선순위 |
+|----|----------|----------|
+| FR-MOBILE-001 | 모바일 이슈 조회/생성 | 필수 |
+| FR-MOBILE-002 | 모바일 보드 확인 (터치 기반 상태 변경) | 필수 |
+| FR-MOBILE-003 | 모바일 푸시 알림 수신 (FCM/APNs) | 선택 |
+| FR-MOBILE-004 | 오프라인 모드 (로컬 캐싱·동기화) | 선택 |
+
+상세 Acceptance Criteria·화면(SCR-MOB-001~005)·API 매핑은 `07-요구사항정의서_v2.3` 및 `03-아키텍처정의서_v4.0` §17(모바일)을 따른다.
+
 ---
 
 ## 4. 비기능 요구사항
@@ -210,22 +226,27 @@ Backlog → Selected for Sprint → In Progress → Code Review → QA → Done
 | ID | 분류 | 요구사항 | 목표치 | 우선순위 |
 |----|------|----------|--------|----------|
 | NFR-001 | 성능 | API 응답 시간 | P95 < 200ms | 필수 |
-| NFR-002 | 성능 | JQL 검색 응답 | < 500ms | 필수 |
-| NFR-003 | 가용성 | 시스템 가동률 | 99.9% | 필수 |
+| NFR-002 | 성능 | JQL 검색 응답 | P95 < 500ms | 필수 |
+| NFR-003 | 가용성 | 시스템 가동률 | 99.9% (월 ≤ 43분) | 필수 |
 | NFR-004 | 확장성 | 동시 접속자 | 500명 | 필수 |
-| NFR-005 | 보안 | 비밀번호 암호화 | bcrypt | 필수 |
+| NFR-005 | 보안 | 비밀번호 암호화 | bcrypt (cost ≥ 12) | 필수 |
 | NFR-006 | 보안 | 통신 암호화 | HTTPS TLS 1.3 | 필수 |
 | NFR-007 | 보안 | 로그인 실패 잠금 | 5회 실패 시 30분 잠금 | 필수 |
 | NFR-008 | 감사 | 변경 이력 보존 | 전체 필드 변경 추적 | 필수 |
 | NFR-009 | 아카이브 | 자동 아카이브 | 6개월 미수정 이슈 | 선택 |
+| NFR-010 | 모바일 성능 | 모바일 앱 시작(콜드 스타트) | < 3초 | 필수 |
+| NFR-011 | 모바일 안정성 | 오프라인 동기화 데이터 손실 | 0건 | 선택 |
 
 ---
 
 ## 5. 데이터 모델 (주요 엔티티)
 
+> **ERD 정본**: `02-ERD_v4.0.md` — 약 **33개 테이블**, `BOARD` 엔티티(프로젝트당 복수 보드), `PROJECT.board_type` 제거·보드 테이블 이관, `ISSUE.start_date`, `EXTERNAL_INTEGRATION` / `AUTOMATION_EXECUTION_LOG`, `COMMENT.visibility`, `ISSUE_LINK`에 CLONES 등 v4.0 변경을 반영한다.
+
 | 엔티티 | 설명 | 주요 필드 |
 |--------|------|-----------|
-| `PROJECT` | 프로젝트 | key(UK), name, board_type(SCRUM/KANBAN), lead_id, archived |
+| `PROJECT` | 프로젝트 | key(UK), name, lead_id, archived |
+| `BOARD` | 보드 (v4.0) | project_id, board_type(SCRUM/KANBAN 등), is_default, created_by |
 | `USER_ACCOUNT` | 사용자 | email(UK), password(해시), name |
 | `PROJECT_MEMBER` | 프로젝트 멤버십 | project_id, user_id, role(ADMIN/DEVELOPER/QA/REPORTER/VIEWER) |
 | `ISSUE` | 이슈 | issue_key(UK), project_id, issue_type, summary, status, priority, story_points, assignee_id, reporter_id, parent_id, sprint_id, security_level |
@@ -247,6 +268,8 @@ Backlog → Selected for Sprint → In Progress → Code Review → QA → Done
 ---
 
 ## 6. API 설계 요약
+
+> 구현·스키마·신규 그룹(Planning Poker, WIP, Screen, Bulk, 사용자 초대 등)의 **정본**은 `04-API정의서_v4.0.md`이다. 본 절은 개발 편의용 요약이다.
 
 ### 6.1 기본 정보
 
@@ -408,30 +431,37 @@ Internet → Route 53 → CloudFront (CDN) / WAF → ALB
 - 단위 테스트 통과 (커버리지 80%+)
 - QA 테스트 통과
 - 문서 업데이트 완료
-- main/develop 머지 완료, 빌드 성공
+- main/develop(또는 dev) 머지 완료, 빌드 성공
 - 회귀 테스트 확인
 
 ---
 
 ## 10. 프로젝트 일정
 
+> 상세·스프린트별 FR 매핑은 `00-스케줄_v3.1.md` 정본.
+
 | 단계 | 기간 | 산출물 |
 |------|------|--------|
-| 기획 | 2주 (2026-04-01 ~ 04-14) | 요구사항 정의서, 화면 설계서 |
-| 설계 | 3주 (2026-04-15 ~ 05-05) | ERD, API 정의서, 아키텍처 정의서 |
-| 개발 | 8주 (2026-05-06 ~ 06-30) | 소스코드, 단위 테스트 |
-| QA | 3주 (2026-07-01 ~ 07-21) | 테스트 리포트 |
-| 배포 | 1.5주 (2026-07-22 ~ 07-31) | 운영 시스템 |
+| 기획 | 2026-04-01 ~ 04-14 | 요구사항·화면 설계, UI/UX 시안 |
+| DoR/DoD 확정 | 2026-04-21 (M1.1) | DoR/DoD 체크리스트, 스프린트 운영 가이드 |
+| 설계 | 2026-04-15 ~ 05-05 | ERD, API, 아키텍처, 권한·워크플로 설계 |
+| 개발 | 8주 (2026-05-06 ~ 06-30), 2주 스프린트 × 4 | 소스코드, 단위 테스트 |
+| QA | 2026-07-01 ~ 07-21 | 기능·성능·보안 테스트 리포트 |
+| 배포 | 2026-07-22 ~ 07-31 | 운영 시스템, 릴리즈 노트 v1.0.0 |
 
 ### 마일스톤
 
 | 마일스톤 | 목표일 | 산출물 |
 |----------|--------|--------|
-| M1. 기획 완료 | 2026-04-14 | 요구사항 정의서, 화면 설계서 |
-| M2. 설계 완료 | 2026-05-05 | ERD, API 정의서, 아키텍처 정의서 |
-| M3. 개발 완료 | 2026-06-30 | 소스코드, 단위 테스트 결과 |
-| M4. QA 완료 | 2026-07-21 | 테스트 리포트 |
-| M5. 배포 | 2026-07-31 | 배포 완료 보고서 |
+| M1. 기획 완료 | 2026-04-14 | 요구사항 정의서, 화면 설계서, UI/UX 디자인 시안 |
+| M1.1. DoR/DoD 확정 | 2026-04-21 | DoR/DoD 체크리스트, 스프린트 운영 가이드 |
+| M2. 설계 완료 | 2026-05-05 | ERD, API 정의서, 아키텍처 정의서, 권한·워크플로 설계 |
+| M3. Sprint 1 완료 | 2026-05-19 | 이슈 CRUD·워크플로 엔진·단위 테스트 |
+| M4. Sprint 2 완료 | 2026-06-02 | 보드·스프린트·JQL·모바일 이슈 UI |
+| M5. Sprint 3 완료 | 2026-06-16 | 대시보드·리포트·RBAC·Audit·릴리즈·워치·모바일 보드/푸시 |
+| M6. Sprint 4 완료 (개발 완료) | 2026-06-30 | 자동화·협업·외부연동·모바일 오프라인 등 |
+| M7. QA 완료 | 2026-07-21 | 테스트 리포트 |
+| M8. 배포 (v1.0.0) | 2026-07-31 | 배포 완료 보고서, 릴리즈 노트 |
 
 ---
 
@@ -441,9 +471,10 @@ Internet → Route 53 → CloudFront (CDN) / WAF → ALB
 |------|------|
 | PM | 프로젝트 관리, 일정 조율, 이해관계자 소통 |
 | 백엔드 개발 | REST API, 워크플로우 엔진, DB 설계 및 구현 |
-| 프론트엔드 개발 | 보드, 대시보드, 이슈 관리 UI/UX 구현 |
+| 프론트엔드 개발 | 웹: 보드, 대시보드, 이슈 관리 UI/UX |
+| Flutter 모바일 개발 | iOS/Android 앱 — 이슈·보드·알림·오프라인 (FR-MOBILE-001~004) |
 | QA | 테스트 계획 및 실행, 결함 관리 |
-| 디자이너 | UI/UX 디자인 (보드, 대시보드, 이슈 화면) |
+| 디자이너 | UI/UX 디자인 (웹·모바일 공통 패턴) |
 
 ---
 
@@ -462,3 +493,4 @@ Internet → Route 53 → CloudFront (CDN) / WAF → ALB
 | 버전 | 날짜 | 작성자 | 변경 내용 |
 |------|------|--------|-----------|
 | v1.0 | 2026-03-22 | - | jira-doc 기반 PRD 초안 작성 |
+| v1.1 | 2026-04-09 | - | `documents` 저장소(PCH v3.5, 07 v2.3, 01 v3.0, 00-스케줄 v3.1, ERD v4.0)와 정합: 범위·모바일 FR·NFR-010/011·BOARD·마일스톤 M1.1·기술 스택 버전 갱신 |

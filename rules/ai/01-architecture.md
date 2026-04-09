@@ -1,8 +1,8 @@
 # Architecture Rules
 
 ## Package Structure
-- 도메인별 flat 패키지: `com.jira.mng.{domain}/`
-- 공통 인프라: `com.jira.mng.global/` (config, exception, response, enums, filter, aop)
+- 도메인별 flat 패키지: `com.pch.mng.{domain}/`
+- 공통 인프라: `com.pch.mng.global/` (config, exception, response, enums, filter, aop)
 - 기술 레이어별 패키지 분류 금지 (entity/, service/, controller/)
 
 ## File Naming per Domain
