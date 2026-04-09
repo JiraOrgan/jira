@@ -12,6 +12,7 @@
 | Base path (현재) | `/api/v1` (인증은 `/api/auth`) |
 | 성공 래퍼 | `ApiResponse<T>` (`success`, `data`, `error`) |
 | 인증 | Bearer JWT (`JwtAuthenticationFilter`) |
+| 권한 | `@PreAuthorize` + `projectSecurity` / `dashboardSecurity` (프로젝트 멤버·역할) |
 
 ## 인증 `AuthController`
 
