@@ -26,3 +26,9 @@ jwt:
 logging:
   level:
     com.pch.mng: DEBUG
+
+app:
+  storage:
+    type: local
+    local:
+      base-path: ./build/test-attachments

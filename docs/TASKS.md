@@ -1,8 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.5
+> **버전**: v1.6
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-10 (T-308 Auth·User·Project 단위 테스트)
+> **최종수정일**: 2026-04-10 (T-406 첨부 업로드·로컬/S3 스토리지)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -88,7 +88,7 @@
 | T-402 | 워크플로우 전환 규칙 엔진 구현 (`IssueWorkflowPolicy`) | Backend | DONE | FR-013, FR-014 | T-400 |
 | T-403 | WorkflowTransition 자동 기록 | Backend | DONE | FR-013 | T-402 |
 | T-404 | 이슈 링크 CRUD | Backend | DONE | FR-007 | T-400 |
-| T-406 | 첨부파일 업로드 (S3 연동) | Backend | TODO | - | T-400 |
+| T-406 | 첨부파일 업로드 (S3 연동) | Backend | DONE | 로컬 기본·`app.storage.type=s3` | T-400 |
 | T-408 | 이슈 레이블/컴포넌트 연결 | Backend | DONE | FR-006 | T-400 |
 | T-409 | 단위 테스트 (Issue, Workflow) | Backend | DONE | - | T-408 |
 

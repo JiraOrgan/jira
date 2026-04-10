@@ -53,6 +53,10 @@ dependencies {
     // -- Gson
     implementation 'com.google.code.gson:gson:2.11.0'
 
+    // -- AWS S3 (선택적 첨부 저장소)
+    implementation platform('software.amazon.awssdk:bom:2.29.34')
+    implementation 'software.amazon.awssdk:s3'
+
     // -- Utility
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

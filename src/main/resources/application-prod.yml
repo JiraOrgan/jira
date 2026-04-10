@@ -43,3 +43,15 @@ logging:
     rollingpolicy:
       max-file-size: 50MB
       max-history: 30
+
+app:
+  storage:
+    type: s3
+    local:
+      base-path: /tmp/attachments-unused
+    s3:
+      bucket: ${S3_BUCKET}
+      region: ${AWS_REGION:ap-northeast-2}
+      endpoint: ${S3_ENDPOINT:}
+      access-key: ${AWS_ACCESS_KEY_ID:}
+      secret-key: ${AWS_SECRET_ACCESS_KEY:}
