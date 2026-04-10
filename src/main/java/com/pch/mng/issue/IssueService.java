@@ -1,5 +1,6 @@
 package com.pch.mng.issue;
 
+import com.pch.mng.global.enums.BoardType;
 import com.pch.mng.global.enums.IssueStatus;
 import com.pch.mng.global.enums.IssueType;
 import com.pch.mng.global.enums.SprintStatus;
@@ -11,6 +12,7 @@ import com.pch.mng.project.Project;
 import com.pch.mng.project.ProjectComponent;
 import com.pch.mng.project.ProjectComponentRepository;
 import com.pch.mng.project.ProjectRepository;
+import com.pch.mng.project.WipLimitRepository;
 import com.pch.mng.sprint.Sprint;
 import com.pch.mng.sprint.SprintRepository;
 import com.pch.mng.user.UserAccount;
@@ -44,6 +46,7 @@ public class IssueService {
     private final IssueComponentRepository issueComponentRepository;
     private final LabelRepository labelRepository;
     private final ProjectComponentRepository projectComponentRepository;
+    private final WipLimitRepository wipLimitRepository;
 
     public Page<IssueResponse.MinDTO> findByProject(Long projectId, Pageable pageable) {
         return issueRepository.findByProjectIdOrderByCreatedAtDesc(projectId, pageable)
@@ -122,6 +125,18 @@ public class IssueService {
         Issue issue = builder.build();
         issueRepository.save(issue);
         return toDetail(issue);
+    }
+
+    private void assertWipAllows(Project project, IssueStatus toStatus) {
+        if (project.getBoardType() != BoardType.KANBAN) {
+            return;
+        }
+        wipLimitRepository.findByProjectIdAndStatus(project.getId(), toStatus).ifPresent(limit -> {
+            long n = issueRepository.countByProjectIdAndStatus(project.getId(), toStatus);
+            if (n >= limit.getMaxIssues()) {
+                throw new BusinessException(ErrorCode.WIP_LIMIT_EXCEEDED);
+            }
+        });
     }
 
     private void assertSprintOpenAndSameProject(Sprint sprint, Project project) {
@@ -239,7 +254,7 @@ public class IssueService {
 
     @Transactional
     public IssueResponse.DetailDTO transition(String issueKey, IssueRequest.TransitionDTO reqDTO, Long actorUserId) {
-        Issue issue = issueRepository.findByIssueKey(issueKey)
+        Issue issue = issueRepository.findByIssueKeyWithProject(issueKey)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
         IssueStatus from = issue.getStatus();
         IssueStatus to = reqDTO.getToStatus();
@@ -247,6 +262,7 @@ public class IssueService {
             return toDetail(issue);
         }
         issueWorkflowPolicy.assertTransition(from, to);
+        assertWipAllows(issue.getProject(), to);
         UserAccount actor = userAccountRepository.findById(actorUserId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 

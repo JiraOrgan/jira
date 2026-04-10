@@ -267,6 +267,8 @@ phs/
 | `GET` | `/api/v1/projects/{id}/members` | 멤버 목록 | ✅ |
 | `POST` | `/api/v1/projects/{id}/members` | 멤버 추가 | ✅ |
 | `DELETE` | `/api/v1/projects/{id}/members/{memberId}` | 멤버 제거 | ✅ |
+| `GET` | `/api/v1/projects/{projectId}/wip-limits` | 칸반 WIP 한도 목록 | ✅ |
+| `PUT` | `/api/v1/projects/{projectId}/wip-limits` | WIP 한도 전체 교체 (`limits`: `[{status,maxIssues}]`, KANBAN만) | ✅ |
 
 ### 이슈 API
 
@@ -280,7 +282,7 @@ phs/
 | `POST` | `/api/v1/issues` | 이슈 생성 | ✅ |
 | `PUT` | `/api/v1/issues/{issueKey}` | 이슈 수정 | ✅ |
 | `DELETE` | `/api/v1/issues/{issueKey}` | 이슈 삭제 | ✅ |
-| `POST` | `/api/v1/issues/{issueKey}/transitions` | 상태 전환 | ✅ |
+| `POST` | `/api/v1/issues/{issueKey}/transitions` | 상태 전환 (KANBAN + WIP 설정 시 한도 초과 시 409) | ✅ |
 | `GET` | `/api/v1/issues/{issueKey}/transitions` | 전환 이력 | ✅ |
 | `GET` | `/api/v1/issues/{issueKey}/links` | 이슈 링크 목록 | ✅ |
 | `POST` | `/api/v1/issues/{issueKey}/links` | 이슈 링크 생성 (`targetIssueKey`, `linkType`) | ✅ |
