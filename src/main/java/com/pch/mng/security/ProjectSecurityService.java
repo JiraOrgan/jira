@@ -4,6 +4,7 @@ import com.pch.mng.auth.CustomUserDetails;
 import com.pch.mng.global.enums.ProjectRole;
 import com.pch.mng.comment.CommentRepository;
 import com.pch.mng.issue.Issue;
+import com.pch.mng.issue.IssueLinkRepository;
 import com.pch.mng.issue.IssueRepository;
 import com.pch.mng.project.ProjectMember;
 import com.pch.mng.project.ProjectMemberRepository;
@@ -31,6 +32,7 @@ public class ProjectSecurityService {
     private final SprintRepository sprintRepository;
     private final ReleaseVersionRepository releaseVersionRepository;
     private final IssueRepository issueRepository;
+    private final IssueLinkRepository issueLinkRepository;
     private final CommentRepository commentRepository;
 
     private Long currentUserId() {
@@ -191,6 +193,19 @@ public class ProjectSecurityService {
         return issueRepository.findByIdWithProject(issueId)
                 .map(i -> hasAnyRole(i.getProject().getId(), ProjectRole.ADMIN, ProjectRole.DEVELOPER,
                         ProjectRole.QA, ProjectRole.REPORTER))
+                .orElse(false);
+    }
+
+    /**
+     * 이슈 링크 수정/삭제: 소스 또는 타겟 이슈 중 하나라도 {@link #canUpdateIssue(String)}를 만족하면 허용.
+     */
+    public boolean canModifyIssueLink(Long linkId) {
+        if (linkId == null) {
+            return false;
+        }
+        return issueLinkRepository.findByIdWithIssues(linkId)
+                .map(link -> canUpdateIssue(link.getSourceIssue().getIssueKey())
+                        || canUpdateIssue(link.getTargetIssue().getIssueKey()))
                 .orElse(false);
     }
 

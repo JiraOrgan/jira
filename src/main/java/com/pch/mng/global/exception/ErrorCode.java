@@ -31,7 +31,10 @@ public enum ErrorCode {
     ISSUE_PARENT_PROJECT_MISMATCH(400, "부모 이슈가 같은 프로젝트에 있어야 합니다"),
     SPRINT_PROJECT_MISMATCH(400, "스프린트가 해당 프로젝트에 속하지 않습니다"),
     COMPONENT_PROJECT_MISMATCH(400, "컴포넌트는 이슈와 같은 프로젝트에 속해야 합니다"),
-    WORKFLOW_VIOLATION(409, "허용되지 않는 워크플로 전환입니다");
+    WORKFLOW_VIOLATION(409, "허용되지 않는 워크플로 전환입니다"),
+    ISSUE_LINK_SELF(400, "동일 이슈에는 링크를 걸 수 없습니다"),
+    ISSUE_LINK_PROJECT_MISMATCH(400, "링크 대상 이슈는 같은 프로젝트에 있어야 합니다"),
+    ISSUE_LINK_DUPLICATE(409, "동일한 이슈 링크가 이미 존재합니다");
 
     private final int status;
     private final String message;

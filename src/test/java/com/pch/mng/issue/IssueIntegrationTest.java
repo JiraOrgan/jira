@@ -27,6 +27,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -275,6 +276,71 @@ class IssueIntegrationTest {
                         .content("""
                                 {"projectId":%d,"issueType":"TASK","summary":"t","priority":"MEDIUM","sprintId":%d}
                                 """.formatted(projectA, sprintId)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("이슈 링크 생성·목록·수정·삭제 (같은 프로젝트)")
+    void issueLinkCrudHappyPath() throws Exception {
+        String email = "link-ok-" + System.nanoTime() + "@ex.com";
+        String token = registerAndLogin(email);
+        String pk = "LK" + (System.nanoTime() % 100000);
+        long projectId = createProject(token, pk);
+        String keyA = createTaskAndGetKey(token, projectId);
+        String keyB = createTaskAndGetKey(token, projectId);
+
+        MvcResult createRes = mockMvc.perform(post("/api/v1/issues/%s/links".formatted(keyA))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"targetIssueKey\":\"" + keyB + "\",\"linkType\":\"BLOCKS\"}"))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long linkId = objectMapper.readTree(createRes.getResponse().getContentAsString())
+                .path("data").path("id").asLong();
+
+        mockMvc.perform(get("/api/v1/issues/%s/links".formatted(keyA))
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    JsonNode arr = objectMapper.readTree(result.getResponse().getContentAsString()).path("data");
+                    assertThat(arr.isArray()).isTrue();
+                    assertThat(arr.size()).isEqualTo(1);
+                    assertThat(arr.get(0).path("linkType").asText()).isEqualTo("BLOCKS");
+                });
+
+        mockMvc.perform(put("/api/v1/issues/links/%d".formatted(linkId))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"linkType\":\"RELATES_TO\"}"))
+                .andExpect(status().isOk())
+                .andExpect(result -> assertThat(objectMapper.readTree(result.getResponse().getContentAsString())
+                        .path("data").path("linkType").asText()).isEqualTo("RELATES_TO"));
+
+        mockMvc.perform(delete("/api/v1/issues/links/%d".formatted(linkId))
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/v1/issues/%s/links".formatted(keyA))
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(result -> assertThat(objectMapper.readTree(result.getResponse().getContentAsString())
+                        .path("data").size()).isEqualTo(0));
+    }
+
+    @Test
+    @DisplayName("다른 프로젝트 이슈에는 링크할 수 없다")
+    void issueLinkRejectsCrossProject() throws Exception {
+        String email = "link-xp-" + System.nanoTime() + "@ex.com";
+        String token = registerAndLogin(email);
+        long projectA = createProject(token, "XA" + (System.nanoTime() % 100000));
+        long projectB = createProject(token, "XB" + (System.nanoTime() % 100000));
+        String keyA = createTaskAndGetKey(token, projectA);
+        String keyB = createTaskAndGetKey(token, projectB);
+
+        mockMvc.perform(post("/api/v1/issues/%s/links".formatted(keyA))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"targetIssueKey\":\"" + keyB + "\",\"linkType\":\"RELATES_TO\"}"))
                 .andExpect(status().isBadRequest());
     }
 
