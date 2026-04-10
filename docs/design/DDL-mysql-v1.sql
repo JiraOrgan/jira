@@ -5,6 +5,7 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS saved_jql_filter_tb;
 DROP TABLE IF EXISTS dashboard_gadget_tb;
 DROP TABLE IF EXISTS dashboard_tb;
 DROP TABLE IF EXISTS workflow_transition_tb;
@@ -249,4 +250,17 @@ CREATE TABLE dashboard_gadget_tb (
     position INT NOT NULL,
     config_json TEXT NULL,
     CONSTRAINT fk_gadget_dash FOREIGN KEY (dashboard_id) REFERENCES dashboard_tb (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- FR-016 저장 JQL 필터 (T-603)
+CREATE TABLE saved_jql_filter_tb (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    project_id BIGINT NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    jql VARCHAR(4000) NOT NULL,
+    created_at DATETIME(6) NULL,
+    CONSTRAINT fk_sjf_owner FOREIGN KEY (owner_id) REFERENCES user_account_tb (id),
+    CONSTRAINT fk_sjf_project FOREIGN KEY (project_id) REFERENCES project_tb (id),
+    KEY idx_sjf_project_owner (project_id, owner_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
