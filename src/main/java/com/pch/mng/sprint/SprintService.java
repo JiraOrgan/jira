@@ -3,6 +3,7 @@ package com.pch.mng.sprint;
 import com.pch.mng.global.enums.SprintStatus;
 import com.pch.mng.global.exception.BusinessException;
 import com.pch.mng.global.exception.ErrorCode;
+import com.pch.mng.board.SprintBoardRedisCache;
 import com.pch.mng.issue.IssueRepository;
 import com.pch.mng.project.Project;
 import com.pch.mng.project.ProjectRepository;
@@ -20,6 +21,7 @@ public class SprintService {
     private final SprintRepository sprintRepository;
     private final ProjectRepository projectRepository;
     private final IssueRepository issueRepository;
+    private final SprintBoardRedisCache sprintBoardRedisCache;
 
     public List<SprintResponse.MinDTO> findByProject(Long projectId) {
         return sprintRepository.findByProjectIdOrderByCreatedAtDesc(projectId).stream()
@@ -61,6 +63,7 @@ public class SprintService {
             throw new BusinessException(ErrorCode.SPRINT_ACTIVE_ALREADY_EXISTS);
         }
         sprint.setStatus(SprintStatus.ACTIVE);
+        sprintBoardRedisCache.evictSprint(id);
         return SprintResponse.DetailDTO.of(sprint);
     }
 
@@ -72,6 +75,7 @@ public class SprintService {
             throw new BusinessException(ErrorCode.SPRINT_INVALID_TRANSITION);
         }
         sprint.setStatus(SprintStatus.COMPLETED);
+        sprintBoardRedisCache.evictSprint(id);
         return SprintResponse.DetailDTO.of(sprint);
     }
 
@@ -85,6 +89,7 @@ public class SprintService {
         if (issueRepository.countBySprint_Id(id) > 0) {
             throw new BusinessException(ErrorCode.SPRINT_DELETE_FORBIDDEN);
         }
+        sprintBoardRedisCache.evictSprint(id);
         sprintRepository.delete(sprint);
     }
 }

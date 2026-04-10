@@ -28,8 +28,20 @@ public class BoardService {
 
     private final SprintRepository sprintRepository;
     private final IssueRepository issueRepository;
+    private final SprintBoardRedisCache sprintBoardRedisCache;
 
     public SprintBoardResponse getSprintBoard(Long sprintId, BoardSwimlane swimlane) {
+        if (!sprintBoardRedisCache.isEnabled()) {
+            return loadSprintBoard(sprintId, swimlane);
+        }
+        return sprintBoardRedisCache.get(sprintId, swimlane).orElseGet(() -> {
+            SprintBoardResponse loaded = loadSprintBoard(sprintId, swimlane);
+            sprintBoardRedisCache.put(sprintId, swimlane, loaded);
+            return loaded;
+        });
+    }
+
+    private SprintBoardResponse loadSprintBoard(Long sprintId, BoardSwimlane swimlane) {
         if (!sprintRepository.existsById(sprintId)) {
             throw new BusinessException(ErrorCode.ENTITY_NOT_FOUND);
         }
