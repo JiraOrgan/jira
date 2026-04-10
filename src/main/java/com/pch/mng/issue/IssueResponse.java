@@ -2,7 +2,10 @@ package com.pch.mng.issue;
 
 import com.pch.mng.global.enums.*;
 import lombok.Data;
+
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 
 public class IssueResponse {
 
@@ -36,6 +39,18 @@ public class IssueResponse {
     }
 
     @Data
+    public static class LabelItemDTO {
+        private Long id;
+        private String name;
+    }
+
+    @Data
+    public static class ComponentItemDTO {
+        private Long id;
+        private String name;
+    }
+
+    @Data
     public static class DetailDTO {
         private Long id;
         private String issueKey;
@@ -57,10 +72,16 @@ public class IssueResponse {
         private SecurityLevel securityLevel;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
+        private List<LabelItemDTO> labels = Collections.emptyList();
+        private List<ComponentItemDTO> components = Collections.emptyList();
 
         private DetailDTO() {}
 
         public static DetailDTO of(Issue issue) {
+            return of(issue, Collections.emptyList(), Collections.emptyList());
+        }
+
+        public static DetailDTO of(Issue issue, List<IssueLabel> issueLabels, List<IssueComponent> issueComponents) {
             DetailDTO dto = new DetailDTO();
             dto.id = issue.getId();
             dto.issueKey = issue.getIssueKey();
@@ -92,6 +113,18 @@ public class IssueResponse {
             if (issue.getSprint() != null) {
                 dto.sprintId = issue.getSprint().getId();
             }
+            dto.labels = issueLabels.stream().map(il -> {
+                LabelItemDTO l = new LabelItemDTO();
+                l.setId(il.getLabel().getId());
+                l.setName(il.getLabel().getName());
+                return l;
+            }).toList();
+            dto.components = issueComponents.stream().map(ic -> {
+                ComponentItemDTO c = new ComponentItemDTO();
+                c.setId(ic.getComponent().getId());
+                c.setName(ic.getComponent().getName());
+                return c;
+            }).toList();
             return dto;
         }
     }

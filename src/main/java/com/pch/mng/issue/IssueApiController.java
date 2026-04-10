@@ -90,4 +90,38 @@ public class IssueApiController {
         }
         return ResponseEntity.ok(ApiResponse.ok(issueService.transition(issueKey, reqDTO, principal.getId())));
     }
+
+    @PostMapping("/{issueKey}/labels")
+    @PreAuthorize("@projectSecurity.canUpdateIssue(#issueKey)")
+    public ResponseEntity<ApiResponse<IssueResponse.DetailDTO>> addLabel(
+            @PathVariable String issueKey,
+            @Valid @RequestBody IssueRequest.LabelAttachDTO reqDTO) {
+        return ResponseEntity.status(201)
+                .body(ApiResponse.created(issueService.addLabel(issueKey, reqDTO.getLabelId())));
+    }
+
+    @DeleteMapping("/{issueKey}/labels/{labelId}")
+    @PreAuthorize("@projectSecurity.canUpdateIssue(#issueKey)")
+    public ResponseEntity<ApiResponse<IssueResponse.DetailDTO>> removeLabel(
+            @PathVariable String issueKey,
+            @PathVariable Long labelId) {
+        return ResponseEntity.ok(ApiResponse.ok(issueService.removeLabel(issueKey, labelId)));
+    }
+
+    @PostMapping("/{issueKey}/components")
+    @PreAuthorize("@projectSecurity.canUpdateIssue(#issueKey)")
+    public ResponseEntity<ApiResponse<IssueResponse.DetailDTO>> addComponent(
+            @PathVariable String issueKey,
+            @Valid @RequestBody IssueRequest.ComponentAttachDTO reqDTO) {
+        return ResponseEntity.status(201)
+                .body(ApiResponse.created(issueService.addComponent(issueKey, reqDTO.getComponentId())));
+    }
+
+    @DeleteMapping("/{issueKey}/components/{componentId}")
+    @PreAuthorize("@projectSecurity.canUpdateIssue(#issueKey)")
+    public ResponseEntity<ApiResponse<IssueResponse.DetailDTO>> removeComponent(
+            @PathVariable String issueKey,
+            @PathVariable Long componentId) {
+        return ResponseEntity.ok(ApiResponse.ok(issueService.removeComponent(issueKey, componentId)));
+    }
 }
