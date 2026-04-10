@@ -22,6 +22,11 @@ spring:
   jackson:
     time-zone: Asia/Seoul
 
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 21MB
+
 # Actuator
 management:
   endpoints:
@@ -42,6 +47,17 @@ app:
     login:
       max-attempts: 5
       lock-minutes: 30
+  storage:
+    # local: 개발·테스트 기본 / s3: 운영/스테이징 (버킷·자격 증명 필요)
+    type: local
+    local:
+      base-path: ./data/attachments
+    s3:
+      bucket: ${S3_BUCKET:}
+      region: ${AWS_REGION:ap-northeast-2}
+      endpoint: ${S3_ENDPOINT:}
+      access-key: ${AWS_ACCESS_KEY_ID:}
+      secret-key: ${AWS_SECRET_ACCESS_KEY:}
 
 # 공통 로깅
 logging:

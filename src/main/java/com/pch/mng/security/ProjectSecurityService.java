@@ -2,6 +2,7 @@ package com.pch.mng.security;
 
 import com.pch.mng.auth.CustomUserDetails;
 import com.pch.mng.global.enums.ProjectRole;
+import com.pch.mng.attachment.AttachmentRepository;
 import com.pch.mng.comment.CommentRepository;
 import com.pch.mng.issue.Issue;
 import com.pch.mng.issue.IssueLinkRepository;
@@ -34,6 +35,7 @@ public class ProjectSecurityService {
     private final IssueRepository issueRepository;
     private final IssueLinkRepository issueLinkRepository;
     private final CommentRepository commentRepository;
+    private final AttachmentRepository attachmentRepository;
 
     private Long currentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -230,6 +232,24 @@ public class ProjectSecurityService {
         }
         return issueRepository.findByIdWithProject(issueId)
                 .map(i -> isProjectAdmin(i.getProject().getId()))
+                .orElse(false);
+    }
+
+    public boolean canReadAttachment(Long attachmentId) {
+        if (attachmentId == null) {
+            return false;
+        }
+        return attachmentRepository.findIssueKeyByAttachmentId(attachmentId)
+                .map(this::canReadIssue)
+                .orElse(false);
+    }
+
+    public boolean canDeleteAttachment(Long attachmentId) {
+        if (attachmentId == null) {
+            return false;
+        }
+        return attachmentRepository.findIssueKeyByAttachmentId(attachmentId)
+                .map(this::canUpdateIssue)
                 .orElse(false);
     }
 }

@@ -288,6 +288,10 @@ phs/
 | `DELETE` | `/api/v1/issues/{issueKey}/labels/{labelId}` | 레이블 해제 | ✅ |
 | `POST` | `/api/v1/issues/{issueKey}/components` | 컴포넌트 연결 (`componentId`, 동일 프로젝트만) | ✅ |
 | `DELETE` | `/api/v1/issues/{issueKey}/components/{componentId}` | 컴포넌트 해제 | ✅ |
+| `GET` | `/api/v1/issues/{issueKey}/attachments` | 이슈 첨부 목록 | ✅ |
+| `POST` | `/api/v1/issues/{issueKey}/attachments` | 첨부 업로드 (`multipart/form-data`, 파트명 `file`, 최대 20MB) | ✅ |
+| `GET` | `/api/v1/attachments/{id}/file` | 첨부 파일 다운로드 (바이너리) | ✅ |
+| `DELETE` | `/api/v1/attachments/{id}` | 첨부 삭제 | ✅ |
 
 ### 스프린트 API
 
