@@ -299,9 +299,12 @@ phs/
 |--------|-----|------|:----:|
 | `GET` | `/api/v1/sprints/project/{projectId}` | 스프린트 목록 | ✅ |
 | `GET` | `/api/v1/sprints/{id}` | 스프린트 상세 | ✅ |
-| `POST` | `/api/v1/sprints` | 스프린트 생성 | ✅ |
-| `POST` | `/api/v1/sprints/{id}/start` | 스프린트 시작 | ✅ |
-| `POST` | `/api/v1/sprints/{id}/complete` | 스프린트 완료 | ✅ |
+| `POST` | `/api/v1/sprints` | 스프린트 생성 (`PLANNING`) | ✅ |
+| `POST` | `/api/v1/sprints/{id}/start` | 스프린트 시작 (`PLANNING`→`ACTIVE`, 프로젝트당 `ACTIVE` 1개) | ✅ |
+| `POST` | `/api/v1/sprints/{id}/complete` | 스프린트 완료 (`ACTIVE`→`COMPLETED`) | ✅ |
+| `DELETE` | `/api/v1/sprints/{id}` | 스프린트 삭제 (`ACTIVE`·이슈 배정 시 409) | ✅ |
+
+**FR-011**: 잘못된 전환이나 동시 진행·삭제 제한 위반 시 HTTP 409 (`SPRINT_*` 오류 코드).
 
 ### 릴리즈/댓글/대시보드/감사 API
 

@@ -32,6 +32,11 @@ public enum ErrorCode {
     SPRINT_PROJECT_MISMATCH(400, "스프린트가 해당 프로젝트에 속하지 않습니다"),
     COMPONENT_PROJECT_MISMATCH(400, "컴포넌트는 이슈와 같은 프로젝트에 속해야 합니다"),
     WORKFLOW_VIOLATION(409, "허용되지 않는 워크플로 전환입니다"),
+
+    // Sprint (FR-011)
+    SPRINT_INVALID_TRANSITION(409, "허용되지 않는 스프린트 상태 전환입니다"),
+    SPRINT_ACTIVE_ALREADY_EXISTS(409, "해당 프로젝트에 이미 진행 중인 스프린트가 있습니다"),
+    SPRINT_DELETE_FORBIDDEN(409, "진행 중이거나 이슈가 배정된 스프린트는 삭제할 수 없습니다"),
     ISSUE_LINK_SELF(400, "동일 이슈에는 링크를 걸 수 없습니다"),
     ISSUE_LINK_PROJECT_MISMATCH(400, "링크 대상 이슈는 같은 프로젝트에 있어야 합니다"),
     ISSUE_LINK_DUPLICATE(409, "동일한 이슈 링크가 이미 존재합니다"),
