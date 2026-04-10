@@ -274,11 +274,20 @@ phs/
 |--------|-----|------|:----:|
 | `GET` | `/api/v1/issues/project/{projectId}` | 이슈 목록 (페이징) | ✅ |
 | `GET` | `/api/v1/issues/project/{projectId}/backlog` | 백로그 | ✅ |
-| `GET` | `/api/v1/issues/{issueKey}` | 이슈 상세 | ✅ |
+| `GET` | `/api/v1/issues/{issueKey}` | 이슈 상세 (`labels`·`components` 배열 포함) | ✅ |
 | `POST` | `/api/v1/issues` | 이슈 생성 | ✅ |
 | `PUT` | `/api/v1/issues/{issueKey}` | 이슈 수정 | ✅ |
 | `DELETE` | `/api/v1/issues/{issueKey}` | 이슈 삭제 | ✅ |
 | `POST` | `/api/v1/issues/{issueKey}/transitions` | 상태 전환 | ✅ |
+| `GET` | `/api/v1/issues/{issueKey}/transitions` | 전환 이력 | ✅ |
+| `GET` | `/api/v1/issues/{issueKey}/links` | 이슈 링크 목록 | ✅ |
+| `POST` | `/api/v1/issues/{issueKey}/links` | 이슈 링크 생성 (`targetIssueKey`, `linkType`) | ✅ |
+| `PUT` | `/api/v1/issues/links/{linkId}` | 링크 유형 변경 | ✅ |
+| `DELETE` | `/api/v1/issues/links/{linkId}` | 링크 삭제 | ✅ |
+| `POST` | `/api/v1/issues/{issueKey}/labels` | 레이블 연결 (`labelId`) | ✅ |
+| `DELETE` | `/api/v1/issues/{issueKey}/labels/{labelId}` | 레이블 해제 | ✅ |
+| `POST` | `/api/v1/issues/{issueKey}/components` | 컴포넌트 연결 (`componentId`, 동일 프로젝트만) | ✅ |
+| `DELETE` | `/api/v1/issues/{issueKey}/components/{componentId}` | 컴포넌트 해제 | ✅ |
 
 ### 스프린트 API
 

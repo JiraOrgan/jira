@@ -3,6 +3,12 @@ package com.pch.mng.issue;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pch.mng.global.enums.BoardType;
+import com.pch.mng.label.Label;
+import com.pch.mng.label.LabelRepository;
+import com.pch.mng.project.Project;
+import com.pch.mng.project.ProjectComponent;
+import com.pch.mng.project.ProjectComponentRepository;
+import com.pch.mng.project.ProjectRepository;
 import com.pch.mng.project.ProjectRequest;
 import com.pch.mng.sprint.SprintRequest;
 import org.junit.jupiter.api.DisplayName;
@@ -32,6 +38,15 @@ class IssueIntegrationTest {
 
     @Autowired
     WebApplicationContext webApplicationContext;
+
+    @Autowired
+    LabelRepository labelRepository;
+
+    @Autowired
+    ProjectRepository projectRepository;
+
+    @Autowired
+    ProjectComponentRepository projectComponentRepository;
 
     private MockMvc mockMvc;
 
@@ -326,6 +341,78 @@ class IssueIntegrationTest {
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"targetIssueKey\":\"" + keyB + "\",\"linkType\":\"RELATES_TO\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("이슈에 레이블·컴포넌트 연결 및 상세 응답에 포함")
+    void issueLabelAndComponentAttach() throws Exception {
+        String email = "lc-ok-" + System.nanoTime() + "@ex.com";
+        String token = registerAndLogin(email);
+        long projectId = createProject(token, "LC" + (System.nanoTime() % 100000));
+        String issueKey = createTaskAndGetKey(token, projectId);
+
+        Project project = projectRepository.findById(projectId).orElseThrow();
+        Label label = labelRepository.save(Label.builder().name("lbl-" + System.nanoTime()).build());
+        ProjectComponent comp = projectComponentRepository.save(
+                ProjectComponent.builder().project(project).name("api").build());
+
+        mockMvc.perform(post("/api/v1/issues/%s/labels".formatted(issueKey))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"labelId\":" + label.getId() + "}"))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/v1/issues/%s/components".formatted(issueKey))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"componentId\":" + comp.getId() + "}"))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/api/v1/issues/%s".formatted(issueKey))
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    JsonNode data = objectMapper.readTree(result.getResponse().getContentAsString()).path("data");
+                    assertThat(data.path("labels").size()).isEqualTo(1);
+                    assertThat(data.path("labels").get(0).path("name").asText()).isEqualTo(label.getName());
+                    assertThat(data.path("components").size()).isEqualTo(1);
+                    assertThat(data.path("components").get(0).path("name").asText()).isEqualTo("api");
+                });
+
+        mockMvc.perform(delete("/api/v1/issues/%s/labels/%d".formatted(issueKey, label.getId()))
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+        mockMvc.perform(delete("/api/v1/issues/%s/components/%d".formatted(issueKey, comp.getId()))
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/v1/issues/%s".formatted(issueKey))
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    JsonNode data = objectMapper.readTree(result.getResponse().getContentAsString()).path("data");
+                    assertThat(data.path("labels").size()).isEqualTo(0);
+                    assertThat(data.path("components").size()).isEqualTo(0);
+                });
+    }
+
+    @Test
+    @DisplayName("다른 프로젝트 컴포넌트는 이슈에 연결할 수 없다")
+    void componentMustMatchIssueProject() throws Exception {
+        String email = "lc-xp-" + System.nanoTime() + "@ex.com";
+        String token = registerAndLogin(email);
+        long projectA = createProject(token, "CA" + (System.nanoTime() % 100000));
+        long projectB = createProject(token, "CB" + (System.nanoTime() % 100000));
+        String issueKey = createTaskAndGetKey(token, projectA);
+        Project projB = projectRepository.findById(projectB).orElseThrow();
+        ProjectComponent compB = projectComponentRepository.save(
+                ProjectComponent.builder().project(projB).name("other").build());
+
+        mockMvc.perform(post("/api/v1/issues/%s/components".formatted(issueKey))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"componentId\":" + compB.getId() + "}"))
                 .andExpect(status().isBadRequest());
     }
 }
