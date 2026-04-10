@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface WipLimitRepository extends JpaRepository<WipLimit, Long> {
     List<WipLimit> findByProjectId(Long projectId);
     Optional<WipLimit> findByProjectIdAndStatus(Long projectId, IssueStatus status);
+
+    void deleteByProjectId(Long projectId);
 }

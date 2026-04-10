@@ -32,6 +32,7 @@ public enum ErrorCode {
     SPRINT_PROJECT_MISMATCH(400, "스프린트가 해당 프로젝트에 속하지 않습니다"),
     COMPONENT_PROJECT_MISMATCH(400, "컴포넌트는 이슈와 같은 프로젝트에 속해야 합니다"),
     WORKFLOW_VIOLATION(409, "허용되지 않는 워크플로 전환입니다"),
+    WIP_LIMIT_EXCEEDED(409, "해당 워크플로 상태 열의 WIP 한도를 초과했습니다"),
 
     // Sprint (FR-011)
     SPRINT_INVALID_TRANSITION(409, "허용되지 않는 스프린트 상태 전환입니다"),
@@ -41,6 +42,9 @@ public enum ErrorCode {
 
     // Backlog (FR-010)
     BACKLOG_REORDER_INVALID(400, "백로그 순서가 올바르지 않습니다. 스프린트에 미배정인 이슈 ID 집합과 일치해야 합니다"),
+
+    // Kanban / WIP (FR-009)
+    WIP_LIMITS_KANBAN_ONLY(400, "WIP 제한은 칸반(KANBAN) 프로젝트에서만 설정할 수 있습니다"),
     ISSUE_LINK_SELF(400, "동일 이슈에는 링크를 걸 수 없습니다"),
     ISSUE_LINK_PROJECT_MISMATCH(400, "링크 대상 이슈는 같은 프로젝트에 있어야 합니다"),
     ISSUE_LINK_DUPLICATE(409, "동일한 이슈 링크가 이미 존재합니다"),

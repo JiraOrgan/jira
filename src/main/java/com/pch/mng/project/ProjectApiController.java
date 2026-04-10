@@ -75,4 +75,19 @@ public class ProjectApiController {
         projectService.removeMember(projectId, memberId);
         return ResponseEntity.ok(ApiResponse.noContent());
     }
+
+    @GetMapping("/{projectId}/wip-limits")
+    @PreAuthorize("@projectSecurity.isMember(#projectId)")
+    public ResponseEntity<ApiResponse<List<ProjectResponse.WipLimitDTO>>> findWipLimits(
+            @PathVariable Long projectId) {
+        return ResponseEntity.ok(ApiResponse.ok(projectService.findWipLimits(projectId)));
+    }
+
+    @PutMapping("/{projectId}/wip-limits")
+    @PreAuthorize("@projectSecurity.isProjectAdmin(#projectId)")
+    public ResponseEntity<ApiResponse<List<ProjectResponse.WipLimitDTO>>> replaceWipLimits(
+            @PathVariable Long projectId,
+            @Valid @RequestBody ProjectRequest.WipLimitsReplaceDTO dto) {
+        return ResponseEntity.ok(ApiResponse.ok(projectService.replaceWipLimits(projectId, dto)));
+    }
 }

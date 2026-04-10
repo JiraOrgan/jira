@@ -1,6 +1,8 @@
 package com.pch.mng.project;
 
 import com.pch.mng.auth.CustomUserDetails;
+import com.pch.mng.global.enums.BoardType;
+import com.pch.mng.global.enums.IssueStatus;
 import com.pch.mng.global.enums.ProjectRole;
 import com.pch.mng.global.exception.BusinessException;
 import com.pch.mng.global.exception.ErrorCode;
@@ -11,7 +13,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -21,6 +25,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
     private final UserAccountRepository userAccountRepository;
+    private final WipLimitRepository wipLimitRepository;
 
     public List<ProjectResponse.MinDTO> findAllForUser(Long userId) {
         return projectMemberRepository.findByUser_Id(userId).stream()
@@ -136,6 +141,39 @@ public class ProjectService {
             throw new BusinessException(ErrorCode.ENTITY_NOT_FOUND);
         }
         projectMemberRepository.delete(member);
+    }
+
+    public List<ProjectResponse.WipLimitDTO> findWipLimits(Long projectId) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new BusinessException(ErrorCode.ENTITY_NOT_FOUND);
+        }
+        return wipLimitRepository.findByProjectId(projectId).stream()
+                .map(ProjectResponse.WipLimitDTO::of)
+                .toList();
+    }
+
+    @Transactional
+    public List<ProjectResponse.WipLimitDTO> replaceWipLimits(Long projectId, ProjectRequest.WipLimitsReplaceDTO dto) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        if (project.getBoardType() != BoardType.KANBAN) {
+            throw new BusinessException(ErrorCode.WIP_LIMITS_KANBAN_ONLY);
+        }
+        Set<IssueStatus> seen = new HashSet<>();
+        for (ProjectRequest.WipLimitItemDTO item : dto.getLimits()) {
+            if (!seen.add(item.getStatus())) {
+                throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+            }
+        }
+        wipLimitRepository.deleteByProjectId(projectId);
+        for (ProjectRequest.WipLimitItemDTO item : dto.getLimits()) {
+            wipLimitRepository.save(WipLimit.builder()
+                    .project(project)
+                    .status(item.getStatus())
+                    .maxIssues(item.getMaxIssues())
+                    .build());
+        }
+        return findWipLimits(projectId);
     }
 
     private static CustomUserDetails currentUserDetails() {
