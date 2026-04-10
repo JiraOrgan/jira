@@ -32,4 +32,7 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 
     @Query("SELECT i FROM Issue i JOIN FETCH i.project WHERE i.id = :id")
     Optional<Issue> findByIdWithProject(@Param("id") Long id);
+
+    @Query("SELECT DISTINCT i FROM Issue i LEFT JOIN FETCH i.assignee WHERE i.sprint.id = :sid")
+    List<Issue> findForSprintBoard(@Param("sid") Long sprintId);
 }
