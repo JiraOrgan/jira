@@ -198,6 +198,7 @@ phs/
 │   ├── issue/                     # 이슈 (핵심) + N:M 관계 테이블
 │   ├── sprint/                    # 스프린트 lifecycle
 │   ├── board/                     # 스프린트 보드 조회 (FR-008)
+│   ├── jql/                       # PCH JQL 파서·AST (FR-016, T-602)
 │   ├── release/                   # 릴리즈 버전 관리
 │   ├── comment/                   # 댓글
 │   ├── attachment/                # 첨부파일
