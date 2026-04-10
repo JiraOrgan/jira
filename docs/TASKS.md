@@ -1,8 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.12
+> **버전**: v1.13
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-10 (T-505 Sprint·Board 단위 테스트)
+> **최종수정일**: 2026-04-10 (T-602 JQL 파서 MVP FR-016)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -119,7 +119,7 @@
 | T-503 | 보드 데이터 조회 API (스윔레인 지원) | Backend | DONE | `GET /sprints/{id}/board`, `NONE`/`ASSIGNEE` | T-500 |
 | T-504 | 보드 캐시 (Redis) | Backend | DONE | `app.board.cache`, 무효화: 이슈·스프린트 변경 | T-503 |
 | T-505 | 단위 테스트 (Sprint, Board) | Backend | DONE | `SprintServiceTest`, `BoardServiceTest` 캐시 히트/미스 | T-504 |
-| T-602 | JQL 파서 구현 | Backend | TODO | FR-016 | T-400 |
+| T-602 | JQL 파서 구현 | Backend | DONE | `jql/JqlParser`, AST, SPIKE MVP 문법 | T-400 |
 | T-603 | JQL 검색 API (페이징, 필터 저장) | Backend | TODO | FR-016 | T-602 |
 
 ### Frontend
@@ -266,3 +266,4 @@
 | v1.5 | 2026-04-10 | T-308 JWT·AuthService·UserAccountService·ProjectService Mockito 단위 테스트 (DONE) |
 | v1.11 | 2026-04-10 | T-504 스프린트 보드 JSON 캐시(Redis)·이슈/스프린트 변경 시 무효화·`SprintBoardRedisCacheTest` (DONE) |
 | v1.12 | 2026-04-10 | T-505 `SprintServiceTest`(Mockito)·`BoardServiceTest` 보강 (DONE) |
+| v1.13 | 2026-04-10 | T-602 PCH JQL MVP 파서(`JqlParser`·sealed AST·`JqlParserTest`) FR-016 (DONE) |
