@@ -1,8 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.9
+> **버전**: v1.10
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-10 (T-502 칸반 WIP 검증·설정 API FR-009)
+> **최종수정일**: 2026-04-10 (T-503 스프린트 보드 API FR-008)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -116,7 +116,7 @@
 | T-500 | 스프린트 lifecycle API (생성/시작/완료) | Backend | DONE | FR-011 전이·동시 ACTIVE 1개·삭제 제한 | T-400 |
 | T-501 | 백로그 관리 (순서 변경, 스프린트 배정) | Backend | DONE | `backlog_rank`, reorder API, 일괄 배정 | T-500 |
 | T-502 | WIP 제한 검증 로직 | Backend | DONE | KANBAN 전환 시 검증·`/wip-limits` API | T-500 |
-| T-503 | 보드 데이터 조회 API (스윔레인 지원) | Backend | TODO | FR-008 | T-500 |
+| T-503 | 보드 데이터 조회 API (스윔레인 지원) | Backend | DONE | `GET /sprints/{id}/board`, `NONE`/`ASSIGNEE` | T-500 |
 | T-504 | 보드 캐시 (Redis) | Backend | TODO | - | T-503 |
 | T-505 | 단위 테스트 (Sprint, Board) | Backend | TODO | - | T-504 |
 | T-602 | JQL 파서 구현 | Backend | TODO | FR-016 | T-400 |

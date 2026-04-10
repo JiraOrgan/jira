@@ -197,6 +197,7 @@ phs/
 │   ├── project/                   # 프로젝트 + 멤버 + 컴포넌트 + WIP
 │   ├── issue/                     # 이슈 (핵심) + N:M 관계 테이블
 │   ├── sprint/                    # 스프린트 lifecycle
+│   ├── board/                     # 스프린트 보드 조회 (FR-008)
 │   ├── release/                   # 릴리즈 버전 관리
 │   ├── comment/                   # 댓글
 │   ├── attachment/                # 첨부파일
@@ -307,8 +308,9 @@ phs/
 | `POST` | `/api/v1/sprints/{id}/start` | 스프린트 시작 (`PLANNING`→`ACTIVE`, 프로젝트당 `ACTIVE` 1개) | ✅ |
 | `POST` | `/api/v1/sprints/{id}/complete` | 스프린트 완료 (`ACTIVE`→`COMPLETED`) | ✅ |
 | `DELETE` | `/api/v1/sprints/{id}` | 스프린트 삭제 (`ACTIVE`·이슈 배정 시 409) | ✅ |
+| `GET` | `/api/v1/sprints/{id}/board` | 스프린트 보드 (상태별 컬럼, `swimlane=NONE`\|`ASSIGNEE`) | ✅ |
 
-**FR-011**: 잘못된 전환이나 동시 진행·삭제 제한 위반 시 HTTP 409 (`SPRINT_*` 오류 코드).
+**FR-008**: 보드는 `IssueStatus` 6단계 컬럼 + 스윔레인. **FR-011**: 잘못된 전환이나 동시 진행·삭제 제한 위반 시 HTTP 409 (`SPRINT_*` 오류 코드).
 
 ### 릴리즈/댓글/대시보드/감사 API
 

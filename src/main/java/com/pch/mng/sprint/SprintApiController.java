@@ -1,5 +1,8 @@
 package com.pch.mng.sprint;
 
+import com.pch.mng.board.BoardService;
+import com.pch.mng.board.SprintBoardResponse;
+import com.pch.mng.global.enums.BoardSwimlane;
 import com.pch.mng.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,12 +18,21 @@ import java.util.List;
 public class SprintApiController {
 
     private final SprintService sprintService;
+    private final BoardService boardService;
 
     @GetMapping("/project/{projectId}")
     @PreAuthorize("@projectSecurity.isMember(#projectId)")
     public ResponseEntity<ApiResponse<List<SprintResponse.MinDTO>>> findByProject(
             @PathVariable Long projectId) {
         return ResponseEntity.ok(ApiResponse.ok(sprintService.findByProject(projectId)));
+    }
+
+    @GetMapping("/{id}/board")
+    @PreAuthorize("@projectSecurity.canReadSprint(#sprintId)")
+    public ResponseEntity<ApiResponse<SprintBoardResponse>> sprintBoard(
+            @PathVariable("id") Long sprintId,
+            @RequestParam(defaultValue = "NONE") BoardSwimlane swimlane) {
+        return ResponseEntity.ok(ApiResponse.ok(boardService.getSprintBoard(sprintId, swimlane)));
     }
 
     @GetMapping("/{id}")
