@@ -3,6 +3,7 @@ package com.pch.mng.sprint;
 import com.pch.mng.global.enums.SprintStatus;
 import com.pch.mng.global.exception.BusinessException;
 import com.pch.mng.global.exception.ErrorCode;
+import com.pch.mng.issue.IssueRepository;
 import com.pch.mng.project.Project;
 import com.pch.mng.project.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class SprintService {
 
     private final SprintRepository sprintRepository;
     private final ProjectRepository projectRepository;
+    private final IssueRepository issueRepository;
 
     public List<SprintResponse.MinDTO> findByProject(Long projectId) {
         return sprintRepository.findByProjectIdOrderByCreatedAtDesc(projectId).stream()
@@ -26,7 +28,7 @@ public class SprintService {
     }
 
     public SprintResponse.DetailDTO findById(Long id) {
-        Sprint sprint = sprintRepository.findById(id)
+        Sprint sprint = sprintRepository.findByIdWithProject(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
         return SprintResponse.DetailDTO.of(sprint);
     }
@@ -49,24 +51,40 @@ public class SprintService {
 
     @Transactional
     public SprintResponse.DetailDTO start(Long id) {
-        Sprint sprint = sprintRepository.findById(id)
+        Sprint sprint = sprintRepository.findByIdWithProject(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        if (sprint.getStatus() != SprintStatus.PLANNING) {
+            throw new BusinessException(ErrorCode.SPRINT_INVALID_TRANSITION);
+        }
+        Long projectId = sprint.getProject().getId();
+        if (sprintRepository.existsByProjectIdAndStatusAndIdNot(projectId, SprintStatus.ACTIVE, id)) {
+            throw new BusinessException(ErrorCode.SPRINT_ACTIVE_ALREADY_EXISTS);
+        }
         sprint.setStatus(SprintStatus.ACTIVE);
         return SprintResponse.DetailDTO.of(sprint);
     }
 
     @Transactional
     public SprintResponse.DetailDTO complete(Long id) {
-        Sprint sprint = sprintRepository.findById(id)
+        Sprint sprint = sprintRepository.findByIdWithProject(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        if (sprint.getStatus() != SprintStatus.ACTIVE) {
+            throw new BusinessException(ErrorCode.SPRINT_INVALID_TRANSITION);
+        }
         sprint.setStatus(SprintStatus.COMPLETED);
         return SprintResponse.DetailDTO.of(sprint);
     }
 
     @Transactional
     public void delete(Long id) {
-        Sprint sprint = sprintRepository.findById(id)
+        Sprint sprint = sprintRepository.findByIdWithProject(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        if (sprint.getStatus() == SprintStatus.ACTIVE) {
+            throw new BusinessException(ErrorCode.SPRINT_DELETE_FORBIDDEN);
+        }
+        if (issueRepository.countBySprint_Id(id) > 0) {
+            throw new BusinessException(ErrorCode.SPRINT_DELETE_FORBIDDEN);
+        }
         sprintRepository.delete(sprint);
     }
 }

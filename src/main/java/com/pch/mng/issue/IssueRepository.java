@@ -19,6 +19,8 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
     Page<Issue> findByProjectIdOrderByCreatedAtDesc(Long projectId, Pageable pageable);
     long countByProjectIdAndStatus(Long projectId, IssueStatus status);
 
+    long countBySprint_Id(Long sprintId);
+
     @Query("SELECT i FROM Issue i JOIN FETCH i.project LEFT JOIN FETCH i.assignee LEFT JOIN FETCH i.reporter WHERE i.issueKey = :key")
     Optional<Issue> findByIssueKeyWithDetails(@Param("key") String issueKey);
 

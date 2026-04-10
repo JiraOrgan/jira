@@ -1,8 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.6
+> **버전**: v1.7
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-10 (T-406 첨부 업로드·로컬/S3 스토리지)
+> **최종수정일**: 2026-04-10 (T-500 스프린트 FR-011 전이·삭제 규칙)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -113,7 +113,7 @@
 
 | ID | Task | 담당 | 상태 | 관련 FR | 선행 |
 |----|------|------|------|---------|------|
-| T-500 | 스프린트 lifecycle API (생성/시작/완료) | Backend | TODO | FR-011 | T-400 |
+| T-500 | 스프린트 lifecycle API (생성/시작/완료) | Backend | DONE | FR-011 전이·동시 ACTIVE 1개·삭제 제한 | T-400 |
 | T-501 | 백로그 관리 (순서 변경, 스프린트 배정) | Backend | TODO | FR-010 | T-500 |
 | T-502 | WIP 제한 검증 로직 | Backend | TODO | FR-009 | T-500 |
 | T-503 | 보드 데이터 조회 API (스윔레인 지원) | Backend | TODO | FR-008 | T-500 |
