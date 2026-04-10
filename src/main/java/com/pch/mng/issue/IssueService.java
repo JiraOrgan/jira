@@ -21,6 +21,7 @@ import com.pch.mng.workflow.IssueWorkflowPolicy;
 import com.pch.mng.workflow.WorkflowTransition;
 import com.pch.mng.workflow.WorkflowTransitionRepository;
 import com.pch.mng.workflow.WorkflowTransitionResponse;
+import com.pch.mng.board.SprintBoardRedisCache;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Transactional(readOnly = true)
@@ -47,6 +49,7 @@ public class IssueService {
     private final LabelRepository labelRepository;
     private final ProjectComponentRepository projectComponentRepository;
     private final WipLimitRepository wipLimitRepository;
+    private final SprintBoardRedisCache sprintBoardRedisCache;
 
     public Page<IssueResponse.MinDTO> findByProject(Long projectId, Pageable pageable) {
         return issueRepository.findByProjectIdOrderByCreatedAtDesc(projectId, pageable)
@@ -124,6 +127,7 @@ public class IssueService {
 
         Issue issue = builder.build();
         issueRepository.save(issue);
+        evictBoardForSprintOf(issue);
         return toDetail(issue);
     }
 
@@ -167,8 +171,9 @@ public class IssueService {
 
     @Transactional
     public IssueResponse.DetailDTO update(String issueKey, IssueRequest.UpdateDTO reqDTO) {
-        Issue issue = issueRepository.findByIssueKey(issueKey)
+        Issue issue = issueRepository.findByIssueKeyWithProject(issueKey)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        Long oldSprintId = issue.getSprint() != null ? issue.getSprint().getId() : null;
 
         if (reqDTO.getSummary() != null) issue.setSummary(reqDTO.getSummary());
         if (reqDTO.getDescription() != null) issue.setDescription(reqDTO.getDescription());
@@ -188,6 +193,8 @@ public class IssueService {
             issue.setBacklogRank(0L);
         }
 
+        Long newSprintId = issue.getSprint() != null ? issue.getSprint().getId() : null;
+        evictBoardForSprintPair(oldSprintId, newSprintId);
         return toDetail(issue);
     }
 
@@ -228,12 +235,19 @@ public class IssueService {
                     .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
             assertSprintOpenAndSameProject(sprint, project);
         }
+        Set<Long> sprintsToEvict = new HashSet<>();
+        if (dto.getSprintId() != null) {
+            sprintsToEvict.add(dto.getSprintId());
+        }
         long rankCursor = issueRepository.maxBacklogRankForProjectBacklog(projectId);
         for (Long issueId : dto.getIssueIds()) {
             Issue issue = issueRepository.findByIdWithProject(issueId)
                     .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
             if (!issue.getProject().getId().equals(projectId)) {
                 throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+            }
+            if (issue.getSprint() != null) {
+                sprintsToEvict.add(issue.getSprint().getId());
             }
             issue.setSprint(sprint);
             if (sprint == null) {
@@ -243,13 +257,18 @@ public class IssueService {
                 issue.setBacklogRank(0L);
             }
         }
+        for (Long sid : sprintsToEvict) {
+            sprintBoardRedisCache.evictSprint(sid);
+        }
     }
 
     @Transactional
     public void delete(String issueKey) {
-        Issue issue = issueRepository.findByIssueKey(issueKey)
+        Issue issue = issueRepository.findByIssueKeyWithProject(issueKey)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        Long sprintId = issue.getSprint() != null ? issue.getSprint().getId() : null;
         issueRepository.delete(issue);
+        sprintBoardRedisCache.evictSprint(sprintId);
     }
 
     @Transactional
@@ -277,6 +296,7 @@ public class IssueService {
         log.setConditionNote(reqDTO.getConditionNote());
         workflowTransitionRepository.save(log);
 
+        evictBoardForSprintOf(issue);
         return toDetail(issue);
     }
 
@@ -335,6 +355,21 @@ public class IssueService {
         }
         issueComponentRepository.deleteByIssue_IdAndComponent_Id(issue.getId(), componentId);
         return toDetail(issue);
+    }
+
+    private void evictBoardForSprintOf(Issue issue) {
+        if (issue.getSprint() != null) {
+            sprintBoardRedisCache.evictSprint(issue.getSprint().getId());
+        }
+    }
+
+    private void evictBoardForSprintPair(Long oldSprintId, Long newSprintId) {
+        if (Objects.equals(oldSprintId, newSprintId)) {
+            sprintBoardRedisCache.evictSprint(oldSprintId);
+        } else {
+            sprintBoardRedisCache.evictSprint(oldSprintId);
+            sprintBoardRedisCache.evictSprint(newSprintId);
+        }
     }
 
     private IssueResponse.DetailDTO toDetail(Issue issue) {

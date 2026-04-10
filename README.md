@@ -310,7 +310,7 @@ phs/
 | `DELETE` | `/api/v1/sprints/{id}` | 스프린트 삭제 (`ACTIVE`·이슈 배정 시 409) | ✅ |
 | `GET` | `/api/v1/sprints/{id}/board` | 스프린트 보드 (상태별 컬럼, `swimlane=NONE`\|`ASSIGNEE`) | ✅ |
 
-**FR-008**: 보드는 `IssueStatus` 6단계 컬럼 + 스윔레인. **FR-011**: 잘못된 전환이나 동시 진행·삭제 제한 위반 시 HTTP 409 (`SPRINT_*` 오류 코드).
+**FR-008**: 보드는 `IssueStatus` 6단계 컬럼 + 스윔레인. 응답은 Redis에 JSON으로 캐시됨 (`app.board.cache.enabled` / `ttl-seconds`; 테스트 프로필에서는 기본 비활성). 이슈 생성·수정·전환·삭제·스프린트 배정 및 스프린트 시작·완료·삭제 시 해당 스프린트 캐시 무효화. **FR-011**: 잘못된 전환이나 동시 진행·삭제 제한 위반 시 HTTP 409 (`SPRINT_*` 오류 코드).
 
 ### 릴리즈/댓글/대시보드/감사 API
 

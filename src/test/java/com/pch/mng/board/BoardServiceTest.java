@@ -30,11 +30,15 @@ class BoardServiceTest {
     @Mock
     IssueRepository issueRepository;
 
+    @Mock
+    SprintBoardRedisCache sprintBoardRedisCache;
+
     BoardService boardService;
 
     @BeforeEach
     void setUp() {
-        boardService = new BoardService(sprintRepository, issueRepository);
+        org.mockito.Mockito.when(sprintBoardRedisCache.isEnabled()).thenReturn(false);
+        boardService = new BoardService(sprintRepository, issueRepository, sprintBoardRedisCache);
     }
 
     @Test

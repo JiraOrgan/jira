@@ -28,6 +28,9 @@ logging:
     com.pch.mng: DEBUG
 
 app:
+  board:
+    cache:
+      enabled: false
   storage:
     type: local
     local:
