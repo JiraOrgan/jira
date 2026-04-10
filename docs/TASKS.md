@@ -1,8 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.3
+> **버전**: v1.4
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-10 (T-408 레이블·컴포넌트, T-404 링크 CRUD)
+> **최종수정일**: 2026-04-10 (T-409 이슈·워크플로 단위 테스트)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -90,7 +90,7 @@
 | T-404 | 이슈 링크 CRUD | Backend | DONE | FR-007 | T-400 |
 | T-406 | 첨부파일 업로드 (S3 연동) | Backend | TODO | - | T-400 |
 | T-408 | 이슈 레이블/컴포넌트 연결 | Backend | DONE | FR-006 | T-400 |
-| T-409 | 단위 테스트 (Issue, Workflow) | Backend | TODO | - | T-408 |
+| T-409 | 단위 테스트 (Issue, Workflow) | Backend | DONE | - | T-408 |
 
 ### Frontend
 
@@ -262,3 +262,4 @@
 | v1.1 | 2026-04-09 | `00-스케줄_v3.1`에 맞춰 Sprint 1~4 Task 재배치, Flutter 태스크(T-620~624)·Git 연동(T-625)·워치(T-608) 등 추가, Phase 1 M1.1(T-107) 반영 |
 | v1.2 | 2026-04-10 | T-408 이슈 레이블·컴포넌트 연결 API 완료 반영 (DONE) |
 | v1.3 | 2026-04-10 | T-404 이슈 링크 CRUD API 완료 반영 (DONE), develop 병합 충돌 정리 |
+| v1.4 | 2026-04-10 | T-409 `IssueWorkflowPolicy`·`IssueResponse` 매핑 단위 테스트 추가 (DONE) |
