@@ -18,6 +18,7 @@ public class IssueResponse {
         private IssueStatus status;
         private Priority priority;
         private Integer storyPoints;
+        private long backlogRank;
         private String assigneeName;
 
         private MinDTO() {}
@@ -31,6 +32,7 @@ public class IssueResponse {
             dto.status = issue.getStatus();
             dto.priority = issue.getPriority();
             dto.storyPoints = issue.getStoryPoints();
+            dto.backlogRank = issue.getBacklogRank();
             if (issue.getAssignee() != null) {
                 dto.assigneeName = issue.getAssignee().getName();
             }
@@ -69,6 +71,7 @@ public class IssueResponse {
         private Long parentId;
         private String parentKey;
         private Long sprintId;
+        private long backlogRank;
         private SecurityLevel securityLevel;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
@@ -113,6 +116,7 @@ public class IssueResponse {
             if (issue.getSprint() != null) {
                 dto.sprintId = issue.getSprint().getId();
             }
+            dto.backlogRank = issue.getBacklogRank();
             dto.labels = issueLabels.stream().map(il -> {
                 LabelItemDTO l = new LabelItemDTO();
                 l.setId(il.getLabel().getId());

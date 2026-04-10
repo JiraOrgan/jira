@@ -40,6 +40,23 @@ public class IssueApiController {
         return ResponseEntity.ok(ApiResponse.ok(issueService.findBacklog(projectId)));
     }
 
+    @PutMapping("/project/{projectId}/backlog/order")
+    @PreAuthorize("@projectSecurity.canManageSprintOnProject(#projectId)")
+    public ResponseEntity<ApiResponse<List<IssueResponse.MinDTO>>> reorderBacklog(
+            @PathVariable Long projectId,
+            @Valid @RequestBody IssueRequest.BacklogReorderDTO dto) {
+        return ResponseEntity.ok(ApiResponse.ok(issueService.reorderBacklog(projectId, dto)));
+    }
+
+    @PostMapping("/project/{projectId}/sprint-assignment")
+    @PreAuthorize("@projectSecurity.canManageSprintOnProject(#projectId)")
+    public ResponseEntity<ApiResponse<Void>> assignSprintToIssues(
+            @PathVariable Long projectId,
+            @Valid @RequestBody IssueRequest.SprintAssignmentDTO dto) {
+        issueService.assignSprintToIssues(projectId, dto);
+        return ResponseEntity.ok(ApiResponse.noContent());
+    }
+
     @GetMapping("/{issueKey}")
     @PreAuthorize("@projectSecurity.canReadIssue(#issueKey)")
     public ResponseEntity<ApiResponse<IssueResponse.DetailDTO>> findByKey(

@@ -14,7 +14,10 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
     Optional<Issue> findByIssueKey(String issueKey);
     List<Issue> findByProjectIdAndSprintIdOrderByCreatedAtDesc(Long projectId, Long sprintId);
     List<Issue> findByProjectIdAndStatusOrderByCreatedAtDesc(Long projectId, IssueStatus status);
-    List<Issue> findByProjectIdAndSprintIsNullOrderByCreatedAtDesc(Long projectId);
+    List<Issue> findByProjectIdAndSprintIsNullOrderByBacklogRankAscIdAsc(Long projectId);
+
+    @Query("SELECT COALESCE(MAX(i.backlogRank), 0) FROM Issue i WHERE i.project.id = :pid AND i.sprint IS NULL")
+    long maxBacklogRankForProjectBacklog(@Param("pid") Long projectId);
     List<Issue> findByAssigneeIdOrderByUpdatedAtDesc(Long assigneeId);
     Page<Issue> findByProjectIdOrderByCreatedAtDesc(Long projectId, Pageable pageable);
     long countByProjectIdAndStatus(Long projectId, IssueStatus status);

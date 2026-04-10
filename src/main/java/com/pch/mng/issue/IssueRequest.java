@@ -2,8 +2,11 @@ package com.pch.mng.issue;
 
 import com.pch.mng.global.enums.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+
+import java.util.List;
 
 public class IssueRequest {
 
@@ -53,5 +56,18 @@ public class IssueRequest {
     public static class ComponentAttachDTO {
         @NotNull
         private Long componentId;
+    }
+
+    @Data
+    public static class BacklogReorderDTO {
+        @NotEmpty
+        private List<@NotNull Long> orderedIssueIds;
+    }
+
+    @Data
+    public static class SprintAssignmentDTO {
+        private Long sprintId;
+        @NotEmpty
+        private List<@NotNull Long> issueIds;
     }
 }

@@ -37,6 +37,10 @@ public enum ErrorCode {
     SPRINT_INVALID_TRANSITION(409, "허용되지 않는 스프린트 상태 전환입니다"),
     SPRINT_ACTIVE_ALREADY_EXISTS(409, "해당 프로젝트에 이미 진행 중인 스프린트가 있습니다"),
     SPRINT_DELETE_FORBIDDEN(409, "진행 중이거나 이슈가 배정된 스프린트는 삭제할 수 없습니다"),
+    SPRINT_NOT_ASSIGNABLE(409, "완료된 스프린트에는 이슈를 배정할 수 없습니다"),
+
+    // Backlog (FR-010)
+    BACKLOG_REORDER_INVALID(400, "백로그 순서가 올바르지 않습니다. 스프린트에 미배정인 이슈 ID 집합과 일치해야 합니다"),
     ISSUE_LINK_SELF(400, "동일 이슈에는 링크를 걸 수 없습니다"),
     ISSUE_LINK_PROJECT_MISMATCH(400, "링크 대상 이슈는 같은 프로젝트에 있어야 합니다"),
     ISSUE_LINK_DUPLICATE(409, "동일한 이슈 링크가 이미 존재합니다"),

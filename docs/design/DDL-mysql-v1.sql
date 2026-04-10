@@ -121,6 +121,7 @@ CREATE TABLE issue_tb (
     reporter_id BIGINT NOT NULL,
     parent_id BIGINT NULL,
     sprint_id BIGINT NULL,
+    backlog_rank BIGINT NOT NULL DEFAULT 0,
     security_level VARCHAR(50) NULL,
     created_at DATETIME(6) NULL,
     updated_at DATETIME(6) NULL,

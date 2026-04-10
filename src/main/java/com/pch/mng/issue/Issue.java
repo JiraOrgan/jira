@@ -69,6 +69,10 @@ public class Issue {
     @JoinColumn(name = "sprint_id")
     private Sprint sprint;
 
+    /** 스프린트 미배정(backlog) 이슈 정렬용. 스프린트에 넣은 이슈는 0으로 둘 수 있다. */
+    @Column(nullable = false)
+    private long backlogRank;
+
     @Enumerated(EnumType.STRING)
     private SecurityLevel securityLevel;
 
@@ -82,7 +86,7 @@ public class Issue {
     public Issue(String issueKey, Project project, IssueType issueType, String summary,
                  String description, IssueStatus status, Priority priority, Integer storyPoints,
                  UserAccount assignee, UserAccount reporter, Issue parent, Sprint sprint,
-                 SecurityLevel securityLevel) {
+                 long backlogRank, SecurityLevel securityLevel) {
         this.issueKey = issueKey;
         this.project = project;
         this.issueType = issueType;
@@ -95,6 +99,7 @@ public class Issue {
         this.reporter = reporter;
         this.parent = parent;
         this.sprint = sprint;
+        this.backlogRank = backlogRank;
         this.securityLevel = securityLevel;
     }
 }
