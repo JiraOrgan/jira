@@ -15,10 +15,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.pch.mng.global.exception.BusinessException;
+import com.pch.mng.global.exception.ErrorCode;
+
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,11 +40,15 @@ class BoardServiceTest {
     @Mock
     IssueRepository issueRepository;
 
+    @Mock
+    SprintBoardRedisCache sprintBoardRedisCache;
+
     BoardService boardService;
 
     @BeforeEach
     void setUp() {
-        boardService = new BoardService(sprintRepository, issueRepository);
+        org.mockito.Mockito.when(sprintBoardRedisCache.isEnabled()).thenReturn(false);
+        boardService = new BoardService(sprintRepository, issueRepository, sprintBoardRedisCache);
     }
 
     @Test
@@ -73,6 +87,65 @@ class BoardServiceTest {
                 .findFirst()
                 .orElseThrow();
         assertThat(col.getBuckets()).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("스프린트가 없으면 ENTITY_NOT_FOUND")
+    void sprintMissing() {
+        when(sprintRepository.existsById(99L)).thenReturn(false);
+
+        assertThatThrownBy(() -> boardService.getSprintBoard(99L, BoardSwimlane.NONE))
+                .isInstanceOf(BusinessException.class)
+                .extracting(ex -> ((BusinessException) ex).getErrorCode())
+                .isEqualTo(ErrorCode.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("swimlane NONE: 컬럼당 단일 버킷, 이슈는 BACKLOG 컬럼에만")
+    void noneSwimlaneSingleBucketPerColumn() {
+        when(sprintRepository.existsById(10L)).thenReturn(true);
+        LocalDateTime t = LocalDateTime.of(2026, 4, 10, 12, 0);
+        Issue i1 = issue(1L, "P-1", IssueStatus.BACKLOG, null, t);
+        when(issueRepository.findForSprintBoard(10L)).thenReturn(List.of(i1));
+
+        SprintBoardResponse r = boardService.getSprintBoard(10L, BoardSwimlane.NONE);
+
+        assertThat(r.getSwimlane()).isEqualTo(BoardSwimlane.NONE);
+        assertThat(r.getColumns()).hasSize(IssueStatus.values().length);
+        assertThat(r.getColumns().get(0).getBuckets()).hasSize(1);
+        assertThat(r.getColumns().get(0).getBuckets().get(0).getIssues()).hasSize(1);
+        for (int i = 1; i < r.getColumns().size(); i++) {
+            assertThat(r.getColumns().get(i).getBuckets().get(0).getIssues()).isEmpty();
+        }
+    }
+
+    @Test
+    @DisplayName("캐시 히트 시 DB 조회 없음")
+    void cacheHitSkipsRepositories() {
+        when(sprintBoardRedisCache.isEnabled()).thenReturn(true);
+        SprintBoardResponse cached = new SprintBoardResponse();
+        cached.setSwimlane(BoardSwimlane.NONE);
+        when(sprintBoardRedisCache.get(10L, BoardSwimlane.NONE)).thenReturn(Optional.of(cached));
+
+        SprintBoardResponse r = boardService.getSprintBoard(10L, BoardSwimlane.NONE);
+
+        assertThat(r).isSameAs(cached);
+        verify(sprintRepository, never()).existsById(anyLong());
+        verify(issueRepository, never()).findForSprintBoard(anyLong());
+        verify(sprintBoardRedisCache, never()).put(anyLong(), any(BoardSwimlane.class), any(SprintBoardResponse.class));
+    }
+
+    @Test
+    @DisplayName("캐시 미스 시 조회 후 put")
+    void cacheMissLoadsAndPuts() {
+        when(sprintBoardRedisCache.isEnabled()).thenReturn(true);
+        when(sprintBoardRedisCache.get(10L, BoardSwimlane.NONE)).thenReturn(Optional.empty());
+        when(sprintRepository.existsById(10L)).thenReturn(true);
+        when(issueRepository.findForSprintBoard(10L)).thenReturn(List.of());
+
+        boardService.getSprintBoard(10L, BoardSwimlane.NONE);
+
+        verify(sprintBoardRedisCache).put(eq(10L), eq(BoardSwimlane.NONE), any(SprintBoardResponse.class));
     }
 
     private static Issue issue(long id, String key, IssueStatus status, UserAccount assignee, LocalDateTime t) {
