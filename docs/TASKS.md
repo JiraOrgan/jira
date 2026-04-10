@@ -1,8 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.13
+> **버전**: v1.14
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-10 (T-602 JQL 파서 MVP FR-016)
+> **최종수정일**: 2026-04-10 (T-400 PRD 이슈 계층 검증 FR-002)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -83,7 +83,7 @@
 | T-306 | 프로젝트 CRUD API 완성 | Backend | DONE | 멤버십 기반 목록·생성 시 창립자 ADMIN | T-305 |
 | T-307 | 프로젝트 멤버 관리 API 완성 | Backend | DONE | ADMIN 전용 추가/삭제·`projectId` 검증 | T-306 |
 | T-308 | 단위 테스트 (Auth, User, Project) | Backend | DONE | - | T-307 |
-| T-400 | 이슈 CRUD API 완성 (5 타입; 키·계층·스프린트 검증) | Backend | IN_PROGRESS | FR-001, FR-002 | T-306 |
+| T-400 | 이슈 CRUD API 완성 (5 타입; 키·계층·스프린트 검증) | Backend | DONE | FR-001, FR-002; `IssueHierarchyPolicy` PRD §3.1 | T-306 |
 | T-401 | 이슈 키 자동 생성 로직 (PROJ-N) | Backend | DONE | FR-001 | T-400 |
 | T-402 | 워크플로우 전환 규칙 엔진 구현 (`IssueWorkflowPolicy`) | Backend | DONE | FR-013, FR-014 | T-400 |
 | T-403 | WorkflowTransition 자동 기록 | Backend | DONE | FR-013 | T-402 |
@@ -267,3 +267,4 @@
 | v1.11 | 2026-04-10 | T-504 스프린트 보드 JSON 캐시(Redis)·이슈/스프린트 변경 시 무효화·`SprintBoardRedisCacheTest` (DONE) |
 | v1.12 | 2026-04-10 | T-505 `SprintServiceTest`(Mockito)·`BoardServiceTest` 보강 (DONE) |
 | v1.13 | 2026-04-10 | T-602 PCH JQL MVP 파서(`JqlParser`·sealed AST·`JqlParserTest`) FR-016 (DONE) |
+| v1.14 | 2026-04-10 | T-400 PRD §3.1 이슈 타입 계층 검증(`IssueHierarchyPolicy`)·통합 테스트·FR-002 (DONE) |

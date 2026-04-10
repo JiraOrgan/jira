@@ -251,6 +251,163 @@ class IssueIntegrationTest {
     }
 
     @Test
+    @DisplayName("EPIC은 부모 이슈를 가질 수 없다 (PRD L1)")
+    void epicCannotHaveParent() throws Exception {
+        String email = "iss-epic-" + System.nanoTime() + "@ex.com";
+        String token = registerAndLogin(email);
+        long projectId = createProject(token, "PE" + (System.nanoTime() % 100000));
+
+        MvcResult storyRes = mockMvc.perform(post("/api/v1/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"projectId":%d,"issueType":"STORY","summary":"s","priority":"MEDIUM"}
+                                """.formatted(projectId)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long storyId = objectMapper.readTree(storyRes.getResponse().getContentAsString())
+                .path("data").path("id").asLong();
+
+        mockMvc.perform(post("/api/v1/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"projectId":%d,"issueType":"EPIC","summary":"e","priority":"MEDIUM","parentId":%d}
+                                """.formatted(projectId, storyId)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("SUBTASK의 부모는 EPIC이 될 수 없다 (PRD: L3는 L2 하위만)")
+    void subtaskRejectParentEpic() throws Exception {
+        String email = "iss-ste-" + System.nanoTime() + "@ex.com";
+        String token = registerAndLogin(email);
+        long projectId = createProject(token, "SE" + (System.nanoTime() % 100000));
+
+        MvcResult epicRes = mockMvc.perform(post("/api/v1/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"projectId":%d,"issueType":"EPIC","summary":"e","priority":"MEDIUM"}
+                                """.formatted(projectId)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long epicId = objectMapper.readTree(epicRes.getResponse().getContentAsString())
+                .path("data").path("id").asLong();
+
+        mockMvc.perform(post("/api/v1/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"projectId":%d,"issueType":"SUBTASK","summary":"st","priority":"LOW","parentId":%d}
+                                """.formatted(projectId, epicId)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("SUBTASK 아래에 SUBTASK를 둘 수 없다")
+    void subtaskRejectNestedSubtask() throws Exception {
+        String email = "iss-nst-" + System.nanoTime() + "@ex.com";
+        String token = registerAndLogin(email);
+        long projectId = createProject(token, "NS" + (System.nanoTime() % 100000));
+
+        MvcResult storyRes = mockMvc.perform(post("/api/v1/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"projectId":%d,"issueType":"STORY","summary":"s","priority":"MEDIUM"}
+                                """.formatted(projectId)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long storyId = objectMapper.readTree(storyRes.getResponse().getContentAsString())
+                .path("data").path("id").asLong();
+
+        MvcResult subRes = mockMvc.perform(post("/api/v1/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"projectId":%d,"issueType":"SUBTASK","summary":"a","priority":"LOW","parentId":%d}
+                                """.formatted(projectId, storyId)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long subId = objectMapper.readTree(subRes.getResponse().getContentAsString())
+                .path("data").path("id").asLong();
+
+        mockMvc.perform(post("/api/v1/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"projectId":%d,"issueType":"SUBTASK","summary":"b","priority":"LOW","parentId":%d}
+                                """.formatted(projectId, subId)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("STORY의 부모는 EPIC만 허용 (TASK를 부모로 두면 거절)")
+    void storyRejectNonEpicParent() throws Exception {
+        String email = "iss-snp-" + System.nanoTime() + "@ex.com";
+        String token = registerAndLogin(email);
+        long projectId = createProject(token, "SN" + (System.nanoTime() % 100000));
+
+        MvcResult taskRes = mockMvc.perform(post("/api/v1/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"projectId":%d,"issueType":"TASK","summary":"t","priority":"MEDIUM"}
+                                """.formatted(projectId)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long taskId = objectMapper.readTree(taskRes.getResponse().getContentAsString())
+                .path("data").path("id").asLong();
+
+        mockMvc.perform(post("/api/v1/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"projectId":%d,"issueType":"STORY","summary":"s","priority":"MEDIUM","parentId":%d}
+                                """.formatted(projectId, taskId)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("PRD 계층 허용: EPIC → STORY → SUBTASK")
+    void prdHierarchyHappyPath() throws Exception {
+        String email = "iss-hpy-" + System.nanoTime() + "@ex.com";
+        String token = registerAndLogin(email);
+        long projectId = createProject(token, "HP" + (System.nanoTime() % 100000));
+
+        MvcResult epicRes = mockMvc.perform(post("/api/v1/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"projectId":%d,"issueType":"EPIC","summary":"e","priority":"MEDIUM"}
+                                """.formatted(projectId)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long epicId = objectMapper.readTree(epicRes.getResponse().getContentAsString())
+                .path("data").path("id").asLong();
+
+        MvcResult storyRes = mockMvc.perform(post("/api/v1/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"projectId":%d,"issueType":"STORY","summary":"s","priority":"MEDIUM","parentId":%d}
+                                """.formatted(projectId, epicId)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long storyId = objectMapper.readTree(storyRes.getResponse().getContentAsString())
+                .path("data").path("id").asLong();
+
+        mockMvc.perform(post("/api/v1/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"projectId":%d,"issueType":"SUBTASK","summary":"st","priority":"LOW","parentId":%d}
+                                """.formatted(projectId, storyId)))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
     @DisplayName("스프린트는 이슈 프로젝트와 일치해야 한다")
     void sprintMustMatchProject() throws Exception {
         String email = "iss-spr-" + System.nanoTime() + "@ex.com";

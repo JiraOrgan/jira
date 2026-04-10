@@ -153,20 +153,16 @@ public class IssueService {
     }
 
     private Issue resolveAndValidateParent(IssueType issueType, Long parentId, Project project) {
-        if (issueType == IssueType.SUBTASK) {
-            if (parentId == null) {
-                throw new BusinessException(ErrorCode.INVALID_ISSUE_HIERARCHY);
+        Issue parent = null;
+        if (parentId != null) {
+            parent = issueRepository.findByIdWithProject(parentId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+            if (!parent.getProject().getId().equals(project.getId())) {
+                throw new BusinessException(ErrorCode.ISSUE_PARENT_PROJECT_MISMATCH);
             }
         }
-        if (parentId == null) {
-            return null;
-        }
-        Issue p = issueRepository.findByIdWithProject(parentId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
-        if (!p.getProject().getId().equals(project.getId())) {
-            throw new BusinessException(ErrorCode.ISSUE_PARENT_PROJECT_MISMATCH);
-        }
-        return p;
+        IssueHierarchyPolicy.assertValidParent(issueType, parent);
+        return parent;
     }
 
     @Transactional
