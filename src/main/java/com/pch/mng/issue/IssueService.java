@@ -2,6 +2,7 @@ package com.pch.mng.issue;
 
 import com.pch.mng.global.enums.IssueStatus;
 import com.pch.mng.global.enums.IssueType;
+import com.pch.mng.global.enums.SprintStatus;
 import com.pch.mng.global.exception.BusinessException;
 import com.pch.mng.global.exception.ErrorCode;
 import com.pch.mng.label.Label;
@@ -24,7 +25,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -48,7 +51,7 @@ public class IssueService {
     }
 
     public List<IssueResponse.MinDTO> findBacklog(Long projectId) {
-        return issueRepository.findByProjectIdAndSprintIsNullOrderByCreatedAtDesc(projectId).stream()
+        return issueRepository.findByProjectIdAndSprintIsNullOrderByBacklogRankAscIdAsc(projectId).stream()
                 .map(IssueResponse.MinDTO::of)
                 .toList();
     }
@@ -80,10 +83,12 @@ public class IssueService {
         if (reqDTO.getSprintId() != null) {
             sprint = sprintRepository.findByIdWithProject(reqDTO.getSprintId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
-            if (!sprint.getProject().getId().equals(project.getId())) {
-                throw new BusinessException(ErrorCode.SPRINT_PROJECT_MISMATCH);
-            }
+            assertSprintOpenAndSameProject(sprint, project);
         }
+
+        long backlogRank = sprint == null
+                ? issueRepository.maxBacklogRankForProjectBacklog(project.getId()) + 1000L
+                : 0L;
 
         long nextSeq = project.getIssueSequence() + 1;
         project.setIssueSequence(nextSeq);
@@ -99,6 +104,7 @@ public class IssueService {
                 .priority(reqDTO.getPriority())
                 .storyPoints(reqDTO.getStoryPoints())
                 .reporter(reporter)
+                .backlogRank(backlogRank)
                 .securityLevel(reqDTO.getSecurityLevel());
 
         if (reqDTO.getAssigneeId() != null) {
@@ -116,6 +122,15 @@ public class IssueService {
         Issue issue = builder.build();
         issueRepository.save(issue);
         return toDetail(issue);
+    }
+
+    private void assertSprintOpenAndSameProject(Sprint sprint, Project project) {
+        if (!sprint.getProject().getId().equals(project.getId())) {
+            throw new BusinessException(ErrorCode.SPRINT_PROJECT_MISMATCH);
+        }
+        if (sprint.getStatus() == SprintStatus.COMPLETED) {
+            throw new BusinessException(ErrorCode.SPRINT_NOT_ASSIGNABLE);
+        }
     }
 
     private Issue resolveAndValidateParent(IssueType issueType, Long parentId, Project project) {
@@ -153,13 +168,66 @@ public class IssueService {
         if (reqDTO.getSprintId() != null) {
             Sprint sprint = sprintRepository.findByIdWithProject(reqDTO.getSprintId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
-            if (!sprint.getProject().getId().equals(issue.getProject().getId())) {
-                throw new BusinessException(ErrorCode.SPRINT_PROJECT_MISMATCH);
-            }
+            assertSprintOpenAndSameProject(sprint, issue.getProject());
             issue.setSprint(sprint);
+            issue.setBacklogRank(0L);
         }
 
         return toDetail(issue);
+    }
+
+    @Transactional
+    public List<IssueResponse.MinDTO> reorderBacklog(Long projectId, IssueRequest.BacklogReorderDTO dto) {
+        List<Long> ordered = dto.getOrderedIssueIds();
+        List<Issue> backlog = issueRepository.findByProjectIdAndSprintIsNullOrderByBacklogRankAscIdAsc(projectId);
+        Set<Long> expected = new HashSet<>();
+        for (Issue i : backlog) {
+            expected.add(i.getId());
+        }
+        if (ordered.size() != expected.size() || ordered.stream().distinct().count() != ordered.size()) {
+            throw new BusinessException(ErrorCode.BACKLOG_REORDER_INVALID);
+        }
+        if (!expected.equals(new HashSet<>(ordered))) {
+            throw new BusinessException(ErrorCode.BACKLOG_REORDER_INVALID);
+        }
+        long step = 1000L;
+        for (int i = 0; i < ordered.size(); i++) {
+            Long id = ordered.get(i);
+            Issue issue = issueRepository.findById(id)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.BACKLOG_REORDER_INVALID));
+            if (!issue.getProject().getId().equals(projectId) || issue.getSprint() != null) {
+                throw new BusinessException(ErrorCode.BACKLOG_REORDER_INVALID);
+            }
+            issue.setBacklogRank(i * step);
+        }
+        return findBacklog(projectId);
+    }
+
+    @Transactional
+    public void assignSprintToIssues(Long projectId, IssueRequest.SprintAssignmentDTO dto) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        Sprint sprint = null;
+        if (dto.getSprintId() != null) {
+            sprint = sprintRepository.findByIdWithProject(dto.getSprintId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+            assertSprintOpenAndSameProject(sprint, project);
+        }
+        long rankCursor = issueRepository.maxBacklogRankForProjectBacklog(projectId);
+        for (Long issueId : dto.getIssueIds()) {
+            Issue issue = issueRepository.findByIdWithProject(issueId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+            if (!issue.getProject().getId().equals(projectId)) {
+                throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+            }
+            issue.setSprint(sprint);
+            if (sprint == null) {
+                rankCursor += 1000L;
+                issue.setBacklogRank(rankCursor);
+            } else {
+                issue.setBacklogRank(0L);
+            }
+        }
     }
 
     @Transactional
