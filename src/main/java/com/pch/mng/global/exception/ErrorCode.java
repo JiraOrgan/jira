@@ -49,6 +49,11 @@ public enum ErrorCode {
     ISSUE_LINK_PROJECT_MISMATCH(400, "링크 대상 이슈는 같은 프로젝트에 있어야 합니다"),
     ISSUE_LINK_DUPLICATE(409, "동일한 이슈 링크가 이미 존재합니다"),
 
+    // JQL (FR-016)
+    JQL_INVALID_VALUE(400, "JQL 값이 올바르지 않습니다"),
+    JQL_UNSUPPORTED_CLAUSE(400, "JQL에서 해당 필드와 연산 조합을 지원하지 않습니다"),
+    JQL_PROJECT_KEY_MISMATCH(400, "JQL의 project 조건이 현재 프로젝트와 일치하지 않습니다"),
+
     // Attachment
     FILE_REQUIRED(400, "업로드할 파일이 필요합니다"),
     FILE_TOO_LARGE(413, "파일 크기 제한(20MB)을 초과했습니다"),

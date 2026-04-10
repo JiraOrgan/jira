@@ -198,7 +198,7 @@ phs/
 │   ├── issue/                     # 이슈 (핵심) + N:M 관계 테이블
 │   ├── sprint/                    # 스프린트 lifecycle
 │   ├── board/                     # 스프린트 보드 조회 (FR-008)
-│   ├── jql/                       # PCH JQL 파서·AST (FR-016, T-602)
+│   ├── jql/                       # PCH JQL 파서·검색·저장 필터 (FR-016, T-602·T-603)
 │   ├── release/                   # 릴리즈 버전 관리
 │   ├── comment/                   # 댓글
 │   ├── attachment/                # 첨부파일
@@ -298,6 +298,15 @@ phs/
 | `POST` | `/api/v1/issues/{issueKey}/attachments` | 첨부 업로드 (`multipart/form-data`, 파트명 `file`, 최대 20MB) | ✅ |
 | `GET` | `/api/v1/attachments/{id}/file` | 첨부 파일 다운로드 (바이너리) | ✅ |
 | `DELETE` | `/api/v1/attachments/{id}` | 첨부 삭제 | ✅ |
+
+### JQL (FR-016)
+
+| Method | URL | 설명 | 인증 |
+|--------|-----|------|:----:|
+| `POST` | `/api/v1/projects/{projectId}/jql/search` | JQL 검색 (`jql`, `startAt`, `maxResults`; `app.jql.max-results-cap` 상한) | ✅ |
+| `POST` | `/api/v1/projects/{projectId}/jql/filters` | 저장 필터 생성 (`name`, `jql`) | ✅ |
+| `GET` | `/api/v1/projects/{projectId}/jql/filters` | 현재 사용자 저장 필터 목록 | ✅ |
+| `DELETE` | `/api/v1/projects/{projectId}/jql/filters/{filterId}` | 저장 필터 삭제 (소유자만) | ✅ |
 
 ### 스프린트 API
 

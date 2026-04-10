@@ -43,6 +43,9 @@ jwt:
   refresh-expiration: 604800000
 
 app:
+  jql:
+    max-results-cap: 100
+    default-max-results: 20
   board:
     cache:
       enabled: true
