@@ -42,4 +42,16 @@ public class IssueRequest {
         private IssueStatus toStatus;
         private String conditionNote;
     }
+
+    @Data
+    public static class LabelAttachDTO {
+        @NotNull
+        private Long labelId;
+    }
+
+    @Data
+    public static class ComponentAttachDTO {
+        @NotNull
+        private Long componentId;
+    }
 }

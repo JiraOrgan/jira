@@ -4,7 +4,11 @@ import com.pch.mng.global.enums.IssueStatus;
 import com.pch.mng.global.enums.IssueType;
 import com.pch.mng.global.exception.BusinessException;
 import com.pch.mng.global.exception.ErrorCode;
+import com.pch.mng.label.Label;
+import com.pch.mng.label.LabelRepository;
 import com.pch.mng.project.Project;
+import com.pch.mng.project.ProjectComponent;
+import com.pch.mng.project.ProjectComponentRepository;
 import com.pch.mng.project.ProjectRepository;
 import com.pch.mng.sprint.Sprint;
 import com.pch.mng.sprint.SprintRepository;
@@ -33,6 +37,10 @@ public class IssueService {
     private final SprintRepository sprintRepository;
     private final IssueWorkflowPolicy issueWorkflowPolicy;
     private final WorkflowTransitionRepository workflowTransitionRepository;
+    private final IssueLabelRepository issueLabelRepository;
+    private final IssueComponentRepository issueComponentRepository;
+    private final LabelRepository labelRepository;
+    private final ProjectComponentRepository projectComponentRepository;
 
     public Page<IssueResponse.MinDTO> findByProject(Long projectId, Pageable pageable) {
         return issueRepository.findByProjectIdOrderByCreatedAtDesc(projectId, pageable)
@@ -48,7 +56,7 @@ public class IssueService {
     public IssueResponse.DetailDTO findByKey(String issueKey) {
         Issue issue = issueRepository.findByIssueKeyWithDetails(issueKey)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
-        return IssueResponse.DetailDTO.of(issue);
+        return toDetail(issue);
     }
 
     public List<WorkflowTransitionResponse.DetailDTO> findTransitionsByIssueKey(String issueKey) {
@@ -107,7 +115,7 @@ public class IssueService {
 
         Issue issue = builder.build();
         issueRepository.save(issue);
-        return IssueResponse.DetailDTO.of(issue);
+        return toDetail(issue);
     }
 
     private Issue resolveAndValidateParent(IssueType issueType, Long parentId, Project project) {
@@ -151,7 +159,7 @@ public class IssueService {
             issue.setSprint(sprint);
         }
 
-        return IssueResponse.DetailDTO.of(issue);
+        return toDetail(issue);
     }
 
     @Transactional
@@ -168,7 +176,7 @@ public class IssueService {
         IssueStatus from = issue.getStatus();
         IssueStatus to = reqDTO.getToStatus();
         if (from == to) {
-            return IssueResponse.DetailDTO.of(issue);
+            return toDetail(issue);
         }
         issueWorkflowPolicy.assertTransition(from, to);
         UserAccount actor = userAccountRepository.findById(actorUserId)
@@ -185,6 +193,69 @@ public class IssueService {
         log.setConditionNote(reqDTO.getConditionNote());
         workflowTransitionRepository.save(log);
 
-        return IssueResponse.DetailDTO.of(issue);
+        return toDetail(issue);
+    }
+
+    @Transactional
+    public IssueResponse.DetailDTO addLabel(String issueKey, Long labelId) {
+        Issue issue = issueRepository.findByIssueKeyWithProject(issueKey)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        Label label = labelRepository.findById(labelId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        if (issueLabelRepository.existsByIssue_IdAndLabel_Id(issue.getId(), labelId)) {
+            throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE);
+        }
+        IssueLabel link = new IssueLabel();
+        link.setIssue(issue);
+        link.setLabel(label);
+        issueLabelRepository.save(link);
+        return toDetail(issue);
+    }
+
+    @Transactional
+    public IssueResponse.DetailDTO removeLabel(String issueKey, Long labelId) {
+        Issue issue = issueRepository.findByIssueKeyWithProject(issueKey)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        if (!issueLabelRepository.existsByIssue_IdAndLabel_Id(issue.getId(), labelId)) {
+            throw new BusinessException(ErrorCode.ENTITY_NOT_FOUND);
+        }
+        issueLabelRepository.deleteByIssueIdAndLabelId(issue.getId(), labelId);
+        return toDetail(issue);
+    }
+
+    @Transactional
+    public IssueResponse.DetailDTO addComponent(String issueKey, Long componentId) {
+        Issue issue = issueRepository.findByIssueKeyWithProject(issueKey)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        ProjectComponent component = projectComponentRepository.findByIdWithProject(componentId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        if (!component.getProject().getId().equals(issue.getProject().getId())) {
+            throw new BusinessException(ErrorCode.COMPONENT_PROJECT_MISMATCH);
+        }
+        if (issueComponentRepository.existsByIssue_IdAndComponent_Id(issue.getId(), componentId)) {
+            throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE);
+        }
+        IssueComponent link = new IssueComponent();
+        link.setIssue(issue);
+        link.setComponent(component);
+        issueComponentRepository.save(link);
+        return toDetail(issue);
+    }
+
+    @Transactional
+    public IssueResponse.DetailDTO removeComponent(String issueKey, Long componentId) {
+        Issue issue = issueRepository.findByIssueKeyWithProject(issueKey)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        if (!issueComponentRepository.existsByIssue_IdAndComponent_Id(issue.getId(), componentId)) {
+            throw new BusinessException(ErrorCode.ENTITY_NOT_FOUND);
+        }
+        issueComponentRepository.deleteByIssue_IdAndComponent_Id(issue.getId(), componentId);
+        return toDetail(issue);
+    }
+
+    private IssueResponse.DetailDTO toDetail(Issue issue) {
+        List<IssueLabel> labels = issueLabelRepository.findByIssueIdWithLabel(issue.getId());
+        List<IssueComponent> components = issueComponentRepository.findByIssueIdWithComponent(issue.getId());
+        return IssueResponse.DetailDTO.of(issue, labels, components);
     }
 }
