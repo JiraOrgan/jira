@@ -101,7 +101,7 @@
 | Method | Path | 설명 |
 |--------|------|------|
 | GET | `/api/v1/dashboards` | (소유자 기준) 목록 |
-| GET | `/api/v1/dashboards/{id}` | 단건 |
+| GET | `/api/v1/dashboards/{id}` | 단건(인증 필수; 없으면 404, 비공개·타인 소유면 403) |
 | POST | `/api/v1/dashboards` | 생성 |
 | PUT | `/api/v1/dashboards/{id}` | 수정 |
 | DELETE | `/api/v1/dashboards/{id}` | 삭제 |

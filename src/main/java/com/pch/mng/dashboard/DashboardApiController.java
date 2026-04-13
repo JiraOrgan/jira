@@ -31,9 +31,14 @@ public class DashboardApiController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("@dashboardSecurity.canReadDashboard(#id)")
-    public ResponseEntity<ApiResponse<DashboardResponse.DetailDTO>> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.ok(dashboardService.findById(id)));
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<DashboardResponse.DetailDTO>> findById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        if (principal == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+        return ResponseEntity.ok(ApiResponse.ok(dashboardService.findById(id, principal.getId())));
     }
 
     @PostMapping

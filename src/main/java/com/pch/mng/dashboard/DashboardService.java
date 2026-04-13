@@ -28,9 +28,17 @@ public class DashboardService {
                 .toList();
     }
 
-    public DashboardResponse.DetailDTO findById(Long id) {
+    /**
+     * 대시보드 단건. 없으면 404, 소유자도 아니고 공유도 아니면 403.
+     * (존재하지 않는 ID를 Spring Security SpEL만으로 막으면 403으로만 응답되는 문제를 피한다.)
+     */
+    public DashboardResponse.DetailDTO findById(Long id, Long viewerUserId) {
         Dashboard dashboard = dashboardRepository.findByIdWithGadgets(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        boolean owner = dashboard.getOwner().getId().equals(viewerUserId);
+        if (!owner && !dashboard.isShared()) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
         return DashboardResponse.DetailDTO.of(dashboard);
     }
 
