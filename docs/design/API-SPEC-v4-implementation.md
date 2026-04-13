@@ -77,6 +77,7 @@
 |--------|------|------|
 | GET | `/api/v1/versions/project/{projectId}` | 목록 |
 | GET | `/api/v1/versions/{id}` | 단건 |
+| GET | `/api/v1/versions/{id}/release-notes` | Fix 버전 연결 이슈 집계 릴리즈 노트 초안 (마크다운, FR-020) |
 | POST | `/api/v1/versions` | 생성 |
 | POST | `/api/v1/versions/{id}/release` | 릴리즈 처리 |
 | DELETE | `/api/v1/versions/{id}` | 삭제 |

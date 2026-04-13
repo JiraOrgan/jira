@@ -1,13 +1,18 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useProjectByKey } from '../hooks/useProjects'
 import {
   createReleaseVersion,
   deleteReleaseVersion,
+  fetchReleaseNotes,
   fetchReleaseVersionsByProject,
   markVersionReleased,
 } from '../lib/releaseApi'
-import type { ReleaseVersionMin, VersionStatus } from '../types/domain'
+import type {
+  ReleaseNotesPayload,
+  ReleaseVersionMin,
+  VersionStatus,
+} from '../types/domain'
 
 function statusLabel(s: VersionStatus): string {
   return s === 'RELEASED' ? '릴리즈됨' : '미배포'
@@ -29,6 +34,14 @@ export function ReleasesPage() {
 
   const [actionErr, setActionErr] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<number | null>(null)
+
+  const [notesFor, setNotesFor] = useState<ReleaseVersionMin | null>(null)
+  const [notesPayload, setNotesPayload] = useState<ReleaseNotesPayload | null>(
+    null,
+  )
+  const [notesBusyForId, setNotesBusyForId] = useState<number | null>(null)
+  const [notesErr, setNotesErr] = useState<string | null>(null)
+  const notesRequestSeq = useRef(0)
 
   const load = useCallback(async () => {
     if (!project) return
@@ -102,6 +115,43 @@ export function ReleasesPage() {
     }
   }
 
+  function closeNotesModal() {
+    setNotesFor(null)
+    setNotesPayload(null)
+    setNotesErr(null)
+  }
+
+  async function openReleaseNotes(v: ReleaseVersionMin) {
+    const seq = ++notesRequestSeq.current
+    setNotesFor(v)
+    setNotesPayload(null)
+    setNotesErr(null)
+    setNotesBusyForId(v.id)
+    try {
+      const data = await fetchReleaseNotes(v.id)
+      if (notesRequestSeq.current !== seq) return
+      setNotesPayload(data)
+    } catch (err) {
+      if (notesRequestSeq.current !== seq) return
+      setNotesErr(
+        err instanceof Error ? err.message : '릴리즈 노트를 불러오지 못했습니다',
+      )
+    } finally {
+      if (notesRequestSeq.current === seq) {
+        setNotesBusyForId(null)
+      }
+    }
+  }
+
+  async function copyNotesMarkdown() {
+    if (!notesPayload?.markdown) return
+    try {
+      await navigator.clipboard.writeText(notesPayload.markdown)
+    } catch {
+      setNotesErr('클립보드에 복사하지 못했습니다.')
+    }
+  }
+
   async function handleDelete(v: ReleaseVersionMin) {
     if (!confirm(`"${v.name}" 을(를) 삭제할까요?`)) return
     setActionErr(null)
@@ -152,7 +202,8 @@ export function ReleasesPage() {
         <h1 className="mt-2 text-xl font-semibold text-white">Fix 버전 · 릴리즈</h1>
         <p className="mt-1 text-sm text-slate-400">
           프로젝트 단위 버전을 등록하고 릴리즈 상태로 전환합니다. 생성·릴리즈·삭제는
-          프로젝트 관리 권한이 필요할 수 있습니다.
+          프로젝트 관리 권한이 필요할 수 있습니다. Fix 버전에 연결된 이슈로 릴리즈
+          노트 초안을 자동 생성할 수 있습니다.
         </p>
       </div>
 
@@ -273,6 +324,14 @@ export function ReleasesPage() {
                       {v.releaseDate ?? '—'}
                     </td>
                     <td className="px-4 py-3 text-right">
+                      <button
+                        type="button"
+                        disabled={busyId === v.id || notesBusyForId === v.id}
+                        onClick={() => void openReleaseNotes(v)}
+                        className="mr-3 text-sm text-slate-300 hover:text-white disabled:opacity-50"
+                      >
+                        노트
+                      </button>
                       {v.status === 'UNRELEASED' ? (
                         <button
                           type="button"
@@ -299,6 +358,59 @@ export function ReleasesPage() {
           </div>
         )}
       </section>
+
+      {notesFor ? (
+        <div
+          className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="release-notes-title"
+        >
+          <div className="max-h-[85vh] w-full max-w-2xl overflow-hidden rounded-xl border border-slate-700 bg-slate-950 shadow-xl">
+            <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3">
+              <h2
+                id="release-notes-title"
+                className="text-sm font-semibold text-white"
+              >
+                릴리즈 노트 — {notesFor.name}
+              </h2>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={!notesPayload?.markdown}
+                  onClick={() => void copyNotesMarkdown()}
+                  className="rounded-lg border border-slate-600 px-3 py-1 text-xs text-slate-200 hover:bg-slate-800 disabled:opacity-40"
+                >
+                  마크다운 복사
+                </button>
+                <button
+                  type="button"
+                  onClick={closeNotesModal}
+                  className="rounded-lg px-3 py-1 text-xs text-slate-400 hover:bg-slate-800 hover:text-white"
+                >
+                  닫기
+                </button>
+              </div>
+            </div>
+            <div className="max-h-[calc(85vh-3.5rem)] overflow-auto p-4">
+              {notesBusyForId !== null ? (
+                <p className="text-sm text-slate-500">불러오는 중…</p>
+              ) : notesErr ? (
+                <p className="text-sm text-red-400">{notesErr}</p>
+              ) : notesPayload ? (
+                <>
+                  <p className="mb-3 text-xs text-slate-500">
+                    연결 이슈 {notesPayload.issueCount}건 (타입별 마크다운 초안)
+                  </p>
+                  <pre className="whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-slate-300">
+                    {notesPayload.markdown}
+                  </pre>
+                </>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

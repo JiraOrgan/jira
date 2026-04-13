@@ -77,6 +77,22 @@ export type ReleaseVersionDetail = {
   createdAt: string
 }
 
+/** `ReleaseNotesResponse.DTO` — Fix 버전 연결 이슈 기반 릴리즈 노트 초안 */
+export type ReleaseNotesIssueLine = {
+  issueKey: string
+  summary: string
+  issueType: IssueType
+  status: IssueStatus
+}
+
+export type ReleaseNotesPayload = {
+  versionId: number
+  versionName: string
+  issueCount: number
+  markdown: string
+  issues: ReleaseNotesIssueLine[]
+}
+
 /** `IssueResponse.MinDTO` — 백로그·목록용 */
 export type IssueMin = {
   id: number
