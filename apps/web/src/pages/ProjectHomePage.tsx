@@ -64,6 +64,12 @@ export function ProjectHomePage() {
           JQL 검색
         </Link>
         <Link
+          to={`/project/${project.key}/roadmap`}
+          className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 hover:border-slate-600"
+        >
+          로드맵
+        </Link>
+        <Link
           to={`/project/${project.key}/issues/new`}
           className="rounded-lg border border-indigo-600 px-4 py-2 text-sm font-medium text-indigo-300 hover:bg-indigo-950/50"
         >

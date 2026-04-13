@@ -10,6 +10,7 @@ import { JqlSearchPage } from './pages/JqlSearchPage'
 import { KanbanPage } from './pages/KanbanPage'
 import { LoginPage } from './pages/LoginPage'
 import { ProjectHomePage } from './pages/ProjectHomePage'
+import { RoadmapPage } from './pages/RoadmapPage'
 import { ScrumBoardPage } from './pages/ScrumBoardPage'
 import { SprintsPage } from './pages/SprintsPage'
 import { useAuthStore } from './stores/authStore'
@@ -60,6 +61,10 @@ export default function App() {
         <Route
           path="project/:projectKey/jql"
           element={<JqlSearchPage />}
+        />
+        <Route
+          path="project/:projectKey/roadmap"
+          element={<RoadmapPage />}
         />
         <Route
           path="project/:projectKey/issues/new"
