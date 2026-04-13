@@ -54,6 +54,12 @@ export function AppLayout() {
               >
                 개요
               </NavLink>
+              <NavLink
+                to={`/project/${projectKey}/settings`}
+                className={navCls}
+              >
+                설정
+              </NavLink>
               <NavLink to={`/project/${projectKey}/board`} className={navCls}>
                 스크럼 보드
               </NavLink>
