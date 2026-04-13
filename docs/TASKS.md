@@ -1,8 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.15
+> **버전**: v1.20
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-10 (T-603 JQL 검색 API·필터 저장 FR-016)
+> **최종수정일**: 2026-04-13 (T-511 스크럼 보드 DnD SCR-004)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -96,12 +96,12 @@
 
 | ID | Task | 담당 | 상태 | 화면 ID | 선행 |
 |----|------|------|------|---------|------|
-| T-310 | React 프로젝트 초기 설정 (Vite + Zustand + Tailwind) | Frontend | TODO | - | - |
-| T-311 | 로그인 화면 구현 | Frontend | TODO | SCR-001 | T-310 |
-| T-312 | 토큰 관리 (Axios Interceptor) | Frontend | TODO | - | T-311 |
-| T-314 | 공통 레이아웃 (GNB, 사이드바) | Frontend | TODO | - | T-310 |
-| T-410 | 이슈 생성 폼 (동적 필드) | Frontend | TODO | SCR-007 | T-312 |
-| T-411 | 이슈 상세 화면 (첨부, 상태 전환 — 댓글은 Sprint 4) | Frontend | TODO | SCR-006 | T-410 |
+| T-310 | React 프로젝트 초기 설정 (Vite + Zustand + Tailwind) | Frontend | DONE | `apps/web`, 루트 npm workspaces | - |
+| T-311 | 로그인 화면 구현 | Frontend | DONE | SCR-001; `LoginPage`, `/login` | T-310 |
+| T-312 | 토큰 관리 (Axios Interceptor) | Frontend | DONE | `api`·`bareApi`, localStorage, 401→refresh 큐 | T-311 |
+| T-314 | 공통 레이아웃 (GNB, 사이드바) | Frontend | DONE | `AppLayout`, `ProjectsProvider` | T-310 |
+| T-410 | 이슈 생성 폼 (동적 필드) | Frontend | DONE | SCR-007; `/project/:key/issues/new`, Bug 안내 | T-312 |
+| T-411 | 이슈 상세 화면 (첨부, 상태 전환 — 댓글은 Sprint 4) | Frontend | DONE | SCR-006; `/issue/:issueKey`, 전환·첨부·이력 | T-410 |
 
 ---
 
@@ -126,8 +126,8 @@
 
 | ID | Task | 담당 | 상태 | 화면 ID | 선행 |
 |----|------|------|------|---------|------|
-| T-510 | 백로그 화면 (드래그앤드롭) | Frontend | TODO | SCR-003 | T-411 |
-| T-511 | 스크럼 보드 (드래그앤드롭) | Frontend | TODO | SCR-004 | T-510 |
+| T-510 | 백로그 화면 (드래그앤드롭) | Frontend | DONE | SCR-003; `/project/:key/backlog`, @dnd-kit | T-411 |
+| T-511 | 스크럼 보드 (드래그앤드롭) | Frontend | DONE | SCR-004; `/project/:key/board`, 컬럼→`transition` | T-510 |
 | T-512 | 칸반 보드 (WIP 표시) | Frontend | TODO | SCR-005 | T-511 |
 | T-513 | 스프린트 관리 화면 | Frontend | TODO | SCR-010 | T-510 |
 | T-611 | JQL 검색 화면 (자동완성) | Frontend | TODO | SCR-008 | T-512 |
@@ -137,7 +137,7 @@
 
 | ID | Task | 담당 | 상태 | 관련 FR | 선행 |
 |----|------|------|------|---------|------|
-| T-620 | Flutter 앱 프로젝트 초기화 (Riverpod, Dio) | Mobile | TODO | FR-MOBILE-001 | T-300 |
+| T-620 | Flutter 앱 프로젝트 초기화 (Riverpod, Dio) | Mobile | DONE | `apps/mobile`, `flutter create .` 로 플랫폼 생성 | T-300 |
 | T-621 | 모바일 이슈 목록·생성·상세 | Mobile | TODO | FR-MOBILE-001 | T-620 |
 
 ---
@@ -269,3 +269,8 @@
 | v1.13 | 2026-04-10 | T-602 PCH JQL MVP 파서(`JqlParser`·sealed AST·`JqlParserTest`) FR-016 (DONE) |
 | v1.14 | 2026-04-10 | T-400 PRD §3.1 이슈 타입 계층 검증(`IssueHierarchyPolicy`)·통합 테스트·FR-002 (DONE) |
 | v1.15 | 2026-04-10 | T-603 JQL 검색 API(`POST .../jql/search`)·저장 필터 CRUD·QueryDSL·`DDL` `saved_jql_filter_tb` (DONE) |
+| v1.16 | 2026-04-13 | 모노레포: `apps/web`(Vite·React·Zustand·Tailwind·axios·API 프록시), `apps/mobile`(pubspec·Riverpod·Dio·`api_client`), 루트 `package.json` workspaces — T-310·T-620 DONE |
+| v1.17 | 2026-04-13 | 웹: `react-router-dom`, 로그인(SCR-001)·보호 라우트, Zustand+localStorage 토큰, `api` 인터셉터(Authorization·401 refresh 큐·실패 시 `/login`) — T-311·T-312 DONE |
+| v1.18 | 2026-04-13 | 웹: 공통 레이아웃·프로젝트 컨텍스트, 이슈 생성/상세(워크플로 전이·첨부·전환 이력), API 클라이언트(`issueApi` 등) — T-314·T-410·T-411 DONE |
+| v1.19 | 2026-04-13 | 웹: 백로그 화면(`fetchBacklog`·`reorderBacklog`·`assignSprintToIssues`), @dnd-kit 정렬+스프린트 드롭 — T-510 DONE |
+| v1.20 | 2026-04-13 | 웹: 스크럼 보드(`fetchSprintBoard`, 스윔레인 NONE/ASSIGNEE, 컬럼 드롭→`transitionIssue`) — T-511 DONE |

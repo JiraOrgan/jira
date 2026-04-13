@@ -1,0 +1,145 @@
+import type { ApiResponse } from './api'
+
+export type IssueType = 'EPIC' | 'STORY' | 'TASK' | 'BUG' | 'SUBTASK'
+
+export type IssueStatus =
+  | 'BACKLOG'
+  | 'SELECTED'
+  | 'IN_PROGRESS'
+  | 'CODE_REVIEW'
+  | 'QA'
+  | 'DONE'
+
+export type Priority = 'HIGHEST' | 'HIGH' | 'MEDIUM' | 'LOW' | 'LOWEST'
+
+export type SecurityLevel = 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL'
+
+export type SprintStatus = 'PLANNING' | 'ACTIVE' | 'COMPLETED'
+
+export type ProjectMin = {
+  id: number
+  key: string
+  name: string
+  boardType: string
+  archived: boolean
+}
+
+/** `IssueResponse.MinDTO` — 백로그·목록용 */
+export type IssueMin = {
+  id: number
+  issueKey: string
+  issueType: IssueType
+  summary: string
+  status: IssueStatus
+  priority: Priority
+  storyPoints: number | null
+  backlogRank: number
+  assigneeName: string | null
+}
+
+export type BoardSwimlane = 'NONE' | 'ASSIGNEE'
+
+export type SprintBoardBucket = {
+  assigneeId: number | null
+  assigneeName: string | null
+  issues: IssueMin[]
+}
+
+export type SprintBoardColumn = {
+  status: IssueStatus
+  buckets: SprintBoardBucket[]
+}
+
+export type SprintBoardData = {
+  swimlane: BoardSwimlane
+  columns: SprintBoardColumn[]
+}
+
+export type IssueLabelItem = { id: number; name: string }
+export type IssueComponentItem = { id: number; name: string }
+
+export type IssueDetail = {
+  id: number
+  issueKey: string
+  projectId: number
+  projectKey: string
+  issueType: IssueType
+  summary: string
+  description: string | null
+  status: IssueStatus
+  priority: Priority
+  storyPoints: number | null
+  assigneeId: number | null
+  assigneeName: string | null
+  reporterId: number
+  reporterName: string | null
+  parentId: number | null
+  parentKey: string | null
+  sprintId: number | null
+  backlogRank: number
+  securityLevel: SecurityLevel | null
+  createdAt: string
+  updatedAt: string
+  labels: IssueLabelItem[]
+  components: IssueComponentItem[]
+}
+
+export type IssueSaveBody = {
+  projectId: number
+  issueType: IssueType
+  summary: string
+  description?: string
+  priority: Priority
+  storyPoints?: number
+  assigneeId?: number
+  parentId?: number
+  sprintId?: number
+  securityLevel?: SecurityLevel
+}
+
+export type TransitionBody = {
+  toStatus: IssueStatus
+  conditionNote?: string
+}
+
+export type WorkflowTransitionItem = {
+  id: number
+  issueId: number
+  fromStatus: IssueStatus
+  toStatus: IssueStatus
+  changedByName: string | null
+  conditionNote: string | null
+  transitionedAt: string
+}
+
+export type SprintMin = {
+  id: number
+  name: string
+  status: SprintStatus
+  startDate: string
+  endDate: string
+}
+
+export type UserMin = {
+  id: number
+  email: string
+  name: string
+}
+
+export type AttachmentDetail = {
+  id: number
+  issueId: number
+  uploaderName: string | null
+  fileName: string
+  filePath: string
+  fileSize: number
+  mimeType: string
+  createdAt: string
+}
+
+export function unwrapApi<T>(body: ApiResponse<T>): T {
+  if (!body.success || body.data === null) {
+    throw new Error(body.message || '요청에 실패했습니다')
+  }
+  return body.data
+}
