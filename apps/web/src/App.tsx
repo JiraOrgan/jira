@@ -4,13 +4,14 @@ import { ProjectsProvider } from './context/ProjectsProvider'
 import { AppLayout } from './layout/AppLayout'
 import { BacklogPage } from './pages/BacklogPage'
 import { HomePage } from './pages/HomePage'
-import { ScrumBoardPage } from './pages/ScrumBoardPage'
-import { SprintsPage } from './pages/SprintsPage'
-import { KanbanPage } from './pages/KanbanPage'
 import { IssueCreatePage } from './pages/IssueCreatePage'
 import { IssueDetailPage } from './pages/IssueDetailPage'
+import { JqlSearchPage } from './pages/JqlSearchPage'
+import { KanbanPage } from './pages/KanbanPage'
 import { LoginPage } from './pages/LoginPage'
 import { ProjectHomePage } from './pages/ProjectHomePage'
+import { ScrumBoardPage } from './pages/ScrumBoardPage'
+import { SprintsPage } from './pages/SprintsPage'
 import { useAuthStore } from './stores/authStore'
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -55,6 +56,10 @@ export default function App() {
         <Route
           path="project/:projectKey/backlog"
           element={<BacklogPage />}
+        />
+        <Route
+          path="project/:projectKey/jql"
+          element={<JqlSearchPage />}
         />
         <Route
           path="project/:projectKey/issues/new"
