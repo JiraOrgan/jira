@@ -297,6 +297,52 @@ export type AuditLogRow = {
   changedAt: string
 }
 
+/** `GET .../reports/sprints/{id}/burndown` */
+export type ReportBurndownPoint = {
+  date: string
+  remainingStoryPoints: number
+  idealRemainingPoints: number
+}
+
+export type ReportBurndown = {
+  projectId: number
+  sprintId: number
+  sprintName: string
+  startDate: string
+  endDate: string
+  totalScopePoints: number
+  series: ReportBurndownPoint[]
+}
+
+export type ReportVelocityBar = {
+  sprintId: number
+  sprintName: string
+  endDate: string | null
+  completedStoryPoints: number
+}
+
+export type ReportVelocity = {
+  projectId: number
+  sprints: ReportVelocityBar[]
+}
+
+export type ReportCfdStatusCount = {
+  status: IssueStatus
+  count: number
+}
+
+export type ReportCfdDay = {
+  date: string
+  byStatus: ReportCfdStatusCount[]
+}
+
+export type ReportCfd = {
+  projectId: number
+  sprintId: number | null
+  windowDays: number
+  series: ReportCfdDay[]
+}
+
 export function unwrapApi<T>(body: ApiResponse<T>): T {
   if (!body.success || body.data === null) {
     throw new Error(body.message || '요청에 실패했습니다')

@@ -14,6 +14,7 @@ import { ProjectHomePage } from './pages/ProjectHomePage'
 import { ProjectAuditPage } from './pages/ProjectAuditPage'
 import { ProjectSettingsPage } from './pages/ProjectSettingsPage'
 import { ReleasesPage } from './pages/ReleasesPage'
+import { ReportsPage } from './pages/ReportsPage'
 import { RoadmapPage } from './pages/RoadmapPage'
 import { ScrumBoardPage } from './pages/ScrumBoardPage'
 import { SprintsPage } from './pages/SprintsPage'
@@ -77,6 +78,10 @@ export default function App() {
         <Route
           path="project/:projectKey/releases"
           element={<ReleasesPage />}
+        />
+        <Route
+          path="project/:projectKey/reports"
+          element={<ReportsPage />}
         />
         <Route
           path="project/:projectKey/issues/new"
