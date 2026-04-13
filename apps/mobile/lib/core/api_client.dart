@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 
-/// 백엔드 Base URL — 빌드 시 `--dart-define=API_BASE_URL=...` 로 주입 권장.
-Dio createApiClient() {
+/// 백엔드 Base URL — `flutter run --dart-define=API_BASE_URL=http://...`
+Dio createBaseDio() {
   const base = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: 'http://10.0.2.2:8080',
