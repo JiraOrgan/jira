@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-@Profile("test")
+@Profile({"test", "dev"})
 @Primary
 public class InMemoryRefreshTokenStore implements RefreshTokenStore {
 

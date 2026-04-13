@@ -9,7 +9,7 @@ import java.time.Duration;
 import java.util.Optional;
 
 @Component
-@Profile("!test")
+@Profile("!test & !dev")
 @RequiredArgsConstructor
 public class RedisRefreshTokenStore implements RefreshTokenStore {
 

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 
 @Service
-@Profile("!test")
+@Profile("!test & !dev")
 @RequiredArgsConstructor
 public class RedisLoginAttemptService implements LoginAttemptPort {
 

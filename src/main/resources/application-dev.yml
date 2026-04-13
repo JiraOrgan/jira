@@ -1,4 +1,11 @@
 spring:
+  # 로컬에서 Redis 미기동 시에도 기동·로그인 가능 (인메모리 토큰/NoOp 로그인 제한).
+  # Redis를 쓰려면 아래 exclude 두 줄을 제거하고 Redis를 띄운 뒤 실행하세요.
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
   datasource:
     # 로컬 개발: H2 (MySQL 호환 모드). 운영은 application-prod.yml + MySQL.
     url: jdbc:h2:mem:mng_dev;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL;DATABASE_TO_LOWER=TRUE
@@ -11,17 +18,30 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    defer-datasource-initialization: true
     show-sql: true
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.H2Dialect
 
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:db/dev/dev-data.sql
+
+  # Redis 사용 시(autoconfigure exclude 제거 시) 연결 설정
   data:
     redis:
       host: localhost
       port: 6379
       password: ${REDIS_PASSWORD:}
+
+# 로컬 기본: 보드 Redis 캐시 끔(Redis 미기동·연결 실패 시에도 이슈 전환 등 정상 동작).
+app:
+  board:
+    cache:
+      enabled: false
 
 # JWT
 jwt:
