@@ -23,7 +23,15 @@ public enum DashboardGadgetType {
     /** 누적 플로우 */
     CFD,
     /** 저장 JQL 필터 결과 */
-    FILTER_RESULTS;
+    FILTER_RESULTS,
+
+    // --- 웹 UI(`DashboardDetailPage`) 프리셋과 동일한 식별자
+    /** 자유 텍스트 메모 */
+    TEXT_NOTE,
+    /** 프로젝트 키 바로가기 등 */
+    PROJECT_LINKS,
+    /** 자리 표시(향후 위젯 연동) */
+    PLACEHOLDER;
 
     public static boolean isValid(String raw) {
         if (raw == null || raw.isBlank()) {

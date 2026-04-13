@@ -35,6 +35,46 @@ class DashboardServiceTest {
     private DashboardService dashboardService;
 
     @Test
+    @DisplayName("findById: 없으면 ENTITY_NOT_FOUND")
+    void findByIdMissing() {
+        when(dashboardRepository.findByIdWithGadgets(99L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> dashboardService.findById(99L, 1L))
+                .isInstanceOf(BusinessException.class)
+                .extracting(ex -> ((BusinessException) ex).getErrorCode())
+                .isEqualTo(ErrorCode.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("findById: 비공개·타인 소유면 FORBIDDEN")
+    void findByIdForbidden() {
+        UserAccount owner = UserAccount.builder().email("o@x.com").password("p").name("O").build();
+        ReflectionTestUtils.setField(owner, "id", 2L);
+        Dashboard d = Dashboard.builder().name("Priv").owner(owner).shared(false).build();
+        ReflectionTestUtils.setField(d, "id", 1L);
+        when(dashboardRepository.findByIdWithGadgets(1L)).thenReturn(Optional.of(d));
+
+        assertThatThrownBy(() -> dashboardService.findById(1L, 1L))
+                .isInstanceOf(BusinessException.class)
+                .extracting(ex -> ((BusinessException) ex).getErrorCode())
+                .isEqualTo(ErrorCode.FORBIDDEN);
+    }
+
+    @Test
+    @DisplayName("findById: 공유 대시보드는 비소유자 조회 가능")
+    void findByIdSharedOk() {
+        UserAccount owner = UserAccount.builder().email("o@x.com").password("p").name("O").build();
+        ReflectionTestUtils.setField(owner, "id", 2L);
+        Dashboard d = Dashboard.builder().name("Team").owner(owner).shared(true).build();
+        ReflectionTestUtils.setField(d, "id", 1L);
+        d.setGadgets(new ArrayList<>());
+        when(dashboardRepository.findByIdWithGadgets(1L)).thenReturn(Optional.of(d));
+
+        DashboardResponse.DetailDTO dto = dashboardService.findById(1L, 1L);
+        assertThat(dto.getName()).isEqualTo("Team");
+        assertThat(dto.isShared()).isTrue();
+    }
+
+    @Test
     @DisplayName("addGadget: 알 수 없는 gadgetType이면 INVALID_INPUT_VALUE")
     void addGadgetInvalidType() {
         DashboardRequest.GadgetDTO req = new DashboardRequest.GadgetDTO();
@@ -66,6 +106,26 @@ class DashboardServiceTest {
         assertThat(res.getGadgets()).hasSize(1);
         assertThat(res.getGadgets().get(0).getGadgetType()).isEqualTo(DashboardGadgetType.BURNDOWN.name());
         assertThat(res.getGadgets().get(0).getPosition()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("addGadget: 웹 UI 프리셋 TEXT_NOTE 허용")
+    void addGadgetTextNoteOk() {
+        UserAccount owner = UserAccount.builder().email("o@x.com").password("p").name("O").build();
+        Dashboard d = Dashboard.builder().name("My").owner(owner).shared(false).build();
+        ReflectionTestUtils.setField(d, "id", 1L);
+        d.setGadgets(new ArrayList<>());
+
+        DashboardRequest.GadgetDTO req = new DashboardRequest.GadgetDTO();
+        req.setGadgetType("TEXT_NOTE");
+        req.setPosition(0);
+        req.setConfigJson("{\"text\":\"hi\"}");
+
+        when(dashboardRepository.findByIdWithGadgets(1L)).thenReturn(Optional.of(d));
+
+        DashboardResponse.DetailDTO res = dashboardService.addGadget(1L, req);
+        assertThat(res.getGadgets()).hasSize(1);
+        assertThat(res.getGadgets().get(0).getGadgetType()).isEqualTo("TEXT_NOTE");
     }
 
     @Test
