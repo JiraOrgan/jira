@@ -38,4 +38,7 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
     List<Issue> findForSprintBoard(@Param("sid") Long sprintId);
 
     List<Issue> findByProjectIdAndIssueTypeOrderByEpicStartDateAscIdAsc(Long projectId, IssueType issueType);
+
+    @Query("SELECT COALESCE(SUM(i.storyPoints), 0) FROM Issue i WHERE i.sprint.id = :sprintId AND i.status = :status")
+    Long sumStoryPointsBySprintIdAndStatus(@Param("sprintId") Long sprintId, @Param("status") IssueStatus status);
 }
