@@ -1,8 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.30
+> **버전**: v1.31
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-13 (T-601 리포트 번다운·속도·CFD FR-022)
+> **최종수정일**: 2026-04-13 (T-614 웹 리포트 화면 SCR-012 FR-022)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -166,7 +166,7 @@
 | T-313 | 프로젝트 설정 화면 구현 | Frontend | DONE | SCR-013 | T-312 |
 | T-610 | 메인 대시보드 (역할별 가젯) | Frontend | DONE | SCR-002 | T-513 |
 | T-613 | 릴리즈 관리 화면 | Frontend | DONE | SCR-011 | T-610 |
-| T-614 | 리포트 화면 (차트) | Frontend | TODO | SCR-012 | T-601 |
+| T-614 | 리포트 화면 (차트) | Frontend | DONE | SCR-012; `/project/:key/reports`, `reportApi`, 번다운·속도·CFD 탭(SVG) | T-601 |
 | T-615 | Audit Log 화면 | Frontend | DONE | SCR-014; `/project/:key/audit`, `GET /api/v1/audit-logs/project/{id}` (ADMIN) | T-610 |
 | T-616 | Planning Poker UI (선택) | Frontend | TODO | SCR-006 | T-610 |
 
@@ -284,3 +284,4 @@
 | v1.28 | 2026-04-13 | 이슈 도메인 감사 자동 기록(`IssueAuditService`)·삭제 시 `audit_log_tb` 선삭제·통합 테스트 — T-407 FR-028 DONE |
 | v1.29 | 2026-04-13 | T-600 대시보드 가젯: `DashboardGadgetType`·PUT 수정·PUT reorder·삭제 시 대시보드 소속 검증·상세 응답 가젯 position 정렬·API-SPEC 반영 |
 | v1.30 | 2026-04-13 | T-601 리포트 API: 번다운·velocity·CFD, `WorkflowTransitionRepository`·`IssueRepository` 집계 쿼리·TASKS/API-SPEC·T-614 선행 T-601 |
+| v1.31 | 2026-04-13 | 웹: 리포트 페이지(`ReportsPage`·`/reports`)·`reportApi`·사이드바/개요 링크 — T-614 SCR-012 DONE |
