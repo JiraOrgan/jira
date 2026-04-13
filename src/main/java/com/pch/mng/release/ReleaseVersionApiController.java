@@ -29,6 +29,12 @@ public class ReleaseVersionApiController {
         return ResponseEntity.ok(ApiResponse.ok(releaseVersionService.findById(id)));
     }
 
+    @GetMapping("/{id}/release-notes")
+    @PreAuthorize("@projectSecurity.canReadRelease(#id)")
+    public ResponseEntity<ApiResponse<ReleaseNotesResponse.DTO>> releaseNotes(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.ok(releaseVersionService.generateReleaseNotes(id)));
+    }
+
     @PostMapping
     @PreAuthorize("@projectSecurity.canManageReleaseOnProject(#reqDTO.projectId)")
     public ResponseEntity<ApiResponse<ReleaseVersionResponse.DetailDTO>> save(

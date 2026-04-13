@@ -1,5 +1,9 @@
 import type { ApiResponse } from '../types/api'
-import type { ReleaseVersionDetail, ReleaseVersionMin } from '../types/domain'
+import type {
+  ReleaseNotesPayload,
+  ReleaseVersionDetail,
+  ReleaseVersionMin,
+} from '../types/domain'
 import { unwrapApi } from '../types/domain'
 import { api } from './api'
 
@@ -31,6 +35,15 @@ export async function markVersionReleased(
   const { data } = await api.post<ApiResponse<ReleaseVersionDetail>>(
     `/api/v1/versions/${versionId}/release`,
     {},
+  )
+  return unwrapApi(data)
+}
+
+export async function fetchReleaseNotes(
+  versionId: number,
+): Promise<ReleaseNotesPayload> {
+  const { data } = await api.get<ApiResponse<ReleaseNotesPayload>>(
+    `/api/v1/versions/${versionId}/release-notes`,
   )
   return unwrapApi(data)
 }
