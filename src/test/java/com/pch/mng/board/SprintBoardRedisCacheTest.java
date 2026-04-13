@@ -13,6 +13,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
@@ -31,6 +32,9 @@ import static org.mockito.Mockito.when;
 class SprintBoardRedisCacheTest {
 
     @Mock
+    ObjectProvider<StringRedisTemplate> stringRedisTemplateProvider;
+
+    @Mock
     StringRedisTemplate stringRedisTemplate;
 
     @Mock
@@ -44,8 +48,9 @@ class SprintBoardRedisCacheTest {
     void setUp() {
         properties.setEnabled(true);
         properties.setTtlSeconds(45);
+        when(stringRedisTemplateProvider.getIfAvailable()).thenReturn(stringRedisTemplate);
         when(stringRedisTemplate.opsForValue()).thenReturn(valueOps);
-        cache = new SprintBoardRedisCache(properties, stringRedisTemplate, objectMapper);
+        cache = new SprintBoardRedisCache(properties, stringRedisTemplateProvider, objectMapper);
     }
 
     @Test
@@ -81,14 +86,14 @@ class SprintBoardRedisCacheTest {
     @Test
     @DisplayName("비활성화 시 put·evict·get은 Redis를 쓰지 않음")
     void whenDisabledNoRedis() {
-        Mockito.reset(stringRedisTemplate, valueOps);
+        Mockito.reset(stringRedisTemplateProvider, stringRedisTemplate, valueOps);
         properties.setEnabled(false);
-        cache = new SprintBoardRedisCache(properties, stringRedisTemplate, objectMapper);
+        cache = new SprintBoardRedisCache(properties, stringRedisTemplateProvider, objectMapper);
 
         assertThat(cache.get(1L, BoardSwimlane.NONE)).isEmpty();
         cache.put(1L, BoardSwimlane.NONE, new SprintBoardResponse());
         cache.evictSprint(1L);
 
-        verifyNoInteractions(stringRedisTemplate, valueOps);
+        verifyNoInteractions(stringRedisTemplateProvider, stringRedisTemplate, valueOps);
     }
 }
