@@ -24,6 +24,40 @@ export type ProjectMin = {
   archived: boolean
 }
 
+export type ProjectRole =
+  | 'ADMIN'
+  | 'DEVELOPER'
+  | 'QA'
+  | 'REPORTER'
+  | 'VIEWER'
+
+export type ProjectDetail = {
+  id: number
+  key: string
+  name: string
+  description: string | null
+  boardType: string
+  leadId: number | null
+  leadName: string | null
+  archived: boolean
+  createdAt: string
+}
+
+export type ProjectMember = {
+  id: number
+  userId: number
+  userName: string
+  userEmail: string
+  role: ProjectRole
+  joinedAt: string
+}
+
+export type ProjectUpdateBody = {
+  name: string
+  description?: string | null
+  leadId?: number
+}
+
 /** `IssueResponse.MinDTO` — 백로그·목록용 */
 export type IssueMin = {
   id: number
