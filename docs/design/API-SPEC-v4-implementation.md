@@ -59,6 +59,9 @@
 | PUT | `/api/v1/issues/{issueKey}` | 수정 (`IssueRequest.UpdateDTO`; Epic만 `patchEpicDates`+기간·`clearEpicDates`) |
 | DELETE | `/api/v1/issues/{issueKey}` | 삭제 |
 | POST | `/api/v1/issues/{issueKey}/transitions` | 상태 전환 (`IssueRequest.TransitionDTO`) |
+| GET | `/api/v1/issues/{issueKey}/watchers` | 워처 목록 + 현재 사용자 구독 여부 (`IssueWatcherResponse.ListDTO`, FR-025) |
+| POST | `/api/v1/issues/{issueKey}/watchers/me` | 현재 사용자 워치 구독 (멱등) |
+| DELETE | `/api/v1/issues/{issueKey}/watchers/me` | 현재 사용자 워치 해제 (멱등) |
 
 ### 스프린트 `SprintApiController`
 

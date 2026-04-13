@@ -24,6 +24,7 @@ public class IssueApiController {
 
     private final IssueService issueService;
     private final IssueLinkService issueLinkService;
+    private final IssueWatcherService issueWatcherService;
 
     @GetMapping("/project/{projectId}")
     @PreAuthorize("@projectSecurity.isMember(#projectId)")
@@ -155,5 +156,38 @@ public class IssueApiController {
             @PathVariable String issueKey,
             @PathVariable Long componentId) {
         return ResponseEntity.ok(ApiResponse.ok(issueService.removeComponent(issueKey, componentId)));
+    }
+
+    @GetMapping("/{issueKey}/watchers")
+    @PreAuthorize("@projectSecurity.canReadIssue(#issueKey)")
+    public ResponseEntity<ApiResponse<IssueWatcherResponse.ListDTO>> listWatchers(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @PathVariable String issueKey) {
+        Long uid = principal != null ? principal.getId() : null;
+        return ResponseEntity.ok(ApiResponse.ok(issueWatcherService.listForIssue(issueKey, uid)));
+    }
+
+    @PostMapping("/{issueKey}/watchers/me")
+    @PreAuthorize("@projectSecurity.canReadIssue(#issueKey)")
+    public ResponseEntity<ApiResponse<Void>> watchMe(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @PathVariable String issueKey) {
+        if (principal == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+        issueWatcherService.watch(issueKey, principal.getId());
+        return ResponseEntity.ok(ApiResponse.noContent());
+    }
+
+    @DeleteMapping("/{issueKey}/watchers/me")
+    @PreAuthorize("@projectSecurity.canReadIssue(#issueKey)")
+    public ResponseEntity<ApiResponse<Void>> unwatchMe(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @PathVariable String issueKey) {
+        if (principal == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+        issueWatcherService.unwatch(issueKey, principal.getId());
+        return ResponseEntity.ok(ApiResponse.noContent());
     }
 }
