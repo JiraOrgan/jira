@@ -96,6 +96,9 @@ export function AppLayout() {
               >
                 릴리즈
               </NavLink>
+              <NavLink to={`/project/${projectKey}/audit`} className={navCls}>
+                감사 로그
+              </NavLink>
               <NavLink
                 to={`/project/${projectKey}/issues/new`}
                 className={navCls}

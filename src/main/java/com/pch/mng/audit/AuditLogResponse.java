@@ -9,6 +9,8 @@ public class AuditLogResponse {
     public static class DetailDTO {
         private Long id;
         private Long issueId;
+        /** 프로젝트 감사 목록에서 이슈 식별용 */
+        private String issueKey;
         private Long changedById;
         private String changedByName;
         private String fieldName;
@@ -27,6 +29,7 @@ public class AuditLogResponse {
             dto.changedAt = log.getChangedAt();
             if (log.getIssue() != null) {
                 dto.issueId = log.getIssue().getId();
+                dto.issueKey = log.getIssue().getIssueKey();
             }
             if (log.getChangedBy() != null) {
                 dto.changedById = log.getChangedBy().getId();
