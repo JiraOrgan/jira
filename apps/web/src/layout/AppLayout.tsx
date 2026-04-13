@@ -79,6 +79,12 @@ export function AppLayout() {
                 JQL
               </NavLink>
               <NavLink
+                to={`/project/${projectKey}/roadmap`}
+                className={navCls}
+              >
+                로드맵
+              </NavLink>
+              <NavLink
                 to={`/project/${projectKey}/issues/new`}
                 className={navCls}
               >

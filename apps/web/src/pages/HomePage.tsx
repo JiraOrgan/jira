@@ -85,6 +85,12 @@ export function HomePage() {
                       JQL
                     </Link>
                     <Link
+                      to={`/project/${p.key}/roadmap`}
+                      className="mr-3 text-indigo-400 hover:text-indigo-300"
+                    >
+                      로드맵
+                    </Link>
+                    <Link
                       to={`/project/${p.key}/issues/new`}
                       className="text-indigo-400 hover:text-indigo-300"
                     >

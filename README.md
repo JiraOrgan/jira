@@ -178,7 +178,7 @@ npm run dev:web
 
 브라우저: `http://localhost:5173` — 개발 시 `/api` 요청은 Vite가 `http://localhost:8080` 으로 프록시합니다. 백엔드가 먼저 떠 있어야 합니다. 로그인은 `/login` (`POST /api/auth/login`), 액세스 만료 시 `POST /api/auth/refresh` 로 자동 갱신됩니다.
 
-주요 웹 경로: `/`(프로젝트 목록), `/project/{key}`, `/project/{key}/board`, `/project/{key}/backlog`, `/project/{key}/kanban`, `/project/{key}/sprints`, `/project/{key}/jql`, `/project/{key}/issues/new`, `/issue/{issueKey}`.
+주요 웹 경로: `/`(프로젝트 목록), `/project/{key}`, `/project/{key}/board`, `/project/{key}/backlog`, `/project/{key}/kanban`, `/project/{key}/sprints`, `/project/{key}/jql`, `/project/{key}/roadmap`, `/project/{key}/issues/new`, `/issue/{issueKey}`.
 
 ### 모바일 앱 (Flutter)
 
