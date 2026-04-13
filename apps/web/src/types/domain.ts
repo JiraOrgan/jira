@@ -144,6 +144,21 @@ export type SprintMin = {
   endDate: string
 }
 
+/** `POST .../jql/search` 응답 */
+export type JqlSearchResult = {
+  startAt: number
+  maxResults: number
+  total: number
+  issues: IssueMin[]
+}
+
+export type SavedJqlFilter = {
+  id: number
+  name: string
+  jql: string
+  createdAt: string
+}
+
 export type UserMin = {
   id: number
   email: string

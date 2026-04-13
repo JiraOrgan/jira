@@ -75,6 +75,9 @@ export function AppLayout() {
               >
                 백로그
               </NavLink>
+              <NavLink to={`/project/${projectKey}/jql`} className={navCls}>
+                JQL
+              </NavLink>
               <NavLink
                 to={`/project/${projectKey}/issues/new`}
                 className={navCls}

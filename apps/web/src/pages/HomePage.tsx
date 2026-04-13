@@ -79,6 +79,12 @@ export function HomePage() {
                       백로그
                     </Link>
                     <Link
+                      to={`/project/${p.key}/jql`}
+                      className="mr-3 text-indigo-400 hover:text-indigo-300"
+                    >
+                      JQL
+                    </Link>
+                    <Link
                       to={`/project/${p.key}/issues/new`}
                       className="text-indigo-400 hover:text-indigo-300"
                     >
