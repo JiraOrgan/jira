@@ -11,6 +11,7 @@ import { JqlSearchPage } from './pages/JqlSearchPage'
 import { KanbanPage } from './pages/KanbanPage'
 import { LoginPage } from './pages/LoginPage'
 import { ProjectHomePage } from './pages/ProjectHomePage'
+import { ProjectAuditPage } from './pages/ProjectAuditPage'
 import { ProjectSettingsPage } from './pages/ProjectSettingsPage'
 import { ReleasesPage } from './pages/ReleasesPage'
 import { RoadmapPage } from './pages/RoadmapPage'
@@ -84,6 +85,10 @@ export default function App() {
         <Route
           path="project/:projectKey/settings"
           element={<ProjectSettingsPage />}
+        />
+        <Route
+          path="project/:projectKey/audit"
+          element={<ProjectAuditPage />}
         />
         <Route path="project/:projectKey" element={<ProjectHomePage />} />
         <Route path="issue/:issueKey" element={<IssueDetailPage />} />

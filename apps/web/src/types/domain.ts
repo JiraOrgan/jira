@@ -284,6 +284,19 @@ export type AttachmentDetail = {
   createdAt: string
 }
 
+/** `AuditLogResponse.DetailDTO` */
+export type AuditLogRow = {
+  id: number
+  issueId: number
+  issueKey: string | null
+  changedById: number
+  changedByName: string | null
+  fieldName: string
+  oldValue: string | null
+  newValue: string | null
+  changedAt: string
+}
+
 export function unwrapApi<T>(body: ApiResponse<T>): T {
   if (!body.success || body.data === null) {
     throw new Error(body.message || '요청에 실패했습니다')

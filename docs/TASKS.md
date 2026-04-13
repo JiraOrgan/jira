@@ -1,12 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.26
+> **버전**: v1.27
 > **작성일**: 2026-03-22
-<<<<<<< feat/T-621-mobile-issues
-> **최종수정일**: 2026-04-13 (T-621 모바일 이슈 목록·생성·상세 FR-MOBILE-001)
-=======
-> **최종수정일**: 2026-04-13 (T-613 릴리즈 관리 화면 SCR-011)
->>>>>>> develop
+> **최종수정일**: 2026-04-13 (T-615 프로젝트 감사 로그 UI SCR-014)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -171,7 +167,7 @@
 | T-610 | 메인 대시보드 (역할별 가젯) | Frontend | DONE | SCR-002 | T-513 |
 | T-613 | 릴리즈 관리 화면 | Frontend | DONE | SCR-011 | T-610 |
 | T-614 | 리포트 화면 (차트) | Frontend | TODO | SCR-012 | T-610 |
-| T-615 | Audit Log 화면 | Frontend | TODO | SCR-014 | T-610 |
+| T-615 | Audit Log 화면 | Frontend | DONE | SCR-014; `/project/:key/audit`, `GET /api/v1/audit-logs/project/{id}` (ADMIN) | T-610 |
 | T-616 | Planning Poker UI (선택) | Frontend | TODO | SCR-006 | T-610 |
 
 ### Mobile (Flutter)
@@ -284,3 +280,4 @@
 | v1.23 | 2026-04-13 | 웹: Epic 로드맵(`RoadmapPage`·`/roadmap`·JQL+상세 타임라인·줌) — T-612 DONE |
 | v1.24 | 2026-04-13 | Epic 기간 컬럼·`GET .../roadmap/epics`·이슈 DTO·`RoadmapEpicIntegrationTest`; 웹 로드맵·이슈 폼 연동 — T-506·T-612 보강 |
 | v1.26 | 2026-04-13 | 모바일: 로그인·프로젝트 선택·이슈 목록/상세/생성(Riverpod·Dio·SharedPreferences, `API_BASE_URL`) — T-621 FR-MOBILE-001 DONE |
+| v1.27 | 2026-04-13 | 감사 로그: `GET /api/v1/audit-logs/project/{projectId}`(ADMIN)·`AuditLogResponse.issueKey`·웹 `/project/:key/audit` — T-615 SCR-014 DONE |

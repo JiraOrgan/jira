@@ -26,4 +26,16 @@ public class AuditLogApiController {
                 .map(AuditLogResponse.DetailDTO::of);
         return ResponseEntity.ok(ApiResponse.ok(page));
     }
+
+    /** 프로젝트 소속 이슈의 감사 로그 (프로젝트 ADMIN, SCR-014) */
+    @GetMapping("/project/{projectId}")
+    @PreAuthorize("@projectSecurity.isProjectAdmin(#projectId)")
+    public ResponseEntity<ApiResponse<Page<AuditLogResponse.DetailDTO>>> findByProject(
+            @PathVariable Long projectId,
+            @PageableDefault(size = 30) Pageable pageable) {
+        Page<AuditLogResponse.DetailDTO> page = auditLogRepository
+                .findByIssue_Project_IdOrderByChangedAtDesc(projectId, pageable)
+                .map(AuditLogResponse.DetailDTO::of);
+        return ResponseEntity.ok(ApiResponse.ok(page));
+    }
 }
