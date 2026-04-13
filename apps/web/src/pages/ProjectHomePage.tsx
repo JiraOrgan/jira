@@ -40,6 +40,18 @@ export function ProjectHomePage() {
           스크럼 보드
         </Link>
         <Link
+          to={`/project/${project.key}/kanban`}
+          className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 hover:border-slate-600"
+        >
+          칸반
+        </Link>
+        <Link
+          to={`/project/${project.key}/sprints`}
+          className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 hover:border-slate-600"
+        >
+          스프린트
+        </Link>
+        <Link
           to={`/project/${project.key}/backlog`}
           className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 hover:border-slate-600"
         >

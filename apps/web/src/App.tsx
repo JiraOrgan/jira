@@ -5,6 +5,8 @@ import { AppLayout } from './layout/AppLayout'
 import { BacklogPage } from './pages/BacklogPage'
 import { HomePage } from './pages/HomePage'
 import { ScrumBoardPage } from './pages/ScrumBoardPage'
+import { SprintsPage } from './pages/SprintsPage'
+import { KanbanPage } from './pages/KanbanPage'
 import { IssueCreatePage } from './pages/IssueCreatePage'
 import { IssueDetailPage } from './pages/IssueDetailPage'
 import { LoginPage } from './pages/LoginPage'
@@ -41,6 +43,14 @@ export default function App() {
         <Route
           path="project/:projectKey/board"
           element={<ScrumBoardPage />}
+        />
+        <Route
+          path="project/:projectKey/kanban"
+          element={<KanbanPage />}
+        />
+        <Route
+          path="project/:projectKey/sprints"
+          element={<SprintsPage />}
         />
         <Route
           path="project/:projectKey/backlog"

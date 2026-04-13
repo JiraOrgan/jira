@@ -55,6 +55,30 @@ export type SprintBoardData = {
   columns: SprintBoardColumn[]
 }
 
+export type WipLimitItem = {
+  status: IssueStatus
+  maxIssues: number
+}
+
+export type SpringPage<T> = {
+  content: T[]
+  totalElements: number
+  totalPages: number
+  size: number
+  number: number
+}
+
+export type SprintDetail = {
+  id: number
+  projectId: number
+  name: string
+  status: SprintStatus
+  startDate: string
+  endDate: string
+  goalPoints: number | null
+  createdAt: string
+}
+
 export type IssueLabelItem = { id: number; name: string }
 export type IssueComponentItem = { id: number; name: string }
 
