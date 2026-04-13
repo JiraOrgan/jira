@@ -2,7 +2,7 @@
 
 > **버전**: v1.25
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-13 (T-313 프로젝트 설정 화면 SCR-013)
+> **최종수정일**: 2026-04-13 (T-610 메인 대시보드·가젯 UI SCR-002)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -163,8 +163,8 @@
 
 | ID | Task | 담당 | 상태 | 화면 ID | 선행 |
 |----|------|------|------|---------|------|
-| T-313 | 프로젝트 설정 화면 구현 | Frontend | DONE | SCR-013 | T-312 |
-| T-610 | 메인 대시보드 (역할별 가젯) | Frontend | TODO | SCR-002 | T-513 |
+| T-313 | 프로젝트 설정 화면 구현 | Frontend | TODO | SCR-013 | T-312 |
+| T-610 | 메인 대시보드 (역할별 가젯) | Frontend | DONE | SCR-002 | T-513 |
 | T-613 | 릴리즈 관리 화면 | Frontend | TODO | SCR-011 | T-610 |
 | T-614 | 리포트 화면 (차트) | Frontend | TODO | SCR-012 | T-610 |
 | T-615 | Audit Log 화면 | Frontend | TODO | SCR-014 | T-610 |
