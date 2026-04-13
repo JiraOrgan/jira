@@ -70,6 +70,23 @@ public class DashboardApiController {
         return ResponseEntity.status(201).body(ApiResponse.created(dashboardService.addGadget(dashboardId, reqDTO)));
     }
 
+    @PutMapping("/{dashboardId}/gadgets/{gadgetId}")
+    @PreAuthorize("@dashboardSecurity.canWriteDashboard(#dashboardId)")
+    public ResponseEntity<ApiResponse<DashboardResponse.DetailDTO>> updateGadget(
+            @PathVariable Long dashboardId,
+            @PathVariable Long gadgetId,
+            @Valid @RequestBody DashboardRequest.GadgetUpdateDTO reqDTO) {
+        return ResponseEntity.ok(ApiResponse.ok(dashboardService.updateGadget(dashboardId, gadgetId, reqDTO)));
+    }
+
+    @PutMapping("/{dashboardId}/gadgets/reorder")
+    @PreAuthorize("@dashboardSecurity.canWriteDashboard(#dashboardId)")
+    public ResponseEntity<ApiResponse<DashboardResponse.DetailDTO>> reorderGadgets(
+            @PathVariable Long dashboardId,
+            @Valid @RequestBody DashboardRequest.GadgetReorderDTO reqDTO) {
+        return ResponseEntity.ok(ApiResponse.ok(dashboardService.reorderGadgets(dashboardId, reqDTO)));
+    }
+
     @DeleteMapping("/{dashboardId}/gadgets/{gadgetId}")
     @PreAuthorize("@dashboardSecurity.canWriteDashboard(#dashboardId)")
     public ResponseEntity<ApiResponse<Void>> removeGadget(

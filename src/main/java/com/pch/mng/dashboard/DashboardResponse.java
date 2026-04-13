@@ -1,7 +1,9 @@
 package com.pch.mng.dashboard;
 
 import lombok.Data;
+
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 public class DashboardResponse {
@@ -51,6 +53,7 @@ public class DashboardResponse {
             }
             if (dashboard.getGadgets() != null) {
                 dto.gadgets = dashboard.getGadgets().stream()
+                        .sorted(Comparator.comparingInt(DashboardGadget::getPosition))
                         .map(GadgetDTO::of)
                         .toList();
             }
