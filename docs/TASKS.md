@@ -1,8 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.28
+> **버전**: v1.29
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-13 (T-407 이슈 감사 로그 자동 기록 FR-028)
+> **최종수정일**: 2026-04-13 (T-600 대시보드 가젯 CRUD·재정렬 FR-021)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -152,7 +152,7 @@
 | ID | Task | 담당 | 상태 | 관련 FR | 선행 |
 |----|------|------|------|---------|------|
 | T-407 | AuditLog 자동 기록 (AOP/이벤트) | Backend | DONE | FR-028; `IssueAuditService`·이슈 생성/수정/전환/라벨·컴포넌트·스프린트 배정·삭제 전 정리 | T-400 |
-| T-600 | 대시보드 + 가젯 CRUD | Backend | TODO | FR-021 | T-500 |
+| T-600 | 대시보드 + 가젯 CRUD | Backend | DONE | FR-021; 타입 검증·가젯 수정·reorder·소속 검증·`DashboardServiceTest` | T-500 |
 | T-601 | 번다운/속도/CFD 차트 데이터 API | Backend | TODO | FR-022 | T-600 |
 | T-604 | 릴리즈 노트 자동 생성 | Backend | TODO | FR-020 | T-408 |
 | T-608 | 워치(Watch) 구독 API | Backend | TODO | FR-025 | T-400 |
@@ -282,3 +282,4 @@
 | v1.26 | 2026-04-13 | 모바일: 로그인·프로젝트 선택·이슈 목록/상세/생성(Riverpod·Dio·SharedPreferences, `API_BASE_URL`) — T-621 FR-MOBILE-001 DONE |
 | v1.27 | 2026-04-13 | 감사 로그: `GET /api/v1/audit-logs/project/{projectId}`(ADMIN)·`AuditLogResponse.issueKey`·웹 `/project/:key/audit` — T-615 SCR-014 DONE |
 | v1.28 | 2026-04-13 | 이슈 도메인 감사 자동 기록(`IssueAuditService`)·삭제 시 `audit_log_tb` 선삭제·통합 테스트 — T-407 FR-028 DONE |
+| v1.29 | 2026-04-13 | T-600 대시보드 가젯: `DashboardGadgetType`·PUT 수정·PUT reorder·삭제 시 대시보드 소속 검증·상세 응답 가젯 position 정렬·API-SPEC 반영 |

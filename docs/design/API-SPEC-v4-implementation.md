@@ -101,11 +101,13 @@
 | Method | Path | 설명 |
 |--------|------|------|
 | GET | `/api/v1/dashboards` | (소유자 기준) 목록 |
-| GET | `/api/v1/dashboards/{id}` | 단건 |
+| GET | `/api/v1/dashboards/{id}` | 단건(인증 필수; 없으면 404, 비공개·타인 소유면 403) |
 | POST | `/api/v1/dashboards` | 생성 |
 | PUT | `/api/v1/dashboards/{id}` | 수정 |
 | DELETE | `/api/v1/dashboards/{id}` | 삭제 |
-| POST | `/api/v1/dashboards/{dashboardId}/gadgets` | 가젯 추가 |
+| POST | `/api/v1/dashboards/{dashboardId}/gadgets` | 가젯 추가 (`gadgetType`은 `DashboardGadgetType` enum 이름) |
+| PUT | `/api/v1/dashboards/{dashboardId}/gadgets/{gadgetId}` | 가젯 수정(타입·위치·configJson 부분 갱신) |
+| PUT | `/api/v1/dashboards/{dashboardId}/gadgets/reorder` | 가젯 순서 일괄 변경(본문에 대시보드 소속 가젯 ID 전체) |
 | DELETE | `/api/v1/dashboards/{dashboardId}/gadgets/{gadgetId}` | 가젯 삭제 |
 
 ## 다음 작업 (구현 대비)

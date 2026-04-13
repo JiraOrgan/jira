@@ -31,9 +31,14 @@ public class DashboardApiController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("@dashboardSecurity.canReadDashboard(#id)")
-    public ResponseEntity<ApiResponse<DashboardResponse.DetailDTO>> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.ok(dashboardService.findById(id)));
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<DashboardResponse.DetailDTO>> findById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        if (principal == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+        return ResponseEntity.ok(ApiResponse.ok(dashboardService.findById(id, principal.getId())));
     }
 
     @PostMapping
@@ -68,6 +73,23 @@ public class DashboardApiController {
             @PathVariable Long dashboardId,
             @Valid @RequestBody DashboardRequest.GadgetDTO reqDTO) {
         return ResponseEntity.status(201).body(ApiResponse.created(dashboardService.addGadget(dashboardId, reqDTO)));
+    }
+
+    @PutMapping("/{dashboardId}/gadgets/{gadgetId}")
+    @PreAuthorize("@dashboardSecurity.canWriteDashboard(#dashboardId)")
+    public ResponseEntity<ApiResponse<DashboardResponse.DetailDTO>> updateGadget(
+            @PathVariable Long dashboardId,
+            @PathVariable Long gadgetId,
+            @Valid @RequestBody DashboardRequest.GadgetUpdateDTO reqDTO) {
+        return ResponseEntity.ok(ApiResponse.ok(dashboardService.updateGadget(dashboardId, gadgetId, reqDTO)));
+    }
+
+    @PutMapping("/{dashboardId}/gadgets/reorder")
+    @PreAuthorize("@dashboardSecurity.canWriteDashboard(#dashboardId)")
+    public ResponseEntity<ApiResponse<DashboardResponse.DetailDTO>> reorderGadgets(
+            @PathVariable Long dashboardId,
+            @Valid @RequestBody DashboardRequest.GadgetReorderDTO reqDTO) {
+        return ResponseEntity.ok(ApiResponse.ok(dashboardService.reorderGadgets(dashboardId, reqDTO)));
     }
 
     @DeleteMapping("/{dashboardId}/gadgets/{gadgetId}")
