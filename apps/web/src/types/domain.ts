@@ -190,6 +190,30 @@ export type RoadmapEpicItem = {
   effectiveEnd: string
 }
 
+export type DashboardGadgetRow = {
+  id: number
+  gadgetType: string
+  position: number
+  configJson: string | null
+}
+
+export type DashboardMin = {
+  id: number
+  name: string
+  shared: boolean
+  ownerName: string | null
+}
+
+export type DashboardDetail = {
+  id: number
+  name: string
+  shared: boolean
+  ownerId: number | null
+  ownerName: string | null
+  createdAt: string
+  gadgets: DashboardGadgetRow[] | null
+}
+
 export type UserMin = {
   id: number
   email: string

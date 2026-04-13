@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { ProjectsProvider } from './context/ProjectsProvider'
 import { AppLayout } from './layout/AppLayout'
 import { BacklogPage } from './pages/BacklogPage'
+import { DashboardDetailPage } from './pages/DashboardDetailPage'
 import { HomePage } from './pages/HomePage'
 import { IssueCreatePage } from './pages/IssueCreatePage'
 import { IssueDetailPage } from './pages/IssueDetailPage'
@@ -42,6 +43,10 @@ export default function App() {
         }
       >
         <Route index element={<HomePage />} />
+        <Route
+          path="dashboard/:dashboardId"
+          element={<DashboardDetailPage />}
+        />
         <Route
           path="project/:projectKey/board"
           element={<ScrumBoardPage />}
