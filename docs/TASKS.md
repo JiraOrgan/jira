@@ -2,7 +2,11 @@
 
 > **버전**: v1.26
 > **작성일**: 2026-03-22
+<<<<<<< feat/T-621-mobile-issues
+> **최종수정일**: 2026-04-13 (T-621 모바일 이슈 목록·생성·상세 FR-MOBILE-001)
+=======
 > **최종수정일**: 2026-04-13 (T-613 릴리즈 관리 화면 SCR-011)
+>>>>>>> develop
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -139,7 +143,7 @@
 | ID | Task | 담당 | 상태 | 관련 FR | 선행 |
 |----|------|------|------|---------|------|
 | T-620 | Flutter 앱 프로젝트 초기화 (Riverpod, Dio) | Mobile | DONE | `apps/mobile`, `flutter create .` 로 플랫폼 생성 | T-300 |
-| T-621 | 모바일 이슈 목록·생성·상세 | Mobile | TODO | FR-MOBILE-001 | T-620 |
+| T-621 | 모바일 이슈 목록·생성·상세 | Mobile | DONE | FR-MOBILE-001; Riverpod·Dio·SharedPreferences, 로그인·프로젝트 선택·이슈 CRUD UI | T-620 |
 
 ---
 
@@ -279,3 +283,4 @@
 | v1.22 | 2026-04-13 | 웹: JQL 검색(`JqlSearchPage`·`jqlApi`·토큰 제안·저장 필터) — T-611 DONE |
 | v1.23 | 2026-04-13 | 웹: Epic 로드맵(`RoadmapPage`·`/roadmap`·JQL+상세 타임라인·줌) — T-612 DONE |
 | v1.24 | 2026-04-13 | Epic 기간 컬럼·`GET .../roadmap/epics`·이슈 DTO·`RoadmapEpicIntegrationTest`; 웹 로드맵·이슈 폼 연동 — T-506·T-612 보강 |
+| v1.26 | 2026-04-13 | 모바일: 로그인·프로젝트 선택·이슈 목록/상세/생성(Riverpod·Dio·SharedPreferences, `API_BASE_URL`) — T-621 FR-MOBILE-001 DONE |
