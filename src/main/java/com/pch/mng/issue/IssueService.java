@@ -3,6 +3,7 @@ package com.pch.mng.issue;
 import com.pch.mng.global.enums.BoardType;
 import com.pch.mng.global.enums.IssueStatus;
 import com.pch.mng.global.enums.IssueType;
+import com.pch.mng.global.enums.Priority;
 import com.pch.mng.global.enums.SprintStatus;
 import com.pch.mng.global.exception.BusinessException;
 import com.pch.mng.global.exception.ErrorCode;
@@ -21,6 +22,7 @@ import com.pch.mng.workflow.IssueWorkflowPolicy;
 import com.pch.mng.workflow.WorkflowTransition;
 import com.pch.mng.workflow.WorkflowTransitionRepository;
 import com.pch.mng.workflow.WorkflowTransitionResponse;
+import com.pch.mng.audit.IssueAuditService;
 import com.pch.mng.board.SprintBoardRedisCache;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -51,6 +53,7 @@ public class IssueService {
     private final ProjectComponentRepository projectComponentRepository;
     private final WipLimitRepository wipLimitRepository;
     private final SprintBoardRedisCache sprintBoardRedisCache;
+    private final IssueAuditService issueAuditService;
 
     public Page<IssueResponse.MinDTO> findByProject(Long projectId, Pageable pageable) {
         return issueRepository.findByProjectIdOrderByCreatedAtDesc(projectId, pageable)
@@ -142,6 +145,7 @@ public class IssueService {
 
         Issue issue = builder.build();
         issueRepository.save(issue);
+        issueAuditService.logIssueCreated(issue, reporter);
         evictBoardForSprintOf(issue);
         return toDetail(issue);
     }
@@ -188,25 +192,76 @@ public class IssueService {
 
         assertEpicUpdateAllowedForIssueType(issue, reqDTO);
 
-        if (reqDTO.getSummary() != null) issue.setSummary(reqDTO.getSummary());
-        if (reqDTO.getDescription() != null) issue.setDescription(reqDTO.getDescription());
-        if (reqDTO.getPriority() != null) issue.setPriority(reqDTO.getPriority());
-        if (reqDTO.getStoryPoints() != null) issue.setStoryPoints(reqDTO.getStoryPoints());
-        if (reqDTO.getSecurityLevel() != null) issue.setSecurityLevel(reqDTO.getSecurityLevel());
+        if (reqDTO.getSummary() != null && !Objects.equals(issue.getSummary(), reqDTO.getSummary())) {
+            String old = issue.getSummary();
+            issue.setSummary(reqDTO.getSummary());
+            issueAuditService.recordFromContext(issue, "summary", old, reqDTO.getSummary());
+        }
+        if (reqDTO.getDescription() != null
+                && !Objects.equals(issue.getDescription(), reqDTO.getDescription())) {
+            String old = issue.getDescription();
+            issue.setDescription(reqDTO.getDescription());
+            issueAuditService.recordFromContext(issue, "description", old, reqDTO.getDescription());
+        }
+        if (reqDTO.getPriority() != null && issue.getPriority() != reqDTO.getPriority()) {
+            Priority old = issue.getPriority();
+            issue.setPriority(reqDTO.getPriority());
+            issueAuditService.recordFromContext(issue, "priority", String.valueOf(old),
+                    String.valueOf(reqDTO.getPriority()));
+        }
+        if (reqDTO.getStoryPoints() != null
+                && !Objects.equals(issue.getStoryPoints(), reqDTO.getStoryPoints())) {
+            Integer old = issue.getStoryPoints();
+            issue.setStoryPoints(reqDTO.getStoryPoints());
+            issueAuditService.recordFromContext(issue, "storyPoints",
+                    old != null ? String.valueOf(old) : null,
+                    String.valueOf(reqDTO.getStoryPoints()));
+        }
+        if (reqDTO.getSecurityLevel() != null && issue.getSecurityLevel() != reqDTO.getSecurityLevel()) {
+            var old = issue.getSecurityLevel();
+            issue.setSecurityLevel(reqDTO.getSecurityLevel());
+            issueAuditService.recordFromContext(issue, "securityLevel",
+                    old != null ? String.valueOf(old) : null,
+                    String.valueOf(reqDTO.getSecurityLevel()));
+        }
         if (reqDTO.getAssigneeId() != null) {
             UserAccount assignee = userAccountRepository.findById(reqDTO.getAssigneeId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-            issue.setAssignee(assignee);
+            Long oldId = issue.getAssignee() != null ? issue.getAssignee().getId() : null;
+            Long newId = assignee.getId();
+            if (!Objects.equals(oldId, newId)) {
+                issue.setAssignee(assignee);
+                issueAuditService.recordFromContext(issue, "assigneeId",
+                        oldId != null ? String.valueOf(oldId) : null, String.valueOf(newId));
+            }
         }
         if (reqDTO.getSprintId() != null) {
             Sprint sprint = sprintRepository.findByIdWithProject(reqDTO.getSprintId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
             assertSprintOpenAndSameProject(sprint, issue.getProject());
+            Long oldSid = issue.getSprint() != null ? issue.getSprint().getId() : null;
+            Long newSid = sprint.getId();
             issue.setSprint(sprint);
             issue.setBacklogRank(0L);
+            if (!Objects.equals(oldSid, newSid)) {
+                issueAuditService.recordFromContext(issue, "sprintId",
+                        oldSid != null ? String.valueOf(oldSid) : null, String.valueOf(newSid));
+            }
         }
 
+        LocalDate epicStartBefore = issue.getEpicStartDate();
+        LocalDate epicEndBefore = issue.getEpicEndDate();
         patchEpicDatesOnUpdate(issue, reqDTO);
+        if (!Objects.equals(epicStartBefore, issue.getEpicStartDate())) {
+            issueAuditService.recordFromContext(issue, "epicStartDate",
+                    epicStartBefore != null ? String.valueOf(epicStartBefore) : null,
+                    issue.getEpicStartDate() != null ? String.valueOf(issue.getEpicStartDate()) : null);
+        }
+        if (!Objects.equals(epicEndBefore, issue.getEpicEndDate())) {
+            issueAuditService.recordFromContext(issue, "epicEndDate",
+                    epicEndBefore != null ? String.valueOf(epicEndBefore) : null,
+                    issue.getEpicEndDate() != null ? String.valueOf(issue.getEpicEndDate()) : null);
+        }
 
         Long newSprintId = issue.getSprint() != null ? issue.getSprint().getId() : null;
         evictBoardForSprintPair(oldSprintId, newSprintId);
@@ -264,12 +319,19 @@ public class IssueService {
             if (issue.getSprint() != null) {
                 sprintsToEvict.add(issue.getSprint().getId());
             }
+            Long oldSid = issue.getSprint() != null ? issue.getSprint().getId() : null;
             issue.setSprint(sprint);
             if (sprint == null) {
                 rankCursor += 1000L;
                 issue.setBacklogRank(rankCursor);
             } else {
                 issue.setBacklogRank(0L);
+            }
+            Long newSid = sprint != null ? sprint.getId() : null;
+            if (!Objects.equals(oldSid, newSid)) {
+                issueAuditService.recordFromContext(issue, "sprintId",
+                        oldSid != null ? String.valueOf(oldSid) : null,
+                        newSid != null ? String.valueOf(newSid) : null);
             }
         }
         for (Long sid : sprintsToEvict) {
@@ -282,6 +344,7 @@ public class IssueService {
         Issue issue = issueRepository.findByIssueKeyWithProject(issueKey)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
         Long sprintId = issue.getSprint() != null ? issue.getSprint().getId() : null;
+        issueAuditService.deleteAllForIssue(issue.getId());
         issueRepository.delete(issue);
         sprintBoardRedisCache.evictSprint(sprintId);
     }
@@ -302,6 +365,7 @@ public class IssueService {
 
         issue.setStatus(to);
         issueRepository.save(issue);
+        issueAuditService.record(issue, actor, "status", String.valueOf(from), String.valueOf(to));
 
         WorkflowTransition log = new WorkflowTransition();
         log.setIssue(issue);
@@ -328,6 +392,7 @@ public class IssueService {
         link.setIssue(issue);
         link.setLabel(label);
         issueLabelRepository.save(link);
+        issueAuditService.recordFromContext(issue, "label.added", null, label.getName());
         return toDetail(issue);
     }
 
@@ -338,7 +403,10 @@ public class IssueService {
         if (!issueLabelRepository.existsByIssue_IdAndLabel_Id(issue.getId(), labelId)) {
             throw new BusinessException(ErrorCode.ENTITY_NOT_FOUND);
         }
+        Label label = labelRepository.findById(labelId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
         issueLabelRepository.deleteByIssueIdAndLabelId(issue.getId(), labelId);
+        issueAuditService.recordFromContext(issue, "label.removed", label.getName(), null);
         return toDetail(issue);
     }
 
@@ -358,6 +426,7 @@ public class IssueService {
         link.setIssue(issue);
         link.setComponent(component);
         issueComponentRepository.save(link);
+        issueAuditService.recordFromContext(issue, "component.added", null, component.getName());
         return toDetail(issue);
     }
 
@@ -368,7 +437,10 @@ public class IssueService {
         if (!issueComponentRepository.existsByIssue_IdAndComponent_Id(issue.getId(), componentId)) {
             throw new BusinessException(ErrorCode.ENTITY_NOT_FOUND);
         }
+        ProjectComponent component = projectComponentRepository.findById(componentId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
         issueComponentRepository.deleteByIssue_IdAndComponent_Id(issue.getId(), componentId);
+        issueAuditService.recordFromContext(issue, "component.removed", component.getName(), null);
         return toDetail(issue);
     }
 
