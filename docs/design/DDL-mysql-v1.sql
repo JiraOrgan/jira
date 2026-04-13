@@ -124,6 +124,8 @@ CREATE TABLE issue_tb (
     sprint_id BIGINT NULL,
     backlog_rank BIGINT NOT NULL DEFAULT 0,
     security_level VARCHAR(50) NULL,
+    epic_start_date DATE NULL,
+    epic_end_date DATE NULL,
     created_at DATETIME(6) NULL,
     updated_at DATETIME(6) NULL,
     CONSTRAINT fk_issue_project FOREIGN KEY (project_id) REFERENCES project_tb (id),
@@ -133,7 +135,8 @@ CREATE TABLE issue_tb (
     CONSTRAINT fk_issue_sprint FOREIGN KEY (sprint_id) REFERENCES sprint_tb (id),
     KEY idx_issue_project_status (project_id, status),
     KEY idx_issue_assignee (assignee_id),
-    KEY idx_issue_sprint (sprint_id)
+    KEY idx_issue_sprint (sprint_id),
+    KEY idx_issue_project_type_epic_start (project_id, issue_type, epic_start_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE issue_label_tb (
@@ -264,3 +267,11 @@ CREATE TABLE saved_jql_filter_tb (
     CONSTRAINT fk_sjf_project FOREIGN KEY (project_id) REFERENCES project_tb (id),
     KEY idx_sjf_project_owner (project_id, owner_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- 기존 DB 마이그레이션: Epic 로드맵 기간 (FR-012, T-506)
+-- Flyway 미사용 시 수동 실행. 이미 컬럼이 있으면 스킵.
+-- ---------------------------------------------------------------------------
+-- ALTER TABLE issue_tb ADD COLUMN epic_start_date DATE NULL AFTER security_level;
+-- ALTER TABLE issue_tb ADD COLUMN epic_end_date DATE NULL AFTER epic_start_date;
+-- CREATE INDEX idx_issue_project_type_epic_start ON issue_tb (project_id, issue_type, epic_start_date);

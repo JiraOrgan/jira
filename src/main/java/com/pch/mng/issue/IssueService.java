@@ -28,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -59,6 +60,14 @@ public class IssueService {
     public List<IssueResponse.MinDTO> findBacklog(Long projectId) {
         return issueRepository.findByProjectIdAndSprintIsNullOrderByBacklogRankAscIdAsc(projectId).stream()
                 .map(IssueResponse.MinDTO::of)
+                .toList();
+    }
+
+    public List<RoadmapEpicResponse> listRoadmapEpics(Long projectId) {
+        return issueRepository
+                .findByProjectIdAndIssueTypeOrderByEpicStartDateAscIdAsc(projectId, IssueType.EPIC)
+                .stream()
+                .map(RoadmapEpicResponse::of)
                 .toList();
     }
 
@@ -96,6 +105,9 @@ public class IssueService {
                 ? issueRepository.maxBacklogRankForProjectBacklog(project.getId()) + 1000L
                 : 0L;
 
+        assertEpicDatesOnlyForEpicType(reqDTO.getIssueType(), reqDTO.getEpicStartDate(), reqDTO.getEpicEndDate());
+        validateEpicStartEndOrder(reqDTO.getEpicStartDate(), reqDTO.getEpicEndDate());
+
         long nextSeq = project.getIssueSequence() + 1;
         project.setIssueSequence(nextSeq);
         String issueKey = project.getKey() + "-" + nextSeq;
@@ -123,6 +135,9 @@ public class IssueService {
         }
         if (sprint != null) {
             builder.sprint(sprint);
+        }
+        if (reqDTO.getIssueType() == IssueType.EPIC) {
+            builder.epicStartDate(reqDTO.getEpicStartDate()).epicEndDate(reqDTO.getEpicEndDate());
         }
 
         Issue issue = builder.build();
@@ -171,6 +186,8 @@ public class IssueService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
         Long oldSprintId = issue.getSprint() != null ? issue.getSprint().getId() : null;
 
+        assertEpicUpdateAllowedForIssueType(issue, reqDTO);
+
         if (reqDTO.getSummary() != null) issue.setSummary(reqDTO.getSummary());
         if (reqDTO.getDescription() != null) issue.setDescription(reqDTO.getDescription());
         if (reqDTO.getPriority() != null) issue.setPriority(reqDTO.getPriority());
@@ -188,6 +205,8 @@ public class IssueService {
             issue.setSprint(sprint);
             issue.setBacklogRank(0L);
         }
+
+        patchEpicDatesOnUpdate(issue, reqDTO);
 
         Long newSprintId = issue.getSprint() != null ? issue.getSprint().getId() : null;
         evictBoardForSprintPair(oldSprintId, newSprintId);
@@ -351,6 +370,60 @@ public class IssueService {
         }
         issueComponentRepository.deleteByIssue_IdAndComponent_Id(issue.getId(), componentId);
         return toDetail(issue);
+    }
+
+    private static void assertEpicDatesOnlyForEpicType(IssueType type, LocalDate start, LocalDate end) {
+        if (type == IssueType.EPIC) {
+            return;
+        }
+        if (start != null || end != null) {
+            throw new BusinessException(ErrorCode.EPIC_DATE_NOT_ALLOWED);
+        }
+    }
+
+    private static void validateEpicStartEndOrder(LocalDate start, LocalDate end) {
+        if (start != null && end != null && end.isBefore(start)) {
+            throw new BusinessException(ErrorCode.EPIC_DATE_RANGE_INVALID);
+        }
+    }
+
+    private static void assertEpicUpdateAllowedForIssueType(Issue issue, IssueRequest.UpdateDTO dto) {
+        if (issue.getIssueType() == IssueType.EPIC) {
+            return;
+        }
+        if (Boolean.TRUE.equals(dto.getClearEpicDates())) {
+            throw new BusinessException(ErrorCode.EPIC_DATE_NOT_ALLOWED);
+        }
+        if (Boolean.TRUE.equals(dto.getPatchEpicDates())) {
+            throw new BusinessException(ErrorCode.EPIC_DATE_NOT_ALLOWED);
+        }
+        if (dto.getEpicStartDate() != null || dto.getEpicEndDate() != null) {
+            throw new BusinessException(ErrorCode.EPIC_DATE_NOT_ALLOWED);
+        }
+    }
+
+    private static void patchEpicDatesOnUpdate(Issue issue, IssueRequest.UpdateDTO dto) {
+        if (issue.getIssueType() != IssueType.EPIC) {
+            return;
+        }
+        if (Boolean.TRUE.equals(dto.getClearEpicDates())) {
+            issue.setEpicStartDate(null);
+            issue.setEpicEndDate(null);
+            return;
+        }
+        if (Boolean.TRUE.equals(dto.getPatchEpicDates())) {
+            issue.setEpicStartDate(dto.getEpicStartDate());
+            issue.setEpicEndDate(dto.getEpicEndDate());
+            validateEpicStartEndOrder(issue.getEpicStartDate(), issue.getEpicEndDate());
+            return;
+        }
+        if (dto.getEpicStartDate() != null) {
+            issue.setEpicStartDate(dto.getEpicStartDate());
+        }
+        if (dto.getEpicEndDate() != null) {
+            issue.setEpicEndDate(dto.getEpicEndDate());
+        }
+        validateEpicStartEndOrder(issue.getEpicStartDate(), issue.getEpicEndDate());
     }
 
     private void evictBoardForSprintOf(Issue issue) {

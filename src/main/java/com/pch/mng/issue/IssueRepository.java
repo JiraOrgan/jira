@@ -1,6 +1,7 @@
 package com.pch.mng.issue;
 
 import com.pch.mng.global.enums.IssueStatus;
+import com.pch.mng.global.enums.IssueType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,4 +36,6 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 
     @Query("SELECT DISTINCT i FROM Issue i LEFT JOIN FETCH i.assignee WHERE i.sprint.id = :sid")
     List<Issue> findForSprintBoard(@Param("sid") Long sprintId);
+
+    List<Issue> findByProjectIdAndIssueTypeOrderByEpicStartDateAscIdAsc(Long projectId, IssueType issueType);
 }

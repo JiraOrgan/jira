@@ -2,35 +2,43 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useProjectByKey } from '../hooks/useProjects'
 import { errorMessage } from '../lib/axiosErrors'
-import { searchJql } from '../lib/jqlApi'
-import { fetchIssue } from '../lib/issueApi'
+import { fetchProjectRoadmapEpics } from '../lib/issueApi'
 import { statusLabel } from '../lib/labels'
-import type { IssueDetail, IssueStatus } from '../types/domain'
+import type { IssueStatus, RoadmapEpicItem } from '../types/domain'
 
 const DAY_MS = 86400000
-const MIN_BAR_DAYS = 14
 
 type ZoomMode = 'full' | '90d' | '30d'
 
 type EpicBar = {
-  detail: IssueDetail
+  row: RoadmapEpicItem
   startMs: number
   endMs: number
 }
 
-function parseMs(iso: string): number {
-  const t = new Date(iso).getTime()
-  return Number.isFinite(t) ? t : Date.now()
+/** `YYYY-MM-DD` → 로컬 자정(시작) 또는 해당일 끝(종료) ms */
+function isoLocalToMs(iso: string, endOfDay: boolean): number {
+  const parts = iso.split('-').map(Number)
+  const y = parts[0]
+  const m = parts[1]
+  const d = parts[2]
+  return new Date(
+    y,
+    m - 1,
+    d,
+    endOfDay ? 23 : 0,
+    endOfDay ? 59 : 0,
+    endOfDay ? 59 : 0,
+    endOfDay ? 999 : 0,
+  ).getTime()
 }
 
-function epicSpan(d: IssueDetail): { startMs: number; endMs: number } {
-  const startMs = parseMs(d.createdAt)
-  let endMs = parseMs(d.updatedAt)
-  if (endMs < startMs) endMs = startMs
-  if (endMs - startMs < DAY_MS * 2) {
-    endMs = startMs + DAY_MS * MIN_BAR_DAYS
+function rowToBar(row: RoadmapEpicItem): EpicBar {
+  return {
+    row,
+    startMs: isoLocalToMs(row.effectiveStart, false),
+    endMs: isoLocalToMs(row.effectiveEnd, true),
   }
-  return { startMs, endMs }
 }
 
 const barTone: Record<IssueStatus, string> = {
@@ -87,35 +95,19 @@ export function RoadmapPage() {
 
   const [epicBars, setEpicBars] = useState<EpicBar[]>([])
   const [zoom, setZoom] = useState<ZoomMode>('full')
-  const [phase, setPhase] = useState<'idle' | 'jql' | 'details'>('idle')
+  const [phase, setPhase] = useState<'idle' | 'loading'>('idle')
   const [error, setError] = useState<string | null>(null)
-  /** 타임라인 “현재” 앵커 — 렌더 중 Date.now() 금지(ESLint purity) 대신 갱신 */
   const [viewportNow, setViewportNow] = useState(() => Date.now())
 
   const load = useCallback(async () => {
     if (!project) return
     setError(null)
-    setPhase('jql')
+    setPhase('loading')
     try {
-      const jql = `project = "${project.key}" AND type = EPIC ORDER BY key ASC`
-      const res = await searchJql(project.id, { jql, startAt: 0, maxResults: 100 })
-      if (res.issues.length === 0) {
-        setEpicBars([])
-        setPhase('idle')
-        setViewportNow(Date.now())
-        return
-      }
-      setPhase('details')
-      const details = await Promise.all(
-        res.issues.map((row) => fetchIssue(row.issueKey)),
-      )
-      setEpicBars(
-        details.map((detail) => {
-          const { startMs, endMs } = epicSpan(detail)
-          return { detail, startMs, endMs }
-        }),
-      )
+      const rows = await fetchProjectRoadmapEpics(project.id)
+      setEpicBars(rows.map(rowToBar))
       setPhase('idle')
+      setViewportNow(Date.now())
     } catch (e) {
       setEpicBars([])
       setError(errorMessage(e))
@@ -183,9 +175,9 @@ export function RoadmapPage() {
         <div>
           <h1 className="text-xl font-semibold text-white">로드맵</h1>
           <p className="mt-1 text-sm text-slate-400">
-            Epic만 표시합니다. 막대는 이슈의{' '}
-            <span className="text-slate-300">생성일~최종 수정일</span>을 기준으로 하며,
-            기간이 짧으면 최소 약 {MIN_BAR_DAYS}일 너비로 보입니다. (FR-012 / SCR-009)
+            Epic만 표시합니다. 막대는 서버가 계산한{' '}
+            <span className="text-slate-300">effectiveStart ~ effectiveEnd</span>를 사용합니다
+            (저장된 Epic 기간이 없으면 생성·수정일로 보강, FR-012 / SCR-009).
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -224,9 +216,7 @@ export function RoadmapPage() {
       ) : null}
 
       {loading ? (
-        <p className="text-sm text-slate-500">
-          {phase === 'jql' ? 'Epic 목록 조회 중…' : 'Epic 상세·타임라인 계산 중…'}
-        </p>
+        <p className="text-sm text-slate-500">로드맵 데이터 불러오는 중…</p>
       ) : null}
 
       {!loading && epicBars.length === 0 && !error ? (
@@ -261,38 +251,38 @@ export function RoadmapPage() {
             </div>
 
             <div className="space-y-3">
-              {epicBars.map(({ detail, startMs, endMs }) => {
+              {epicBars.map(({ row, startMs, endMs }) => {
                 const { left, width } = barLayout(
                   startMs,
                   endMs,
                   viewFrom,
                   viewTo,
                 )
-                const tone = barTone[detail.status]
+                const tone = barTone[row.status]
                 return (
                   <div
-                    key={detail.id}
+                    key={row.id}
                     className="grid grid-cols-[160px_1fr] items-center gap-3"
                   >
                     <div className="min-w-0">
                       <Link
-                        to={`/issue/${encodeURIComponent(detail.issueKey)}`}
+                        to={`/issue/${encodeURIComponent(row.issueKey)}`}
                         className="font-mono text-sm font-medium text-indigo-300 hover:underline"
                       >
-                        {detail.issueKey}
+                        {row.issueKey}
                       </Link>
                       <p className="line-clamp-2 text-xs text-slate-500">
-                        {detail.summary}
+                        {row.summary}
                       </p>
                       <p className="text-[10px] text-slate-600">
-                        {statusLabel[detail.status]}
+                        {statusLabel[row.status]}
                       </p>
                     </div>
                     <div className="relative h-9 rounded-md bg-slate-950/80 ring-1 ring-slate-800">
                       <div
                         className={`absolute top-1/2 h-5 -translate-y-1/2 rounded ${tone} opacity-90 shadow-sm ring-1 ring-white/10`}
                         style={{ left: `${left}%`, width: `${width}%` }}
-                        title={`${new Date(startMs).toLocaleDateString('ko-KR')} → ${new Date(endMs).toLocaleDateString('ko-KR')}`}
+                        title={`${row.effectiveStart} → ${row.effectiveEnd}`}
                       />
                     </div>
                   </div>

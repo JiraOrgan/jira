@@ -39,6 +39,8 @@ export function IssueCreatePage() {
   const [parentId, setParentId] = useState<string>('')
   const [sprintId, setSprintId] = useState<string>('')
   const [securityLevel, setSecurityLevel] = useState<string>('')
+  const [epicStart, setEpicStart] = useState('')
+  const [epicEnd, setEpicEnd] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -106,6 +108,12 @@ export function IssueCreatePage() {
       if (parentId) body.parentId = Number(parentId)
       if (sprintId) body.sprintId = Number(sprintId)
       if (securityLevel) body.securityLevel = securityLevel as SecurityLevel
+      if (issueType === 'EPIC') {
+        const es = epicStart.trim()
+        const ee = epicEnd.trim()
+        if (es) body.epicStartDate = es
+        if (ee) body.epicEndDate = ee
+      }
 
       const created = await createIssue(body)
       navigate(`/issue/${encodeURIComponent(created.issueKey)}`, {
@@ -146,6 +154,35 @@ export function IssueCreatePage() {
             <p className="mt-1 text-xs text-amber-400/90">
               Bug는 설명에 재현 절차·기대/실제 결과·환경을 적어 두면 좋습니다.
             </p>
+          ) : null}
+          {issueType === 'EPIC' ? (
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="text-xs font-medium text-slate-400">
+                  Epic 시작일 (선택)
+                </label>
+                <input
+                  type="date"
+                  value={epicStart}
+                  onChange={(e) => setEpicStart(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-slate-400">
+                  Epic 종료일 (선택)
+                </label>
+                <input
+                  type="date"
+                  value={epicEnd}
+                  onChange={(e) => setEpicEnd(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white"
+                />
+              </div>
+              <p className="sm:col-span-2 text-xs text-slate-500">
+                둘 중 하나만 넣을 수 있습니다. 종료는 시작 이상이어야 합니다.
+              </p>
+            </div>
           ) : null}
         </div>
 

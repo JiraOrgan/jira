@@ -13,6 +13,7 @@ import {
   fetchIssue,
   fetchTransitionHistory,
   transitionIssue,
+  updateIssue,
   uploadAttachment,
 } from '../lib/issueApi'
 import { priorityLabel, statusLabel } from '../lib/labels'
@@ -47,6 +48,11 @@ export function IssueDetailPage() {
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
 
+  const [epicStartEdit, setEpicStartEdit] = useState('')
+  const [epicEndEdit, setEpicEndEdit] = useState('')
+  const [epicError, setEpicError] = useState<string | null>(null)
+  const [epicSaving, setEpicSaving] = useState(false)
+
   const reload = useCallback(async () => {
     if (!issueKey) return
     setLoadError(null)
@@ -70,6 +76,50 @@ export function IssueDetailPage() {
   useEffect(() => {
     void reload()
   }, [reload])
+
+  useEffect(() => {
+    if (issue?.issueType === 'EPIC') {
+      setEpicStartEdit(issue.epicStartDate ?? '')
+      setEpicEndEdit(issue.epicEndDate ?? '')
+    }
+  }, [issue])
+
+  async function onSaveEpicDates(e: FormEvent) {
+    e.preventDefault()
+    if (!issue || issue.issueType !== 'EPIC') return
+    setEpicError(null)
+    setEpicSaving(true)
+    try {
+      const updated = await updateIssue(issue.issueKey, {
+        patchEpicDates: true,
+        epicStartDate: epicStartEdit.trim() || null,
+        epicEndDate: epicEndEdit.trim() || null,
+      })
+      setIssue(updated)
+    } catch (err) {
+      setEpicError(errorMessage(err))
+    } finally {
+      setEpicSaving(false)
+    }
+  }
+
+  async function onClearEpicDates() {
+    if (!issue || issue.issueType !== 'EPIC') return
+    setEpicError(null)
+    setEpicSaving(true)
+    try {
+      const updated = await updateIssue(issue.issueKey, {
+        clearEpicDates: true,
+      })
+      setIssue(updated)
+      setEpicStartEdit('')
+      setEpicEndEdit('')
+    } catch (err) {
+      setEpicError(errorMessage(err))
+    } finally {
+      setEpicSaving(false)
+    }
+  }
 
   async function onTransition(e: FormEvent) {
     e.preventDefault()
@@ -168,6 +218,57 @@ export function IssueDetailPage() {
           <pre className="mt-2 whitespace-pre-wrap rounded-lg border border-slate-800 bg-slate-900/50 p-4 text-sm text-slate-200">
             {issue.description}
           </pre>
+        </section>
+      ) : null}
+
+      {issue.issueType === 'EPIC' ? (
+        <section className="border-t border-slate-800 pt-6">
+          <h2 className="text-sm font-medium text-white">Epic 로드맵 기간</h2>
+          <p className="mt-1 text-xs text-slate-500">
+            「기간 저장」은 아래 두 칸 값으로 Epic 기간을 통째로 덮어씁니다(빈 칸은 저장 시
+            NULL). 「기간 삭제」는 둘 다 제거합니다.
+          </p>
+          <form
+            className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end"
+            onSubmit={onSaveEpicDates}
+          >
+            <div>
+              <label className="text-xs text-slate-400">시작일</label>
+              <input
+                type="date"
+                value={epicStartEdit}
+                onChange={(e) => setEpicStartEdit(e.target.value)}
+                className="mt-1 block rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-400">종료일</label>
+              <input
+                type="date"
+                value={epicEndEdit}
+                onChange={(e) => setEpicEndEdit(e.target.value)}
+                className="mt-1 block rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={epicSaving}
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
+            >
+              {epicSaving ? '저장 중…' : '기간 저장'}
+            </button>
+            <button
+              type="button"
+              disabled={epicSaving}
+              onClick={() => void onClearEpicDates()}
+              className="rounded-lg border border-slate-600 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 disabled:opacity-60"
+            >
+              기간 삭제
+            </button>
+          </form>
+          {epicError ? (
+            <p className="mt-2 text-sm text-red-300">{epicError}</p>
+          ) : null}
         </section>
       ) : null}
 
