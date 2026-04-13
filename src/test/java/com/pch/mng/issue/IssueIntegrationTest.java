@@ -572,4 +572,47 @@ class IssueIntegrationTest {
                         .content("{\"componentId\":" + compB.getId() + "}"))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    @DisplayName("이슈 생성·수정 시 감사 로그가 쌓인다 (프로젝트 ADMIN)")
+    void auditLogsRecordedOnIssueCreateAndUpdate() throws Exception {
+        String email = "aud-" + System.nanoTime() + "@ex.com";
+        String token = registerAndLogin(email);
+        long projectId = createProject(token, "AD" + (System.nanoTime() % 100000));
+        MvcResult create = mockMvc.perform(post("/api/v1/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"projectId":%d,"issueType":"TASK","summary":"S1","priority":"HIGH"}
+                                """.formatted(projectId)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        JsonNode created = objectMapper.readTree(create.getResponse().getContentAsString()).path("data");
+        long issueId = created.path("id").asLong();
+        String issueKey = created.path("issueKey").asText();
+
+        MvcResult audit1 = mockMvc.perform(get("/api/v1/audit-logs/issue/" + issueId)
+                        .header("Authorization", "Bearer " + token)
+                        .param("size", "50"))
+                .andExpect(status().isOk())
+                .andReturn();
+        int n1 = objectMapper.readTree(audit1.getResponse().getContentAsString())
+                .path("data").path("content").size();
+        assertThat(n1).isGreaterThanOrEqualTo(1);
+
+        mockMvc.perform(put("/api/v1/issues/%s".formatted(issueKey))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"summary\":\"S2\"}"))
+                .andExpect(status().isOk());
+
+        MvcResult audit2 = mockMvc.perform(get("/api/v1/audit-logs/issue/" + issueId)
+                        .header("Authorization", "Bearer " + token)
+                        .param("size", "50"))
+                .andExpect(status().isOk())
+                .andReturn();
+        int n2 = objectMapper.readTree(audit2.getResponse().getContentAsString())
+                .path("data").path("content").size();
+        assertThat(n2).isGreaterThan(n1);
+    }
 }
