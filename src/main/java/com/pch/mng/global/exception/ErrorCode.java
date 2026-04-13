@@ -56,6 +56,9 @@ public enum ErrorCode {
     JQL_UNSUPPORTED_CLAUSE(400, "JQL에서 해당 필드와 연산 조합을 지원하지 않습니다"),
     JQL_PROJECT_KEY_MISMATCH(400, "JQL의 project 조건이 현재 프로젝트와 일치하지 않습니다"),
 
+    // Dashboard (FR-021)
+    DASHBOARD_GADGET_MISMATCH(400, "해당 대시보드에 속하지 않는 가젯입니다"),
+
     // Attachment
     FILE_REQUIRED(400, "업로드할 파일이 필요합니다"),
     FILE_TOO_LARGE(413, "파일 크기 제한(20MB)을 초과했습니다"),
