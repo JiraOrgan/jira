@@ -257,6 +257,12 @@ export function HomePage() {
                         로드맵
                       </Link>
                       <Link
+                        to={`/project/${p.key}/releases`}
+                        className="mr-3 text-indigo-400 hover:text-indigo-300"
+                      >
+                        릴리즈
+                      </Link>
+                      <Link
                         to={`/project/${p.key}/issues/new`}
                         className="text-indigo-400 hover:text-indigo-300"
                       >

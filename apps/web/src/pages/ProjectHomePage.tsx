@@ -70,6 +70,12 @@ export function ProjectHomePage() {
           로드맵
         </Link>
         <Link
+          to={`/project/${project.key}/releases`}
+          className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 hover:border-slate-600"
+        >
+          릴리즈
+        </Link>
+        <Link
           to={`/project/${project.key}/settings`}
           className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 hover:border-slate-600"
         >

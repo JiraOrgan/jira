@@ -91,6 +91,12 @@ export function AppLayout() {
                 로드맵
               </NavLink>
               <NavLink
+                to={`/project/${projectKey}/releases`}
+                className={navCls}
+              >
+                릴리즈
+              </NavLink>
+              <NavLink
                 to={`/project/${projectKey}/issues/new`}
                 className={navCls}
               >
