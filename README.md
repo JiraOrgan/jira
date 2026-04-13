@@ -136,6 +136,14 @@
 - MySQL 8.0
 - Redis 7.x
 - Gradle 9.x
+- Node.js 20 이상 (웹 앱)
+- Flutter SDK 3.x (모바일 앱, 선택)
+
+### 모노레포 레이아웃
+
+- **백엔드**: 저장소 루트 Gradle Spring Boot
+- **웹**: `apps/web` — React 19, Vite 8, Zustand, Tailwind CSS 4 (`npm` workspaces)
+- **모바일**: `apps/mobile` — Flutter, `flutter_riverpod`, Dio
 
 ### 백엔드 실행
 
@@ -158,6 +166,32 @@ mysql -u root -p -e "CREATE DATABASE mng_dev CHARACTER SET utf8mb4 COLLATE utf8m
 # API:     http://localhost:8080
 # Swagger: http://localhost:8080/swagger-ui.html
 ```
+
+### 웹 앱 실행 (React)
+
+저장소 루트에서:
+
+```bash
+npm install
+npm run dev:web
+```
+
+브라우저: `http://localhost:5173` — 개발 시 `/api` 요청은 Vite가 `http://localhost:8080` 으로 프록시합니다. 백엔드가 먼저 떠 있어야 합니다. 로그인은 `/login` (`POST /api/auth/login`), 액세스 만료 시 `POST /api/auth/refresh` 로 자동 갱신됩니다.
+
+주요 웹 경로: `/`(프로젝트 목록), `/project/{key}`, `/project/{key}/board`, `/project/{key}/backlog`, `/project/{key}/issues/new`, `/issue/{issueKey}`.
+
+### 모바일 앱 (Flutter)
+
+`apps/mobile`에 `android/`·`ios/` 등이 없으면 Flutter SDK로 한 번 생성합니다.
+
+```bash
+cd apps/mobile
+flutter create .
+flutter pub get
+flutter run
+```
+
+에뮬레이터에서 호스트 백엔드 접근 시 기본 `API_BASE_URL`은 Android 에뮬 `10.0.2.2:8080` 입니다. 필요 시 `flutter run --dart-define=API_BASE_URL=http://...` 로 바꿉니다.
 
 ---
 
@@ -185,6 +219,10 @@ SPRING_PROFILES_ACTIVE=dev
 
 ```
 phs/
+├── apps/
+│   ├── web/                       # React SPA (Vite, Zustand, Tailwind)
+│   └── mobile/                    # Flutter 앱 (Riverpod, Dio)
+├── package.json                   # npm workspaces (apps/web)
 ├── src/main/java/com/pch/mng/
 │   ├── global/                    # 공통 인프라
 │   │   ├── config/                #   Security, Redis, Swagger, Gson
