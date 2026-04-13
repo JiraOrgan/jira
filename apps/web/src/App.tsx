@@ -10,6 +10,7 @@ import { JqlSearchPage } from './pages/JqlSearchPage'
 import { KanbanPage } from './pages/KanbanPage'
 import { LoginPage } from './pages/LoginPage'
 import { ProjectHomePage } from './pages/ProjectHomePage'
+import { ProjectSettingsPage } from './pages/ProjectSettingsPage'
 import { RoadmapPage } from './pages/RoadmapPage'
 import { ScrumBoardPage } from './pages/ScrumBoardPage'
 import { SprintsPage } from './pages/SprintsPage'
@@ -69,6 +70,10 @@ export default function App() {
         <Route
           path="project/:projectKey/issues/new"
           element={<IssueCreatePage />}
+        />
+        <Route
+          path="project/:projectKey/settings"
+          element={<ProjectSettingsPage />}
         />
         <Route path="project/:projectKey" element={<ProjectHomePage />} />
         <Route path="issue/:issueKey" element={<IssueDetailPage />} />
