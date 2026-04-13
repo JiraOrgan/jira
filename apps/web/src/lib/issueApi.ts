@@ -4,6 +4,8 @@ import type {
   IssueDetail,
   IssueMin,
   IssueSaveBody,
+  IssueUpdateBody,
+  RoadmapEpicItem,
   SpringPage,
   TransitionBody,
   WorkflowTransitionItem,
@@ -89,6 +91,26 @@ export async function createIssue(body: IssueSaveBody): Promise<IssueDetail> {
 export async function fetchIssue(issueKey: string): Promise<IssueDetail> {
   const { data } = await api.get<ApiResponse<IssueDetail>>(
     `/api/v1/issues/${encodeURIComponent(issueKey)}`,
+  )
+  return unwrapApi(data)
+}
+
+export async function updateIssue(
+  issueKey: string,
+  body: IssueUpdateBody,
+): Promise<IssueDetail> {
+  const { data } = await api.put<ApiResponse<IssueDetail>>(
+    `/api/v1/issues/${encodeURIComponent(issueKey)}`,
+    body,
+  )
+  return unwrapApi(data)
+}
+
+export async function fetchProjectRoadmapEpics(
+  projectId: number,
+): Promise<RoadmapEpicItem[]> {
+  const { data } = await api.get<ApiResponse<RoadmapEpicItem[]>>(
+    `/api/v1/projects/${projectId}/roadmap/epics`,
   )
   return unwrapApi(data)
 }

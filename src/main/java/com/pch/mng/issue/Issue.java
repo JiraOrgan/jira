@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
@@ -76,6 +77,13 @@ public class Issue {
     @Enumerated(EnumType.STRING)
     private SecurityLevel securityLevel;
 
+    /** Epic 전용 로드맵 기간 (FR-012). 비-Epic는 null 유지. */
+    @Column(name = "epic_start_date")
+    private LocalDate epicStartDate;
+
+    @Column(name = "epic_end_date")
+    private LocalDate epicEndDate;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
@@ -86,7 +94,8 @@ public class Issue {
     public Issue(String issueKey, Project project, IssueType issueType, String summary,
                  String description, IssueStatus status, Priority priority, Integer storyPoints,
                  UserAccount assignee, UserAccount reporter, Issue parent, Sprint sprint,
-                 long backlogRank, SecurityLevel securityLevel) {
+                 long backlogRank, SecurityLevel securityLevel,
+                 LocalDate epicStartDate, LocalDate epicEndDate) {
         this.issueKey = issueKey;
         this.project = project;
         this.issueType = issueType;
@@ -101,5 +110,7 @@ public class Issue {
         this.sprint = sprint;
         this.backlogRank = backlogRank;
         this.securityLevel = securityLevel;
+        this.epicStartDate = epicStartDate;
+        this.epicEndDate = epicEndDate;
     }
 }

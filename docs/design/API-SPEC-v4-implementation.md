@@ -46,6 +46,7 @@
 | GET | `/api/v1/projects/{projectId}/members` | 멤버 목록 |
 | POST | `/api/v1/projects/{projectId}/members` | 멤버 추가 |
 | DELETE | `/api/v1/projects/{projectId}/members/{memberId}` | 멤버 제거 |
+| GET | `/api/v1/projects/{projectId}/roadmap/epics` | 로드맵 Epic 목록 (FR-012, `RoadmapEpicResponse`) |
 
 ### 이슈 `IssueApiController`
 
@@ -54,8 +55,8 @@
 | GET | `/api/v1/issues/project/{projectId}` | 페이징 목록 |
 | GET | `/api/v1/issues/project/{projectId}/backlog` | 백로그 |
 | GET | `/api/v1/issues/{issueKey}` | 상세 |
-| POST | `/api/v1/issues` | 생성 (`IssueRequest.SaveDTO`) |
-| PUT | `/api/v1/issues/{issueKey}` | 수정 (`IssueRequest.UpdateDTO`) |
+| POST | `/api/v1/issues` | 생성 (`IssueRequest.SaveDTO`; Epic만 `epicStartDate`/`epicEndDate` 선택) |
+| PUT | `/api/v1/issues/{issueKey}` | 수정 (`IssueRequest.UpdateDTO`; Epic만 `patchEpicDates`+기간·`clearEpicDates`) |
 | DELETE | `/api/v1/issues/{issueKey}` | 삭제 |
 | POST | `/api/v1/issues/{issueKey}/transitions` | 상태 전환 (`IssueRequest.TransitionDTO`) |
 

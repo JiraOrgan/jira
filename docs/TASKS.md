@@ -1,8 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.23
+> **버전**: v1.24
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-13 (T-612 Epic 로드맵 타임라인 SCR-009)
+> **최종수정일**: 2026-04-13 (T-506 Epic 기간 필드·로드맵 API FR-012)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -119,6 +119,7 @@
 | T-503 | 보드 데이터 조회 API (스윔레인 지원) | Backend | DONE | `GET /sprints/{id}/board`, `NONE`/`ASSIGNEE` | T-500 |
 | T-504 | 보드 캐시 (Redis) | Backend | DONE | `app.board.cache`, 무효화: 이슈·스프린트 변경 | T-503 |
 | T-505 | 단위 테스트 (Sprint, Board) | Backend | DONE | `SprintServiceTest`, `BoardServiceTest` 캐시 히트/미스 | T-504 |
+| T-506 | Epic 기간 필드·로드맵 조회 API | Backend | DONE | FR-012; `epic_start_date`/`epic_end_date`, `GET .../roadmap/epics` | T-400 |
 | T-602 | JQL 파서 구현 | Backend | DONE | `jql/JqlParser`, AST, SPIKE MVP 문법 | T-400 |
 | T-603 | JQL 검색 API (페이징, 필터 저장) | Backend | DONE | FR-016; `JqlSearchService`, `saved_jql_filter_tb` | T-602 |
 
@@ -131,7 +132,7 @@
 | T-512 | 칸반 보드 (WIP 표시) | Frontend | DONE | SCR-005; `/project/:key/kanban`, DnD·`wip-limits` | T-511 |
 | T-513 | 스프린트 관리 화면 | Frontend | DONE | SCR-010; `/project/:key/sprints`, 생성·시작·완료·삭제 | T-510 |
 | T-611 | JQL 검색 화면 (자동완성) | Frontend | DONE | SCR-008; `/project/:key/jql`, 제안 토큰·저장 필터 | T-512 |
-| T-612 | 로드맵 (Epic 타임라인) | Frontend | DONE | SCR-009; `/project/:key/roadmap`, JQL Epic·상세일자·줌 | T-512 |
+| T-612 | 로드맵 (Epic 타임라인) | Frontend | DONE | SCR-009; `/project/:key/roadmap`, `GET .../roadmap/epics`·effective·줌 | T-512 |
 
 ### Mobile (Flutter)
 
@@ -277,3 +278,4 @@
 | v1.21 | 2026-04-13 | 웹: 칸반·스프린트(`KanbanPage`·`SprintsPage`·WIP·`/kanban`·`/sprints`) — T-512·T-513 DONE |
 | v1.22 | 2026-04-13 | 웹: JQL 검색(`JqlSearchPage`·`jqlApi`·토큰 제안·저장 필터) — T-611 DONE |
 | v1.23 | 2026-04-13 | 웹: Epic 로드맵(`RoadmapPage`·`/roadmap`·JQL+상세 타임라인·줌) — T-612 DONE |
+| v1.24 | 2026-04-13 | Epic 기간 컬럼·`GET .../roadmap/epics`·이슈 DTO·`RoadmapEpicIntegrationTest`; 웹 로드맵·이슈 폼 연동 — T-506·T-612 보강 |

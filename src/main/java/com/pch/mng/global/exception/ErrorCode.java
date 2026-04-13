@@ -28,6 +28,8 @@ public enum ErrorCode {
 
     // Issue
     INVALID_ISSUE_HIERARCHY(400, "이슈 타입과 부모 이슈 조합이 PRD 계층(Epic→Story/Task/Bug→Sub-task)에 맞지 않습니다"),
+    EPIC_DATE_NOT_ALLOWED(400, "Epic 기간(epicStartDate/epicEndDate)은 Epic 타입 이슈에만 설정할 수 있습니다"),
+    EPIC_DATE_RANGE_INVALID(400, "Epic 종료일은 시작일 이상이어야 합니다"),
     ISSUE_PARENT_PROJECT_MISMATCH(400, "부모 이슈가 같은 프로젝트에 있어야 합니다"),
     SPRINT_PROJECT_MISMATCH(400, "스프린트가 해당 프로젝트에 속하지 않습니다"),
     COMPONENT_PROJECT_MISMATCH(400, "컴포넌트는 이슈와 같은 프로젝트에 속해야 합니다"),

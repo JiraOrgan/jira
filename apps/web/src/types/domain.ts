@@ -102,6 +102,8 @@ export type IssueDetail = {
   sprintId: number | null
   backlogRank: number
   securityLevel: SecurityLevel | null
+  epicStartDate?: string | null
+  epicEndDate?: string | null
   createdAt: string
   updatedAt: string
   labels: IssueLabelItem[]
@@ -119,6 +121,23 @@ export type IssueSaveBody = {
   parentId?: number
   sprintId?: number
   securityLevel?: SecurityLevel
+  epicStartDate?: string
+  epicEndDate?: string
+}
+
+/** `PUT /api/v1/issues/{issueKey}` — null 값은 patchEpicDates true일 때만 전송 권장 */
+export type IssueUpdateBody = {
+  summary?: string
+  description?: string
+  priority?: Priority
+  storyPoints?: number
+  assigneeId?: number
+  sprintId?: number
+  securityLevel?: SecurityLevel
+  clearEpicDates?: boolean
+  patchEpicDates?: boolean
+  epicStartDate?: string | null
+  epicEndDate?: string | null
 }
 
 export type TransitionBody = {
@@ -157,6 +176,18 @@ export type SavedJqlFilter = {
   name: string
   jql: string
   createdAt: string
+}
+
+/** `GET .../projects/{id}/roadmap/epics` */
+export type RoadmapEpicItem = {
+  id: number
+  issueKey: string
+  summary: string
+  status: IssueStatus
+  epicStartDate: string | null
+  epicEndDate: string | null
+  effectiveStart: string
+  effectiveEnd: string
 }
 
 export type UserMin = {

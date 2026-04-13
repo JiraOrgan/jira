@@ -3,6 +3,7 @@ package com.pch.mng.issue;
 import com.pch.mng.global.enums.*;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -73,6 +74,8 @@ public class IssueResponse {
         private Long sprintId;
         private long backlogRank;
         private SecurityLevel securityLevel;
+        private LocalDate epicStartDate;
+        private LocalDate epicEndDate;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
         private List<LabelItemDTO> labels = Collections.emptyList();
@@ -95,6 +98,8 @@ public class IssueResponse {
             dto.priority = issue.getPriority();
             dto.storyPoints = issue.getStoryPoints();
             dto.securityLevel = issue.getSecurityLevel();
+            dto.epicStartDate = issue.getEpicStartDate();
+            dto.epicEndDate = issue.getEpicEndDate();
             dto.createdAt = issue.getCreatedAt();
             dto.updatedAt = issue.getUpdatedAt();
             if (issue.getProject() != null) {

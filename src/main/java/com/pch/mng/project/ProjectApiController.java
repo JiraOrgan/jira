@@ -2,6 +2,8 @@ package com.pch.mng.project;
 
 import com.pch.mng.auth.CustomUserDetails;
 import com.pch.mng.global.response.ApiResponse;
+import com.pch.mng.issue.IssueService;
+import com.pch.mng.issue.RoadmapEpicResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import java.util.List;
 public class ProjectApiController {
 
     private final ProjectService projectService;
+    private final IssueService issueService;
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
@@ -74,6 +77,13 @@ public class ProjectApiController {
             @PathVariable Long projectId, @PathVariable Long memberId) {
         projectService.removeMember(projectId, memberId);
         return ResponseEntity.ok(ApiResponse.noContent());
+    }
+
+    @GetMapping("/{projectId}/roadmap/epics")
+    @PreAuthorize("@projectSecurity.isMember(#projectId)")
+    public ResponseEntity<ApiResponse<List<RoadmapEpicResponse>>> listRoadmapEpics(
+            @PathVariable Long projectId) {
+        return ResponseEntity.ok(ApiResponse.ok(issueService.listRoadmapEpics(projectId)));
     }
 
     @GetMapping("/{projectId}/wip-limits")

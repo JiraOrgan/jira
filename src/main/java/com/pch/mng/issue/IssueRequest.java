@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class IssueRequest {
@@ -26,6 +27,9 @@ public class IssueRequest {
         private Long parentId;
         private Long sprintId;
         private SecurityLevel securityLevel;
+        /** Epic 전용. Epic 타입일 때만 허용. */
+        private LocalDate epicStartDate;
+        private LocalDate epicEndDate;
     }
 
     @Data
@@ -37,6 +41,15 @@ public class IssueRequest {
         private Long assigneeId;
         private Long sprintId;
         private SecurityLevel securityLevel;
+        /** Epic 전용. true이면 epic 기간을 모두 NULL로 초기화(개별 필드보다 우선). */
+        private Boolean clearEpicDates;
+        /**
+         * Epic 전용. true이면 epicStartDate·epicEndDate를 요청 값 그대로 반영(null 포함).
+         * false/null이면 해당 필드는 변경하지 않음(하위 호환).
+         */
+        private Boolean patchEpicDates;
+        private LocalDate epicStartDate;
+        private LocalDate epicEndDate;
     }
 
     @Data
