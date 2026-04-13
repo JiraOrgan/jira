@@ -4,6 +4,7 @@ import type {
   IssueDetail,
   IssueMin,
   IssueSaveBody,
+  SpringPage,
   TransitionBody,
   WorkflowTransitionItem,
 } from '../types/domain'
@@ -25,6 +26,25 @@ export async function downloadAttachmentFile(
   a.click()
   a.remove()
   URL.revokeObjectURL(url)
+}
+
+export async function fetchAllProjectIssues(
+  projectId: number,
+  pageSize = 100,
+): Promise<IssueMin[]> {
+  const all: IssueMin[] = []
+  let page = 0
+  while (true) {
+    const { data } = await api.get<ApiResponse<SpringPage<IssueMin>>>(
+      `/api/v1/issues/project/${projectId}`,
+      { params: { page, size: pageSize, sort: 'updatedAt,desc' } },
+    )
+    const body = unwrapApi(data)
+    all.push(...body.content)
+    if (page + 1 >= body.totalPages || body.content.length === 0) break
+    page += 1
+  }
+  return all
 }
 
 export async function fetchBacklog(projectId: number): Promise<IssueMin[]> {

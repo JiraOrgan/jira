@@ -61,6 +61,18 @@ export function HomePage() {
                       보드
                     </Link>
                     <Link
+                      to={`/project/${p.key}/kanban`}
+                      className="mr-3 text-indigo-400 hover:text-indigo-300"
+                    >
+                      칸반
+                    </Link>
+                    <Link
+                      to={`/project/${p.key}/sprints`}
+                      className="mr-3 text-indigo-400 hover:text-indigo-300"
+                    >
+                      스프린트
+                    </Link>
+                    <Link
                       to={`/project/${p.key}/backlog`}
                       className="mr-3 text-indigo-400 hover:text-indigo-300"
                     >

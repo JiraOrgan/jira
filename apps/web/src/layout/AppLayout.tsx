@@ -58,6 +58,18 @@ export function AppLayout() {
                 스크럼 보드
               </NavLink>
               <NavLink
+                to={`/project/${projectKey}/kanban`}
+                className={navCls}
+              >
+                칸반
+              </NavLink>
+              <NavLink
+                to={`/project/${projectKey}/sprints`}
+                className={navCls}
+              >
+                스프린트
+              </NavLink>
+              <NavLink
                 to={`/project/${projectKey}/backlog`}
                 className={navCls}
               >
