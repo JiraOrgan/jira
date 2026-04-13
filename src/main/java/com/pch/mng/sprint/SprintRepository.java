@@ -16,4 +16,6 @@ public interface SprintRepository extends JpaRepository<Sprint, Long> {
 
     @Query("SELECT s FROM Sprint s JOIN FETCH s.project WHERE s.id = :id")
     Optional<Sprint> findByIdWithProject(@Param("id") Long id);
+
+    List<Sprint> findByProjectIdAndStatusOrderByEndDateDesc(Long projectId, SprintStatus status);
 }

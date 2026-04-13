@@ -110,6 +110,14 @@
 | PUT | `/api/v1/dashboards/{dashboardId}/gadgets/reorder` | 가젯 순서 일괄 변경(본문에 대시보드 소속 가젯 ID 전체) |
 | DELETE | `/api/v1/dashboards/{dashboardId}/gadgets/{gadgetId}` | 가젯 삭제 |
 
+### 리포트 `ProjectReportApiController` (FR-022)
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | `/api/v1/projects/{projectId}/reports/sprints/{sprintId}/burndown` | 스프린트 번다운(전환 이력 기준 일별 잔량·이상선) |
+| GET | `/api/v1/projects/{projectId}/reports/velocity` | 완료 스프린트별 DONE 스토리 포인트 (`limit` 기본 6, 최대 24) |
+| GET | `/api/v1/projects/{projectId}/reports/cfd` | 누적 흐름용 일별 상태별 이슈 수 (`days` 기본 30, 7~90; `sprintId` 선택) |
+
 ## 다음 작업 (구현 대비)
 
 - DTO 필드·검증 어노테이션을 OpenAPI `description`/`example`과 동기화.  
