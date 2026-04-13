@@ -58,6 +58,25 @@ export type ProjectUpdateBody = {
   leadId?: number
 }
 
+export type VersionStatus = 'UNRELEASED' | 'RELEASED'
+
+export type ReleaseVersionMin = {
+  id: number
+  name: string
+  status: VersionStatus
+  releaseDate: string | null
+}
+
+export type ReleaseVersionDetail = {
+  id: number
+  projectId: number
+  name: string
+  description: string | null
+  status: VersionStatus
+  releaseDate: string | null
+  createdAt: string
+}
+
 /** `IssueResponse.MinDTO` — 백로그·목록용 */
 export type IssueMin = {
   id: number
