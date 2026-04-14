@@ -12,7 +12,7 @@
 
 ## 2. GitHub Actions (초안)
 
-구현 워크플로: 저장소 루트 [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) — `develop`/`main` **push·PR** 시 백엔드 `./gradlew test`(Redis 서비스 컨테이너)·`apps/web` **ESLint**(`npm run lint:web`).
+구현 워크플로: 저장소 루트 [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) — `develop`/`main` **push·PR** 시 백엔드 `./gradlew test`(Redis)·`apps/web` **lint+빌드**(`npm run lint:web`·`build:web`)·`apps/mobile` **Flutter analyze**(stable 채널).
 
 ### 워크플로 `ci-backend.yml` (develop, PR)
 
@@ -45,6 +45,7 @@
 
 ## 5. 향후 과제
 
-- [ ] 프론트(Vite)·Flutter 빌드 워크플로 추가.  
+- [x] 프론트(Vite) 프로덕션 빌드·Flutter 정적 분석(`analyze`) — `ci.yml`의 `web`·`mobile-analyze` 잡.  
+- [ ] Flutter `build apk`/iOS·웹 배포 아티팩트.  
 - [ ] SonarQube 또는 CodeQL 정적 분석.  
 - [ ] 스테이징 자동 배포 on `develop`.
