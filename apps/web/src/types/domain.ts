@@ -56,6 +56,8 @@ export type ProjectUpdateBody = {
   name: string
   description?: string | null
   leadId?: number
+  /** 생략 시 백엔드에서 아카이브 플래그 유지 */
+  archived?: boolean
 }
 
 export type VersionStatus = 'UNRELEASED' | 'RELEASED'

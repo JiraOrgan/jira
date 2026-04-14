@@ -32,6 +32,8 @@ class ProjectServiceTest {
     private ProjectMemberRepository projectMemberRepository;
     @Mock
     private UserAccountRepository userAccountRepository;
+    @Mock
+    private WipLimitRepository wipLimitRepository;
 
     @InjectMocks
     private ProjectService projectService;
@@ -100,5 +102,91 @@ class ProjectServiceTest {
                 .isEqualTo(ErrorCode.ENTITY_NOT_FOUND);
 
         verify(projectMemberRepository, never()).delete(any(ProjectMember.class));
+    }
+
+    @Test
+    @DisplayName("findDetailByKeyForUser: 키 없으면 ENTITY_NOT_FOUND")
+    void findDetailByKeyMissing() {
+        when(projectRepository.findByKey("NOPE")).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> projectService.findDetailByKeyForUser("NOPE", 1L))
+                .isInstanceOf(BusinessException.class)
+                .extracting(ex -> ((BusinessException) ex).getErrorCode())
+                .isEqualTo(ErrorCode.ENTITY_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("findDetailByKeyForUser: 비멤버면 FORBIDDEN")
+    void findDetailByKeyForbidden() {
+        Project p = Project.builder()
+                .key("K")
+                .name("N")
+                .boardType(BoardType.SCRUM)
+                .archived(false)
+                .build();
+        ReflectionTestUtils.setField(p, "id", 5L);
+        when(projectRepository.findByKey("K")).thenReturn(Optional.of(p));
+        when(projectMemberRepository.existsByProjectIdAndUserId(5L, 9L)).thenReturn(false);
+
+        assertThatThrownBy(() -> projectService.findDetailByKeyForUser("K", 9L))
+                .isInstanceOf(BusinessException.class)
+                .extracting(ex -> ((BusinessException) ex).getErrorCode())
+                .isEqualTo(ErrorCode.FORBIDDEN);
+    }
+
+    @Test
+    @DisplayName("findDetailByKeyForUser: 멤버면 상세 반환")
+    void findDetailByKeyOk() {
+        Project p = Project.builder()
+                .key("K")
+                .name("N")
+                .boardType(BoardType.SCRUM)
+                .archived(true)
+                .build();
+        ReflectionTestUtils.setField(p, "id", 5L);
+        when(projectRepository.findByKey("K")).thenReturn(Optional.of(p));
+        when(projectMemberRepository.existsByProjectIdAndUserId(5L, 9L)).thenReturn(true);
+
+        assertThat(projectService.findDetailByKeyForUser("K", 9L).isArchived()).isTrue();
+    }
+
+    @Test
+    @DisplayName("update: archived null이면 플래그 유지")
+    void updateArchivedNullKeeps() {
+        Project p = Project.builder()
+                .key("K")
+                .name("Old")
+                .boardType(BoardType.SCRUM)
+                .archived(true)
+                .build();
+        ReflectionTestUtils.setField(p, "id", 1L);
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(p));
+
+        ProjectRequest.UpdateDTO dto = new ProjectRequest.UpdateDTO();
+        dto.setName("New");
+        dto.setArchived(null);
+
+        projectService.update(1L, dto);
+        assertThat(p.isArchived()).isTrue();
+        assertThat(p.getName()).isEqualTo("New");
+    }
+
+    @Test
+    @DisplayName("update: archived false 반영")
+    void updateArchivedFalse() {
+        Project p = Project.builder()
+                .key("K")
+                .name("N")
+                .boardType(BoardType.SCRUM)
+                .archived(true)
+                .build();
+        ReflectionTestUtils.setField(p, "id", 1L);
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(p));
+
+        ProjectRequest.UpdateDTO dto = new ProjectRequest.UpdateDTO();
+        dto.setName("N");
+        dto.setArchived(false);
+
+        projectService.update(1L, dto);
+        assertThat(p.isArchived()).isFalse();
     }
 }

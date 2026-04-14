@@ -39,9 +39,10 @@
 | Method | Path | 설명 |
 |--------|------|------|
 | GET | `/api/v1/projects` | 목록 |
+| GET | `/api/v1/projects/by-key/{key}` | 단건(멤버만, 아카이브 포함) |
 | GET | `/api/v1/projects/{id}` | 단건 |
 | POST | `/api/v1/projects` | 생성 |
-| PUT | `/api/v1/projects/{id}` | 수정 |
+| PUT | `/api/v1/projects/{id}` | 수정 (`UpdateDTO`: `name`, `description`, `leadId`, `archived` 선택) |
 | DELETE | `/api/v1/projects/{id}` | 삭제 |
 | GET | `/api/v1/projects/{projectId}/members` | 멤버 목록 |
 | POST | `/api/v1/projects/{projectId}/members` | 멤버 추가 |

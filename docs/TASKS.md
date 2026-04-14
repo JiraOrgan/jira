@@ -1,8 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.38
+> **버전**: v1.39
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-14 (T-628 이슈 상세 댓글·멘션 UI)
+> **최종수정일**: 2026-04-14 (T-629 프로젝트 설정 아카이브·연동 안내)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -199,7 +199,7 @@
 | ID | Task | 담당 | 상태 | 화면 ID | 선행 |
 |----|------|------|------|---------|------|
 | T-628 | 이슈 상세 댓글·@멘션 UI 보강 | Frontend | DONE | SCR-006; `commentApi`, `IssueDetailPage` 댓글 CRUD·프로젝트 멤버 멘션 삽입·`CommentBody` @강조 (알림·저장 파싱은 T-405) | T-615 |
-| T-629 | 아카이브·연동 설정 UI | Frontend | TODO | SCR-013 | T-628 |
+| T-629 | 아카이브·연동 설정 UI | Frontend | DONE | SCR-013; 설정 아카이브 토글·`GET /projects/by-key/{key}`·외부 연동(T-625) 안내 — 자동 아카이브 규칙 API는 T-617 | T-628 |
 
 ### Mobile (Flutter)
 
@@ -292,3 +292,4 @@
 | v1.36 | 2026-04-14 | T-622 Flutter: 스프린트 보드 API·가로 컬럼·탭 시 전환 바텀시트·`IssueRepository.transition`·롱프레스 상세 — FR-MOBILE-002 |
 | v1.37 | 2026-04-14 | T-616: 웹 이슈 상세 Planning Poker UI (`planningPokerStorage`, 피보나치 선택·로컬 저장·SP 반영) — FR-018 보조 |
 | v1.38 | 2026-04-14 | T-628: 웹 이슈 상세 댓글 목록·등록·편집·삭제, 멘션 토큰 삽입·표시 — FR-023 UI (백엔드 멘션 파싱 T-405) |
+| v1.39 | 2026-04-14 | T-629: 프로젝트 `UpdateDTO.archived`·`GET /api/v1/projects/by-key/{key}`, 웹 설정 아카이브·연동 안내 — FR-026 UI (자동 규칙 T-617) |

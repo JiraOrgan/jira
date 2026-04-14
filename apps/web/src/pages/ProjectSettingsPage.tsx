@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { useProjectByKey, useProjects } from '../hooks/useProjects'
+import { useProjects } from '../hooks/useProjects'
 import {
   addProjectMember,
   deleteProject,
-  fetchProjectById,
+  fetchProjectByKey,
   fetchProjectMembers,
   removeProjectMember,
   updateProject,
@@ -31,8 +31,8 @@ function roleLabel(role: ProjectRole): string {
 }
 
 export function ProjectSettingsPage() {
-  const { projectKey } = useParams<{ projectKey: string }>()
-  const project = useProjectByKey(projectKey)
+  const { projectKey: rawProjectKey } = useParams<{ projectKey: string }>()
+  const projectKey = rawProjectKey ? decodeURIComponent(rawProjectKey) : ''
   const { reload } = useProjects()
   const navigate = useNavigate()
 
@@ -56,14 +56,16 @@ export function ProjectSettingsPage() {
 
   const [deleteBusy, setDeleteBusy] = useState(false)
 
+  const [archived, setArchived] = useState(false)
+
   const load = useCallback(async () => {
-    if (!project) return
+    if (!projectKey) return
     setLoading(true)
     setLoadError(null)
     try {
-      const [d, m, u] = await Promise.all([
-        fetchProjectById(project.id),
-        fetchProjectMembers(project.id),
+      const d = await fetchProjectByKey(projectKey)
+      const [m, u] = await Promise.all([
+        fetchProjectMembers(d.id),
         fetchUsers(),
       ])
       setDetail(d)
@@ -72,6 +74,7 @@ export function ProjectSettingsPage() {
       setName(d.name)
       setDescription(d.description ?? '')
       setLeadIdStr(d.leadId != null ? String(d.leadId) : '')
+      setArchived(d.archived)
     } catch (e) {
       setDetail(null)
       setMembers([])
@@ -82,7 +85,7 @@ export function ProjectSettingsPage() {
     } finally {
       setLoading(false)
     }
-  }, [project])
+  }, [projectKey])
 
   useEffect(() => {
     void load()
@@ -100,7 +103,7 @@ export function ProjectSettingsPage() {
 
   async function handleSaveBasic(e: React.FormEvent) {
     e.preventDefault()
-    if (!project || !detail) return
+    if (!detail) return
     setSaveError(null)
     setSaveMsg(null)
     const trimmed = name.trim()
@@ -113,15 +116,17 @@ export function ProjectSettingsPage() {
       const body: ProjectUpdateBody = {
         name: trimmed,
         description: description.trim() === '' ? null : description.trim(),
+        archived,
       }
       if (leadIdStr) {
         body.leadId = Number(leadIdStr)
       }
-      const updated = await updateProject(project.id, body)
+      const updated = await updateProject(detail.id, body)
       setDetail(updated)
       setName(updated.name)
       setDescription(updated.description ?? '')
       setLeadIdStr(updated.leadId != null ? String(updated.leadId) : '')
+      setArchived(updated.archived)
       await reload()
       setSaveMsg('저장했습니다.')
     } catch (err) {
@@ -135,7 +140,7 @@ export function ProjectSettingsPage() {
 
   async function handleAddMember(e: React.FormEvent) {
     e.preventDefault()
-    if (!project) return
+    if (!detail) return
     setMemberError(null)
     const uid = Number(newUserId)
     if (!newUserId || Number.isNaN(uid)) {
@@ -144,7 +149,7 @@ export function ProjectSettingsPage() {
     }
     setMemberBusy(true)
     try {
-      const row = await addProjectMember(project.id, {
+      const row = await addProjectMember(detail.id, {
         userId: uid,
         role: newRole,
       })
@@ -161,7 +166,7 @@ export function ProjectSettingsPage() {
   }
 
   async function handleRemoveMember(member: ProjectMember) {
-    if (!project) return
+    if (!detail) return
     if (
       !confirm(
         `${member.userName} (${member.userEmail}) 님을 프로젝트에서 제거할까요?`,
@@ -172,7 +177,7 @@ export function ProjectSettingsPage() {
     setMemberError(null)
     setMemberBusy(true)
     try {
-      await removeProjectMember(project.id, member.id)
+      await removeProjectMember(detail.id, member.id)
       setMembers((prev) => prev.filter((m) => m.id !== member.id))
     } catch (err) {
       setMemberError(
@@ -184,7 +189,7 @@ export function ProjectSettingsPage() {
   }
 
   async function handleDeleteProject() {
-    if (!project || !detail) return
+    if (!detail) return
     if (
       !confirm(
         `프로젝트 "${detail.name}" (${detail.key})를 영구 삭제합니다. 계속할까요?`,
@@ -194,7 +199,7 @@ export function ProjectSettingsPage() {
     }
     setDeleteBusy(true)
     try {
-      await deleteProject(project.id)
+      await deleteProject(detail.id)
       await reload()
       navigate('/', { replace: true })
     } catch (err) {
@@ -208,20 +213,6 @@ export function ProjectSettingsPage() {
 
   if (!projectKey) {
     return <p className="text-slate-500">잘못된 경로입니다.</p>
-  }
-
-  if (!project) {
-    return (
-      <div className="space-y-3">
-        <p className="text-slate-400">
-          프로젝트 <span className="font-mono text-white">{projectKey}</span>{' '}
-          을(를) 찾을 수 없거나 아카이브되었습니다.
-        </p>
-        <Link to="/" className="text-sm text-indigo-400 hover:text-indigo-300">
-          대시보드로
-        </Link>
-      </div>
-    )
   }
 
   if (loading) {
@@ -249,9 +240,15 @@ export function ProjectSettingsPage() {
         <h1 className="text-xl font-semibold text-white">프로젝트 설정</h1>
         <p className="mt-1 font-mono text-sm text-indigo-300">{detail.key}</p>
         <p className="mt-2 text-sm text-slate-500">
-          이름·설명·담당자를 수정하고, 멤버를 관리합니다. (멤버 추가·삭제·프로젝트
+          이름·설명·담당자·아카이브를 수정하고, 멤버를 관리합니다. (멤버 추가·삭제·프로젝트
           삭제는 프로젝트 관리자만 가능합니다.)
         </p>
+        {detail.archived ? (
+          <p className="mt-3 rounded-lg border border-amber-800/60 bg-amber-950/30 px-3 py-2 text-sm text-amber-200">
+            아카이브된 프로젝트입니다. 사이드바 목록에는 나타나지 않으며, URL로 이 설정
+            화면에만 진입할 수 있습니다.
+          </p>
+        ) : null}
       </div>
 
       <section className="space-y-4 rounded-xl border border-slate-800 bg-slate-900/40 p-6">
@@ -326,6 +323,27 @@ export function ProjectSettingsPage() {
               담당자만 바뀝니다.
             </p>
           </div>
+          <div className="flex items-start gap-3 rounded-lg border border-slate-800 bg-slate-950/50 p-3">
+            <input
+              id="proj-archived"
+              type="checkbox"
+              checked={archived}
+              onChange={(ev) => setArchived(ev.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-slate-600 bg-slate-950 text-indigo-600"
+            />
+            <div>
+              <label
+                htmlFor="proj-archived"
+                className="text-sm font-medium text-slate-200"
+              >
+                프로젝트 아카이브
+              </label>
+              <p className="mt-1 text-xs text-slate-500">
+                체크 후 저장하면 대시보드·사이드바 비아카이브 목록에서 숨깁니다. 해제 후
+                저장으로 다시 표시할 수 있습니다.
+              </p>
+            </div>
+          </div>
           {saveError ? (
             <p className="text-sm text-red-400">{saveError}</p>
           ) : null}
@@ -340,6 +358,15 @@ export function ProjectSettingsPage() {
             {saving ? '저장 중…' : '저장'}
           </button>
         </form>
+      </section>
+
+      <section className="space-y-3 rounded-xl border border-slate-800 bg-slate-900/40 p-6">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+          외부 연동
+        </h2>
+        <p className="text-sm text-slate-500">
+          GitHub/GitLab 커밋·PR 연동 설정은 백엔드 T-625와 함께 제공될 예정입니다.
+        </p>
       </section>
 
       <section className="space-y-4 rounded-xl border border-slate-800 bg-slate-900/40 p-6">
@@ -451,7 +478,7 @@ export function ProjectSettingsPage() {
       </section>
 
       <Link
-        to={`/project/${project.key}`}
+        to={`/project/${detail.key}`}
         className="inline-block text-sm text-indigo-400 hover:text-indigo-300"
       >
         ← 프로젝트 개요
