@@ -1,8 +1,8 @@
 # Project Control Hub - 개발 워크플로우
 
-> **버전**: v1.3
+> **버전**: v1.4
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-14 (통합 브랜치 `develop` 명시)
+> **최종수정일**: 2026-04-14 (본문 `develop(또는 dev)` 잔여 제거)
 > **연결 문서**: [PHASE.md](PHASE.md) | [TASKS.md](TASKS.md) | [PRD.md](PRD.md)
 > **Git 정본**: `C:\workspace\phs-prj\documents\08-Git규칙정의서_v3.0.md` — 본 파일은 코드 저장소용 요약이며, 세부·예외는 해당 문서를 따른다.
 
@@ -95,7 +95,7 @@ TODO → IN_PROGRESS → REVIEW → DONE
 
 ```
 1. TASKS.md에서 할당된 Task 확인 (TODO → IN_PROGRESS)
-2. develop(또는 dev)에서 기능 브랜치 생성
+2. develop에서 기능 브랜치 생성
    $ git checkout develop && git pull
    $ git checkout -b feature/T-300-jwt-auth
 
@@ -115,7 +115,7 @@ TODO → IN_PROGRESS → REVIEW → DONE
    - 최소 1인 Approve 필수
    - CI 통과 필수
 
-7. develop(또는 dev)로 머지 (Squash Merge 권장)
+7. develop로 머지 (Squash Merge 권장)
 
 8. TASKS.md 상태 업데이트 (DONE)
 ```
@@ -228,7 +228,7 @@ Sprint에 이슈를 포함하기 위한 최소 조건:
 - [ ] 단위 테스트 통과 (커버리지 80%+)
 - [ ] QA 테스트 통과
 - [ ] 문서 업데이트 완료
-- [ ] develop(또는 dev) 브랜치 머지 완료, 빌드 성공
+- [ ] develop 브랜치 머지 완료, 빌드 성공
 - [ ] 회귀 테스트 확인
 
 ---
@@ -263,7 +263,7 @@ main 머지 → 운영 배포 트리거
 | 환경 | 브랜치 | DB | URL |
 |------|--------|-----|-----|
 | Local | feature/* | localhost:5432 (PostgreSQL) | localhost:8080 |
-| Staging | develop (또는 dev) | RDS (staging) | staging.example.com |
+| Staging | develop | RDS (staging) | staging.example.com |
 | Production | main | RDS (prod, Multi-AZ) | api.example.com |
 
 ---
@@ -287,3 +287,4 @@ main 머지 → 운영 배포 트리거
 | v1.0 | 2026-03-22 | 개발 워크플로우 초안 작성 |
 | v1.1 | 2026-04-09 | `08-Git규칙정의서_v3.0` 정렬(main/develop/feature/bugfix/release/hotfix), 커밋 Footer·스코프, CD·환경(PostgreSQL) 갱신 |
 | v1.3 | 2026-04-14 | 본 저장소 통합 브랜치 **`develop`** 명시(§1.1 주석·§1.3), `dev` 혼동 완화 |
+| v1.4 | 2026-04-14 | §3.2·DoD·§7.3 등 본문 잔여 **`develop(또는 dev)`** → **`develop`** 로 통일 |

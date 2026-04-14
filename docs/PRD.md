@@ -431,7 +431,7 @@ Internet → Route 53 → CloudFront (CDN) / WAF → ALB
 - 단위 테스트 통과 (커버리지 80%+)
 - QA 테스트 통과
 - 문서 업데이트 완료
-- main/develop(또는 dev) 머지 완료, 빌드 성공
+- main/develop 머지 완료, 빌드 성공
 - 회귀 테스트 확인
 
 ---
