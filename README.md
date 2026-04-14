@@ -180,6 +180,19 @@ npm run dev:web
 
 주요 웹 경로: `/`(맞춤 대시보드·프로젝트 목록), `/dashboard/{id}`, `/project/{key}`, `/project/{key}/settings`, `/project/{key}/board`, `/project/{key}/backlog`, `/project/{key}/kanban`, `/project/{key}/sprints`, `/project/{key}/jql`, `/project/{key}/roadmap`, `/project/{key}/releases`, `/project/{key}/issues/new`, `/issue/{issueKey}`.
 
+### 백엔드 테스트·빌드 (npm → Gradle Wrapper)
+
+루트에서 웹과 동일하게 `npm`으로 Wrapper를 호출할 수 있습니다(Maven `pom.xml` 없음).
+
+```bash
+npm run test:api    # ./gradlew test 와 동등
+npm run build:api   # bootJar
+npm run boot:api    # bootRun (프로필 등 추가 인자는 아래 참고)
+```
+
+Spring 프로필을 넘기려면 예:  
+`node scripts/run-gradlew.cjs bootRun --args='--spring.profiles.active=dev'`
+
 ### 모바일 앱 (Flutter)
 
 `apps/mobile`에 `android/`·`ios/` 등이 없으면 Flutter SDK로 한 번 생성합니다.

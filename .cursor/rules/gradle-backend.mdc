@@ -9,4 +9,5 @@ alwaysApply: true
 - 컴파일·테스트·실행·패키징은 루트에서 **Gradle Wrapper**로 수행한다.
   - Unix/macOS: `./gradlew test`, `./gradlew bootRun`, `./gradlew bootJar`
   - Windows: `gradlew.bat test` 등
+  - 모노레포 루트에서 `npm run test:api` / `build:api` / `boot:api` 는 `scripts/run-gradlew.cjs` 로 위와 동일한 Wrapper를 호출한다.
 - `build.gradle` 안의 `repositories { mavenCentral() }`는 **Maven Central이라는 아티팩트 저장소**를 Gradle이 바라보게 하는 표준이며, “Maven으로 빌드한다”는 뜻이 아니다. 삭제하지 않는다.
