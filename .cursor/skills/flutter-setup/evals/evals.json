@@ -1,0 +1,23 @@
+{
+  "skill_name": "flutter-setup",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Windows에서 Flutter 개발 환경을 처음부터 세팅하려고 해. Android Studio랑 에뮬레이터까지 전부 설치해줘. flutter doctor에서 에러 안 나게 해줘.",
+      "expected_output": "Windows Flutter SDK 설치, 환경변수 설정, Android Studio 설치, AVD 에뮬레이터 생성, flutter doctor 전체 통과까지 단계별 안내",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "기존 Flutter 프로젝트에 Riverpod 상태관리랑 GoRouter 라우팅을 추가하고 싶어. freezed로 모델 클래스도 만들어야 해. 전체 설정 방법 알려줘.",
+      "expected_output": "pubspec.yaml 의존성 추가, Riverpod 초기 설정, GoRouter 라우팅 구조, freezed 설정 + build_runner 코드 생성까지 안내",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "flutter doctor -v 실행했더니 Android toolchain에서 [✗] 나오고, cmdline-tools component is missing이라고 뜨는데 어떻게 해결해?",
+      "expected_output": "flutter doctor 에러 항목별 원인 분석 + Android SDK Command-line Tools 설치 방법 + 해결 후 재검증까지 안내",
+      "files": []
+    }
+  ]
+}
