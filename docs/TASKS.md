@@ -315,3 +315,4 @@
 | v1.59 | 2026-04-14 | `.cursor/skills/`: Flutter·React 에이전트 스킬(flutter-setup·react-setup) 저장소 포함 — PR #79 |
 | v1.60 | 2026-04-14 | WORKFLOW v1.4: §3.2·DoD·§7.3 등 `develop(또는 dev)` → `develop`; PRD DoD 동일 정리 |
 | v1.61 | 2026-04-14 | DOR-DOD v1.1·PHASE v1.3: `WORKFLOW.md` §1·§4 교차 링크 |
+| v1.62 | 2026-04-14 | WORKFLOW v1.5 §6·`DOR-DOD.md` 정본 안내; README PR 규칙에 DoR/DoD·§6 링크 |
