@@ -310,3 +310,4 @@
 | v1.54 | 2026-04-14 | 모노레포: `scripts/run-gradlew.cjs`·`npm run test:api`/`build:api`/`boot:api`·README 안내 — Gradle 전용 워크플로 |
 | v1.55 | 2026-04-14 | `IssueIntegrationTest`: 아카이브 해제 후 `SELECTED` 전환 성공 — T-617·모바일 해제 흐름과 정합 |
 | v1.56 | 2026-04-14 | 모바일: FVM(`stable`)·Flutter Riverpod 3.3·`riverpod_lint`·Dart 3.10+·디버그 `PrettyDioLogger`·`ProviderScope` 재시도 끔 — T-620·T-621 보강 |
+| v1.57 | 2026-04-14 | README: FVM 선택 사항·Windows `dart pub global activate fvm`·PATH·`fvm` 없이 `flutter`만 사용 안내 |

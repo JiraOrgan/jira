@@ -196,17 +196,26 @@ Spring 프로필을 넘기려면 예:
 ### 모바일 앱 (Flutter)
 
 - **Dart SDK**: `apps/mobile/pubspec.yaml` 기준 **3.10+** (Riverpod 3.3·`riverpod_lint` 3.1과 맞춤).
-- **FVM**(선택): `apps/mobile/.fvm/fvm_config.json`에 `stable` 채널을 두었습니다. 사용 시 [FVM](https://fvm.app/) 설치 후 `cd apps/mobile && fvm install && fvm flutter pub get` — 이후 `fvm flutter run` 등으로 동일 Flutter 버전을 공유합니다.
+- **기본(권장)**: PC에 Flutter SDK를 설치하고 **PATH에 `flutter`만** 두면 됩니다. 아래 명령은 **`fvm` 없이** 그대로 사용하세요.
+- **FVM**(완전 선택): 팀이 Flutter 버전을 고정할 때만 씁니다. `apps/mobile/.fvm/fvm_config.json`은 있어도 **FVM을 설치하지 않으면 무시**해도 됩니다. PowerShell에서 `fvm`을 찾을 수 없다면 → **FVM 설치를 건너뛰고 `flutter` / `dart`만 사용**하면 됩니다.
+  - **Windows에서 FVM을 쓰고 싶을 때**: 먼저 [Flutter](https://docs.flutter.dev/get-started/install/windows)로 `flutter`·`dart`를 PATH에 둔 뒤,
+    ```powershell
+    dart pub global activate fvm
+    ```
+    실행 후 **Pub 전역 bin**을 PATH에 추가합니다. (일반적으로 `%LOCALAPPDATA%\Pub\Cache\bin` — 탐색기 주소창에 붙여 넣어 확인.) 새 터미널에서 `fvm --version`이 나오면 `cd apps/mobile` 후 `fvm install`, `fvm flutter pub get` 순서로 사용합니다.
+  - 자세한 내용: [fvm.app — 설치](https://fvm.app/documentation/getting-started/installation).
 - **상태·HTTP**: Flutter Riverpod **3.x**, Dio, 디버그 빌드에서만 요청/응답 로그(`pretty_dio_logger`, `kDebugMode`).
 
 `apps/mobile`에 `android/`·`ios/` 등이 없으면 Flutter SDK로 한 번 생성합니다.
 
 ```bash
 cd apps/mobile
-flutter create .   # 또는 fvm flutter create .
-flutter pub get    # 또는 fvm flutter pub get
-flutter run        # 또는 fvm flutter run
+flutter create .
+flutter pub get
+flutter run
 ```
+
+FVM을 쓰는 경우에만 위 세 줄 앞에 `fvm`을 붙이면 됩니다 (`fvm flutter pub get` 등).
 
 에뮬레이터에서 호스트 백엔드 접근 시 기본 `API_BASE_URL`은 Android 에뮬 `10.0.2.2:8080` 입니다. 필요 시 `flutter run --dart-define=API_BASE_URL=http://...` 로 바꿉니다.
 
