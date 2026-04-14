@@ -43,7 +43,7 @@ class _IssueCreateScreenState extends ConsumerState<IssueCreateScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           DropdownButtonFormField<String>(
-            value: _type,
+            initialValue: _type,
             decoration: const InputDecoration(labelText: '유형'),
             items: _types
                 .map((t) => DropdownMenuItem(value: t, child: Text(t)))
@@ -52,7 +52,7 @@ class _IssueCreateScreenState extends ConsumerState<IssueCreateScreen> {
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
-            value: _priority,
+            initialValue: _priority,
             decoration: const InputDecoration(labelText: '우선순위'),
             items: _priorities
                 .map((p) => DropdownMenuItem(value: p, child: Text(p)))
