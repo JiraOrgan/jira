@@ -1,9 +1,9 @@
 # Project Control Hub - 개발 워크플로우
 
-> **버전**: v1.4
+> **버전**: v1.5
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-14 (본문 `develop(또는 dev)` 잔여 제거)
-> **연결 문서**: [PHASE.md](PHASE.md) | [TASKS.md](TASKS.md) | [PRD.md](PRD.md)
+> **최종수정일**: 2026-04-14 (§6 Sprint와 DOR-DOD 연계)
+> **연결 문서**: [PHASE.md](PHASE.md) | [TASKS.md](TASKS.md) | [PRD.md](PRD.md) | [DOR-DOD.md](DOR-DOD.md)
 > **Git 정본**: `C:\workspace\phs-prj\documents\08-Git규칙정의서_v3.0.md` — 본 파일은 코드 저장소용 요약이며, 세부·예외는 해당 문서를 따른다.
 
 기능 완료·Task 상태·릴리즈 단위 진척은 **[TASKS.md](TASKS.md) 변경 이력** 및 Phase 로드맵의 **「일정 vs 저장소 진척」** 안내([PHASE.md](PHASE.md))를 본다.
@@ -190,6 +190,8 @@ TODO → IN_PROGRESS → REVIEW → DONE
 
 ## 6. Sprint 운영
 
+스프린트 단위 **DoR·DoD 표준 체크리스트**(M1.1)는 [DOR-DOD.md](DOR-DOD.md)에 있다. 아래 §6.3·§6.4는 본 워크플로 문서 안에서의 요약이다.
+
 ### 6.1 Sprint 사이클 (2주)
 
 | 일차 | 이벤트 | 소요 | 참여 |
@@ -288,3 +290,4 @@ main 머지 → 운영 배포 트리거
 | v1.1 | 2026-04-09 | `08-Git규칙정의서_v3.0` 정렬(main/develop/feature/bugfix/release/hotfix), 커밋 Footer·스코프, CD·환경(PostgreSQL) 갱신 |
 | v1.3 | 2026-04-14 | 본 저장소 통합 브랜치 **`develop`** 명시(§1.1 주석·§1.3), `dev` 혼동 완화 |
 | v1.4 | 2026-04-14 | §3.2·DoD·§7.3 등 본문 잔여 **`develop(또는 dev)`** → **`develop`** 로 통일 |
+| v1.5 | 2026-04-14 | §6 Sprint 상단·헤더에 `DOR-DOD.md` 연계(표준 DoR/DoD 정본) |

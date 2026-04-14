@@ -459,6 +459,7 @@ chore:       build.gradle 의존성 업데이트
 2. 제목: `[T-{id}] {요약}` 형식
 3. 리뷰어 1명 이상 승인 후 Squash Merge
 4. CI (빌드 + 테스트) 통과 필수
+5. 스프린트 단위 DoR/DoD는 [DOR-DOD.md](docs/DOR-DOD.md)를 본다 (Sprint 맥락은 [WORKFLOW.md](docs/WORKFLOW.md) §6)
 
 ### Cursor 에이전트 스킬
 
