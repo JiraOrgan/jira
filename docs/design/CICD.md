@@ -12,7 +12,7 @@
 
 ## 2. GitHub Actions (초안)
 
-구현 워크플로: 저장소 루트 [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) — `develop`/`main` **push·PR** 시 백엔드 `./gradlew test`(Redis)·`apps/web` **lint+빌드**(`npm run lint:web`·`build:web`)·`apps/mobile` **Flutter analyze**(stable 채널).
+구현 워크플로: 저장소 루트 [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) — `develop`/`main` **push·PR** 시 백엔드 `./gradlew test`·**`bootJar`**(Redis 서비스 컨테이너 동일 잡)·`apps/web` **lint+빌드**·`apps/mobile` **Flutter analyze**(stable 채널).
 
 ### 워크플로 `ci-backend.yml` (develop, PR)
 
