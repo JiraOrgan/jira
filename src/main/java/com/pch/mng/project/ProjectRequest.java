@@ -32,6 +32,8 @@ public class ProjectRequest {
         private String name;
         private String description;
         private Long leadId;
+        /** null이면 아카이브 플래그는 변경하지 않음 */
+        private Boolean archived;
     }
 
     @Data

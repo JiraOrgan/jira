@@ -42,6 +42,16 @@ public class ProjectService {
         return ProjectResponse.DetailDTO.of(project);
     }
 
+    /** 멤버만 조회 가능. 아카이브 프로젝트 포함(설정 화면 진입용). */
+    public ProjectResponse.DetailDTO findDetailByKeyForUser(String key, Long userId) {
+        Project project = projectRepository.findByKey(key)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        if (!projectMemberRepository.existsByProjectIdAndUserId(project.getId(), userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+        return ProjectResponse.DetailDTO.of(project);
+    }
+
     @Transactional
     public ProjectResponse.DetailDTO save(ProjectRequest.SaveDTO reqDTO) {
         if (projectRepository.existsByKey(reqDTO.getKey())) {
@@ -96,6 +106,9 @@ public class ProjectService {
             UserAccount newLead = userAccountRepository.findById(reqDTO.getLeadId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
             project.setLead(newLead);
+        }
+        if (reqDTO.getArchived() != null) {
+            project.setArchived(reqDTO.getArchived());
         }
         return ProjectResponse.DetailDTO.of(project);
     }

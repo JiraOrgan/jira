@@ -23,6 +23,16 @@ export async function fetchProjectById(
   return unwrapApi(data)
 }
 
+/** 멤버만 조회. 아카이브 프로젝트 포함(설정 URL 직접 진입). */
+export async function fetchProjectByKey(
+  projectKey: string,
+): Promise<ProjectDetail> {
+  const { data } = await api.get<ApiResponse<ProjectDetail>>(
+    `/api/v1/projects/by-key/${encodeURIComponent(projectKey)}`,
+  )
+  return unwrapApi(data)
+}
+
 export async function updateProject(
   projectId: number,
   body: ProjectUpdateBody,

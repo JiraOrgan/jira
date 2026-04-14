@@ -28,6 +28,15 @@ public class ProjectApiController {
         return ResponseEntity.ok(ApiResponse.ok(projectService.findAllForUser(principal.getId())));
     }
 
+    @GetMapping("/by-key/{key}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<ProjectResponse.DetailDTO>> findByKey(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @PathVariable String key) {
+        return ResponseEntity.ok(
+                ApiResponse.ok(projectService.findDetailByKeyForUser(key, principal.getId())));
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("@projectSecurity.isMember(#id)")
     public ResponseEntity<ApiResponse<ProjectResponse.DetailDTO>> findById(@PathVariable Long id) {
