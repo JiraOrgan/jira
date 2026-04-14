@@ -303,3 +303,4 @@
 | v1.47 | 2026-04-14 | docs: PHASE 일정 vs TASKS 안내·Phase 2/3 주석, WORKFLOW v1.2·TASKS 참조, API-SPEC JQL·아카이브 동작 명시 |
 | v1.48 | 2026-04-14 | JQL: `archived` 필드(EQ/NE/IN)·WHERE 미명시 시 비아카이브 고정·통합 테스트·API-SPEC·`SPIKE-JQL-PARSER`·웹 `jqlHints` |
 | v1.49 | 2026-04-14 | 웹 `JqlSearchPage`: 비아카이브 기본·`archived = true` 등 안내 문구 — T-611 UX |
+| v1.50 | 2026-04-14 | 모바일: 이슈 `archived` 필드·`IssueRepository.update`·상세 아카이브 안내·해제·목록 부제목 표시 — T-617·T-621 보강 |

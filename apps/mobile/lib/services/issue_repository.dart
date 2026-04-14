@@ -46,6 +46,21 @@ class IssueRepository {
     return unwrapData(body);
   }
 
+  Future<IssueDetail> update(
+    String issueKey,
+    Map<String, dynamic> body,
+  ) async {
+    final res = await _dio.put<Map<String, dynamic>>(
+      '/api/v1/issues/${Uri.encodeComponent(issueKey)}',
+      data: body,
+    );
+    final bodyOut = ApiResponse.fromJson(
+      res.data!,
+      (d) => IssueDetail.fromJson(d! as Map<String, dynamic>),
+    );
+    return unwrapData(bodyOut);
+  }
+
   Future<IssueDetail> create(Map<String, dynamic> payload) async {
     final res = await _dio.post<Map<String, dynamic>>(
       '/api/v1/issues',

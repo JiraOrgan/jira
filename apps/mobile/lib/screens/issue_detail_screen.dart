@@ -3,17 +3,47 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/providers.dart';
 
-class IssueDetailScreen extends ConsumerWidget {
+class IssueDetailScreen extends ConsumerStatefulWidget {
   const IssueDetailScreen({super.key, required this.issueKey});
 
   final String issueKey;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(issueDetailProvider(issueKey));
+  ConsumerState<IssueDetailScreen> createState() => _IssueDetailScreenState();
+}
+
+class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
+  bool _unarchiveBusy = false;
+
+  Future<void> _unarchive() async {
+    setState(() => _unarchiveBusy = true);
+    try {
+      final detail = await ref.read(issueRepositoryProvider).update(
+            widget.issueKey,
+            const {'archived': false},
+          );
+      ref.invalidate(issueDetailProvider(widget.issueKey));
+      ref.invalidate(issueListProvider(detail.projectId));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('아카이브를 해제했습니다.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('아카이브 해제 실패: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _unarchiveBusy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final async = ref.watch(issueDetailProvider(widget.issueKey));
 
     return Scaffold(
-      appBar: AppBar(title: Text(issueKey)),
+      appBar: AppBar(title: Text(widget.issueKey)),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('조회 실패: $e')),
@@ -21,6 +51,26 @@ class IssueDetailScreen extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              if (issue.archived) ...[
+                MaterialBanner(
+                  content: const Text(
+                    '이 이슈는 아카이브되어 있습니다. 웹에서 다시 아카이브할 수 있습니다.',
+                  ),
+                  actions: [
+                    FilledButton(
+                      onPressed: _unarchiveBusy ? null : _unarchive,
+                      child: _unarchiveBusy
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('아카이브 해제'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+              ],
               Text(
                 issue.summary,
                 style: Theme.of(context).textTheme.titleLarge,
