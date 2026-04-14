@@ -76,13 +76,50 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 8),
+              Text('프로젝트: ${issue.projectKey}'),
               Text('상태: ${issue.status}'),
               Text('유형: ${issue.issueType}'),
               Text('우선순위: ${issue.priority}'),
+              if (issue.storyPoints != null)
+                Text('스토리 포인트: ${issue.storyPoints}'),
               if (issue.assigneeName != null)
                 Text('담당: ${issue.assigneeName}'),
               Text('보고자: ${issue.reporterName ?? issue.reporterId}'),
-              const SizedBox(height: 16),
+              if (issue.parentKey != null)
+                Text('부모 이슈: ${issue.parentKey}'),
+              if (issue.securityLevel != null)
+                Text('보안 레벨: ${issue.securityLevel}'),
+              const SizedBox(height: 12),
+              if (issue.labels.isNotEmpty) ...[
+                Text(
+                  '레이블',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: issue.labels
+                      .map((l) => Chip(label: Text(l.name)))
+                      .toList(),
+                ),
+                const SizedBox(height: 12),
+              ],
+              if (issue.components.isNotEmpty) ...[
+                Text(
+                  '컴포넌트',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: issue.components
+                      .map((c) => Chip(label: Text(c.name)))
+                      .toList(),
+                ),
+                const SizedBox(height: 12),
+              ],
               if (issue.description != null && issue.description!.isNotEmpty) ...[
                 Text(
                   '설명',
