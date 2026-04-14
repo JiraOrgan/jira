@@ -167,6 +167,7 @@ class BoardServiceTest {
         i.setAssignee(assignee);
         i.setUpdatedAt(t);
         i.setCreatedAt(t);
+        i.setArchived(false);
         return i;
     }
 }

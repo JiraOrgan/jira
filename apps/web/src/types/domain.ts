@@ -40,6 +40,8 @@ export type ProjectDetail = {
   leadId: number | null
   leadName: string | null
   archived: boolean
+  /** DONE 자동 아카이브: `updatedAt` 기준 일수. null이면 비활성 */
+  autoArchiveDoneAfterDays: number | null
   createdAt: string
 }
 
@@ -58,6 +60,8 @@ export type ProjectUpdateBody = {
   leadId?: number
   /** 생략 시 백엔드에서 아카이브 플래그 유지 */
   archived?: boolean
+  /** 0 이하로내면 비활성(null). 생략 시 유지 */
+  autoArchiveDoneAfterDays?: number | null
 }
 
 export type VersionStatus = 'UNRELEASED' | 'RELEASED'
@@ -106,6 +110,7 @@ export type IssueMin = {
   storyPoints: number | null
   backlogRank: number
   assigneeName: string | null
+  archived: boolean
 }
 
 export type BoardSwimlane = 'NONE' | 'ASSIGNEE'
@@ -195,6 +200,7 @@ export type IssueDetail = {
   epicEndDate?: string | null
   createdAt: string
   updatedAt: string
+  archived: boolean
   labels: IssueLabelItem[]
   components: IssueComponentItem[]
 }
@@ -227,6 +233,7 @@ export type IssueUpdateBody = {
   patchEpicDates?: boolean
   epicStartDate?: string | null
   epicEndDate?: string | null
+  archived?: boolean
 }
 
 export type TransitionBody = {

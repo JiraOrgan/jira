@@ -111,9 +111,11 @@ class ReportServiceTest {
                 .reporter(rep)
                 .storyPoints(13)
                 .backlogRank(0)
+                .archived(false)
                 .build();
         ReflectionTestUtils.setField(done, "id", 100L);
-        when(issueRepository.findByProjectIdAndSprintIdOrderByCreatedAtDesc(1L, 10L)).thenReturn(List.of(done));
+        when(issueRepository.findByProjectIdAndSprintIdAndArchivedFalseOrderByCreatedAtDesc(1L, 10L))
+                .thenReturn(List.of(done));
 
         ReportResponse.VelocityDTO dto = reportService.velocity(1L, 6);
         assertThat(dto.getSprints()).hasSize(1);
@@ -134,10 +136,11 @@ class ReportServiceTest {
                 .priority(com.pch.mng.global.enums.Priority.MEDIUM)
                 .reporter(null)
                 .backlogRank(0)
+                .archived(false)
                 .build();
         ReflectionTestUtils.setField(i, "id", 100L);
 
-        when(issueRepository.findByProjectIdOrderByCreatedAtDesc(eq(1L), any(Pageable.class)))
+        when(issueRepository.findByProjectIdAndArchivedFalseOrderByCreatedAtDesc(eq(1L), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(i)));
         when(workflowTransitionRepository.findByIssueIdInOrderByIssueAndTimeAsc(List.of(100L)))
                 .thenReturn(List.of());

@@ -172,7 +172,7 @@ class SprintServiceTest {
     void deleteRejectsWhenIssuesAssigned() {
         Sprint sprint = sprintEntity(5L, 10L, SprintStatus.PLANNING);
         when(sprintRepository.findByIdWithProject(5L)).thenReturn(Optional.of(sprint));
-        when(issueRepository.countBySprint_Id(5L)).thenReturn(1L);
+        when(issueRepository.countBySprint_IdAndArchivedFalse(5L)).thenReturn(1L);
 
         assertThatThrownBy(() -> sprintService.delete(5L))
                 .isInstanceOf(BusinessException.class)
@@ -187,7 +187,7 @@ class SprintServiceTest {
     void deleteEvictsThenRemoves() {
         Sprint sprint = sprintEntity(5L, 10L, SprintStatus.PLANNING);
         when(sprintRepository.findByIdWithProject(5L)).thenReturn(Optional.of(sprint));
-        when(issueRepository.countBySprint_Id(5L)).thenReturn(0L);
+        when(issueRepository.countBySprint_IdAndArchivedFalse(5L)).thenReturn(0L);
 
         sprintService.delete(5L);
 

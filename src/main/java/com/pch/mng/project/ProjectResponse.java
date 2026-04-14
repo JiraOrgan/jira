@@ -39,6 +39,7 @@ public class ProjectResponse {
         private Long leadId;
         private String leadName;
         private boolean archived;
+        private Integer autoArchiveDoneAfterDays;
         private LocalDateTime createdAt;
 
         private DetailDTO() {}
@@ -51,6 +52,7 @@ public class ProjectResponse {
             dto.description = project.getDescription();
             dto.boardType = project.getBoardType();
             dto.archived = project.isArchived();
+            dto.autoArchiveDoneAfterDays = project.getAutoArchiveDoneAfterDays();
             dto.createdAt = project.getCreatedAt();
             if (project.getLead() != null) {
                 dto.leadId = project.getLead().getId();

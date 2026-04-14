@@ -35,6 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -63,7 +64,11 @@ public class IssueService {
 
     public Page<IssueResponse.MinDTO> findByProject(Long projectId, Pageable pageable) {
         var ctx = issueVisibilityEvaluator.requiredContextForProject(projectId);
-        List<Issue> visible = issueRepository.findByProjectIdOrderByCreatedAtDesc(projectId, Pageable.unpaged()).getContent().stream()
+        List<Issue> visible =
+                issueRepository
+                        .findByProjectIdAndArchivedFalseOrderByCreatedAtDesc(projectId, Pageable.unpaged())
+                        .getContent()
+                        .stream()
                 .filter(i -> IssueSecurityPolicy.canView(i, ctx.role(), ctx.userId()))
                 .toList();
         int start = (int) pageable.getOffset();
@@ -79,7 +84,9 @@ public class IssueService {
 
     public List<IssueResponse.MinDTO> findBacklog(Long projectId) {
         var ctx = issueVisibilityEvaluator.requiredContextForProject(projectId);
-        return issueRepository.findByProjectIdAndSprintIsNullOrderByBacklogRankAscIdAsc(projectId).stream()
+        return issueRepository
+                .findByProjectIdAndSprintIsNullAndArchivedFalseOrderByBacklogRankAscIdAsc(projectId)
+                .stream()
                 .filter(i -> IssueSecurityPolicy.canView(i, ctx.role(), ctx.userId()))
                 .map(IssueResponse.MinDTO::of)
                 .toList();
@@ -87,7 +94,8 @@ public class IssueService {
 
     public List<RoadmapEpicResponse> listRoadmapEpics(Long projectId) {
         return issueRepository
-                .findByProjectIdAndIssueTypeOrderByEpicStartDateAscIdAsc(projectId, IssueType.EPIC)
+                .findByProjectIdAndIssueTypeAndArchivedFalseOrderByEpicStartDateAscIdAsc(
+                        projectId, IssueType.EPIC)
                 .stream()
                 .filter(issueVisibilityEvaluator::canView)
                 .map(RoadmapEpicResponse::of)
@@ -170,6 +178,7 @@ public class IssueService {
         if (reqDTO.getIssueType() == IssueType.EPIC) {
             builder.epicStartDate(reqDTO.getEpicStartDate()).epicEndDate(reqDTO.getEpicEndDate());
         }
+        builder.archived(false);
 
         Issue issue = builder.build();
         issueRepository.save(issue);
@@ -183,7 +192,9 @@ public class IssueService {
             return;
         }
         wipLimitRepository.findByProjectIdAndStatus(project.getId(), toStatus).ifPresent(limit -> {
-            long n = issueRepository.countByProjectIdAndStatus(project.getId(), toStatus);
+            long n =
+                    issueRepository.countByProjectIdAndStatusAndArchivedFalse(
+                            project.getId(), toStatus);
             if (n >= limit.getMaxIssues()) {
                 throw new BusinessException(ErrorCode.WIP_LIMIT_EXCEEDED);
             }
@@ -206,6 +217,9 @@ public class IssueService {
                     .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
             if (!parent.getProject().getId().equals(project.getId())) {
                 throw new BusinessException(ErrorCode.ISSUE_PARENT_PROJECT_MISMATCH);
+            }
+            if (parent.isArchived()) {
+                throw new BusinessException(ErrorCode.ISSUE_ARCHIVED);
             }
         }
         IssueHierarchyPolicy.assertValidParent(issueType, parent);
@@ -295,6 +309,16 @@ public class IssueService {
                     issue.getEpicEndDate() != null ? String.valueOf(issue.getEpicEndDate()) : null);
         }
 
+        if (reqDTO.getArchived() != null && reqDTO.getArchived() != issue.isArchived()) {
+            boolean before = issue.isArchived();
+            issue.setArchived(reqDTO.getArchived());
+            issueAuditService.recordFromContext(
+                    issue,
+                    "archived",
+                    String.valueOf(before),
+                    String.valueOf(reqDTO.getArchived()));
+        }
+
         Long newSprintId = issue.getSprint() != null ? issue.getSprint().getId() : null;
         evictBoardForSprintPair(oldSprintId, newSprintId);
         return toDetail(issue);
@@ -303,7 +327,9 @@ public class IssueService {
     @Transactional
     public List<IssueResponse.MinDTO> reorderBacklog(Long projectId, IssueRequest.BacklogReorderDTO dto) {
         List<Long> ordered = dto.getOrderedIssueIds();
-        List<Issue> backlog = issueRepository.findByProjectIdAndSprintIsNullOrderByBacklogRankAscIdAsc(projectId);
+        List<Issue> backlog =
+                issueRepository.findByProjectIdAndSprintIsNullAndArchivedFalseOrderByBacklogRankAscIdAsc(
+                        projectId);
         Set<Long> expected = new HashSet<>();
         for (Issue i : backlog) {
             expected.add(i.getId());
@@ -345,6 +371,7 @@ public class IssueService {
         for (Long issueId : dto.getIssueIds()) {
             Issue issue = issueRepository.findByIdWithProject(issueId)
                     .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+            assertIssueNotArchived(issue);
             if (!issue.getProject().getId().equals(projectId)) {
                 throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
             }
@@ -385,6 +412,7 @@ public class IssueService {
     public IssueResponse.DetailDTO transition(String issueKey, IssueRequest.TransitionDTO reqDTO, Long actorUserId) {
         Issue issue = issueRepository.findByIssueKeyWithProject(issueKey)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        assertIssueNotArchived(issue);
         IssueStatus from = issue.getStatus();
         IssueStatus to = reqDTO.getToStatus();
         if (from == to) {
@@ -415,6 +443,7 @@ public class IssueService {
     public IssueResponse.DetailDTO addLabel(String issueKey, Long labelId) {
         Issue issue = issueRepository.findByIssueKeyWithProject(issueKey)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        assertIssueNotArchived(issue);
         Label label = labelRepository.findById(labelId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
         if (issueLabelRepository.existsByIssue_IdAndLabel_Id(issue.getId(), labelId)) {
@@ -432,6 +461,7 @@ public class IssueService {
     public IssueResponse.DetailDTO removeLabel(String issueKey, Long labelId) {
         Issue issue = issueRepository.findByIssueKeyWithProject(issueKey)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        assertIssueNotArchived(issue);
         if (!issueLabelRepository.existsByIssue_IdAndLabel_Id(issue.getId(), labelId)) {
             throw new BusinessException(ErrorCode.ENTITY_NOT_FOUND);
         }
@@ -446,6 +476,7 @@ public class IssueService {
     public IssueResponse.DetailDTO addComponent(String issueKey, Long componentId) {
         Issue issue = issueRepository.findByIssueKeyWithProject(issueKey)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        assertIssueNotArchived(issue);
         ProjectComponent component = projectComponentRepository.findByIdWithProject(componentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
         if (!component.getProject().getId().equals(issue.getProject().getId())) {
@@ -466,6 +497,7 @@ public class IssueService {
     public IssueResponse.DetailDTO removeComponent(String issueKey, Long componentId) {
         Issue issue = issueRepository.findByIssueKeyWithProject(issueKey)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        assertIssueNotArchived(issue);
         if (!issueComponentRepository.existsByIssue_IdAndComponent_Id(issue.getId(), componentId)) {
             throw new BusinessException(ErrorCode.ENTITY_NOT_FOUND);
         }
@@ -543,6 +575,24 @@ public class IssueService {
             sprintBoardRedisCache.evictSprint(oldSprintId);
             sprintBoardRedisCache.evictSprint(newSprintId);
         }
+    }
+
+    private static void assertIssueNotArchived(Issue issue) {
+        if (issue.isArchived()) {
+            throw new BusinessException(ErrorCode.ISSUE_ARCHIVED);
+        }
+    }
+
+    @Transactional
+    public int autoArchiveDoneForProject(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        Integer days = project.getAutoArchiveDoneAfterDays();
+        if (days == null || days <= 0) {
+            throw new BusinessException(ErrorCode.AUTO_ARCHIVE_NOT_CONFIGURED);
+        }
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(days);
+        return issueRepository.archiveDoneIssuesOlderThan(projectId, IssueStatus.DONE, cutoff);
     }
 
     private IssueResponse.DetailDTO toDetail(Issue issue) {

@@ -130,6 +130,7 @@ class IssueAuditServiceTest {
                 .priority(Priority.MEDIUM)
                 .reporter(creator)
                 .backlogRank(0L)
+                .archived(false)
                 .build();
         ReflectionTestUtils.setField(parent, "id", 100L);
 
@@ -150,6 +151,7 @@ class IssueAuditServiceTest {
                 .securityLevel(SecurityLevel.INTERNAL)
                 .epicStartDate(LocalDate.of(2026, 4, 1))
                 .epicEndDate(LocalDate.of(2026, 4, 30))
+                .archived(false)
                 .build();
         ReflectionTestUtils.setField(issue, "id", 2L);
 
@@ -177,6 +179,7 @@ class IssueAuditServiceTest {
                 .priority(Priority.MEDIUM)
                 .reporter(r)
                 .backlogRank(0L)
+                .archived(false)
                 .build();
     }
 }

@@ -34,6 +34,10 @@ public class ProjectRequest {
         private Long leadId;
         /** null이면 아카이브 플래그는 변경하지 않음 */
         private Boolean archived;
+        /**
+         * DONE 이슈 자동 아카이브 일수. null이면 유지. 0 이하이면 비활성(null 저장).
+         */
+        private Integer autoArchiveDoneAfterDays;
     }
 
     @Data

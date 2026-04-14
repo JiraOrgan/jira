@@ -84,6 +84,10 @@ public class Issue {
     @Column(name = "epic_end_date")
     private LocalDate epicEndDate;
 
+    /** 이슈 아카이브(보드·백로그·JQL 기본 목록에서 제외). */
+    @Column(nullable = false)
+    private boolean archived = false;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
@@ -95,7 +99,7 @@ public class Issue {
                  String description, IssueStatus status, Priority priority, Integer storyPoints,
                  UserAccount assignee, UserAccount reporter, Issue parent, Sprint sprint,
                  long backlogRank, SecurityLevel securityLevel,
-                 LocalDate epicStartDate, LocalDate epicEndDate) {
+                 LocalDate epicStartDate, LocalDate epicEndDate, boolean archived) {
         this.issueKey = issueKey;
         this.project = project;
         this.issueType = issueType;
@@ -112,5 +116,6 @@ public class Issue {
         this.securityLevel = securityLevel;
         this.epicStartDate = epicStartDate;
         this.epicEndDate = epicEndDate;
+        this.archived = archived;
     }
 }

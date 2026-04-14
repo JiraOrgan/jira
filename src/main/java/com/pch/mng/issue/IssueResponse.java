@@ -21,6 +21,7 @@ public class IssueResponse {
         private Integer storyPoints;
         private long backlogRank;
         private String assigneeName;
+        private boolean archived;
 
         private MinDTO() {}
 
@@ -34,6 +35,7 @@ public class IssueResponse {
             dto.priority = issue.getPriority();
             dto.storyPoints = issue.getStoryPoints();
             dto.backlogRank = issue.getBacklogRank();
+            dto.archived = issue.isArchived();
             if (issue.getAssignee() != null) {
                 dto.assigneeName = issue.getAssignee().getName();
             }
@@ -78,6 +80,7 @@ public class IssueResponse {
         private LocalDate epicEndDate;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
+        private boolean archived;
         private List<LabelItemDTO> labels = Collections.emptyList();
         private List<ComponentItemDTO> components = Collections.emptyList();
 
@@ -102,6 +105,7 @@ public class IssueResponse {
             dto.epicEndDate = issue.getEpicEndDate();
             dto.createdAt = issue.getCreatedAt();
             dto.updatedAt = issue.getUpdatedAt();
+            dto.archived = issue.isArchived();
             if (issue.getProject() != null) {
                 dto.projectId = issue.getProject().getId();
                 dto.projectKey = issue.getProject().getKey();
