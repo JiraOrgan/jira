@@ -273,14 +273,27 @@ export function JqlSearchPage() {
                   </thead>
                   <tbody className="divide-y divide-slate-800">
                     {result.issues.map((issue) => (
-                      <tr key={issue.id} className="hover:bg-slate-900/40">
-                        <td className="px-4 py-3 font-mono text-indigo-300">
-                          <Link
-                            to={`/issue/${encodeURIComponent(issue.issueKey)}`}
-                            className="hover:underline"
-                          >
-                            {issue.issueKey}
-                          </Link>
+                      <tr
+                        key={issue.id}
+                        className={[
+                          'hover:bg-slate-900/40',
+                          issue.archived ? 'opacity-80' : '',
+                        ].join(' ')}
+                      >
+                        <td className="px-4 py-3">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Link
+                              to={`/issue/${encodeURIComponent(issue.issueKey)}`}
+                              className="font-mono text-indigo-300 hover:underline"
+                            >
+                              {issue.issueKey}
+                            </Link>
+                            {issue.archived ? (
+                              <span className="rounded border border-amber-800/50 bg-amber-950/40 px-1.5 py-0.5 text-[10px] text-amber-200">
+                                아카이브
+                              </span>
+                            ) : null}
+                          </div>
                         </td>
                         <td className="px-4 py-3 text-slate-400">
                           {issueTypeLabel[issue.issueType]}

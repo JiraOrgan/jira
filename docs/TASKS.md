@@ -1,8 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.44
+> **버전**: v1.45
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-14 (H2 dev 관리자 시드 계정)
+> **최종수정일**: 2026-04-14 (JQL 검색 결과 아카이브 뱃지)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -298,3 +298,4 @@
 | v1.42 | 2026-04-14 | T-617: 이슈 `archived`·프로젝트 자동 아카이브 일수·일괄 실행 API; 웹 타입·설정·이슈 상세; API-SPEC·DDL·H2 시드 반영 — FR-026~027 |
 | v1.43 | 2026-04-14 | 웹: 백로그·칸반·스프린트 보드 카드에 아카이브 뱃지·드래그 비활성 — T-617 UX 보강 |
 | v1.44 | 2026-04-14 | H2 dev 시드: `admin@local.test`(DEMO ADMIN)·`DevSeedAdminLoginTest` 검증 |
+| v1.45 | 2026-04-14 | 웹 JQL 검색 결과 테이블에 아카이브 이슈 뱃지·행 스타일 — T-617 UX |
