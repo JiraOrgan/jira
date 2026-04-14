@@ -3,11 +3,13 @@ package com.pch.mng.jql;
 import com.pch.mng.global.exception.BusinessException;
 import com.pch.mng.global.exception.ErrorCode;
 import com.pch.mng.issue.Issue;
+import com.pch.mng.auth.CustomUserDetails;
 import com.pch.mng.issue.IssueResponse;
 import com.pch.mng.issue.QIssue;
 import com.pch.mng.jql.ast.JqlQuery;
 import com.pch.mng.project.Project;
 import com.pch.mng.project.ProjectRepository;
+import com.pch.mng.security.IssueVisibilityEvaluator;
 import com.pch.mng.user.UserAccount;
 import com.pch.mng.user.UserAccountRepository;
 import com.querydsl.core.types.OrderSpecifier;
@@ -29,15 +31,21 @@ public class JqlSearchService {
     private final SavedJqlFilterRepository savedJqlFilterRepository;
     private final UserAccountRepository userAccountRepository;
     private final JqlSearchProperties jqlSearchProperties;
+    private final IssueVisibilityEvaluator issueVisibilityEvaluator;
 
-    public JqlSearchResponse search(Long projectId, JqlSearchRequest req) {
+    public JqlSearchResponse search(Long projectId, JqlSearchRequest req, CustomUserDetails principal) {
+        if (principal == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
         JqlQuery ast = JqlParser.parse(req.getJql());
         JqlQueryTranslator.validateProjectClauses(ast.where(), project.getKey());
 
+        var ctx = issueVisibilityEvaluator.requiredContextForProject(projectId);
         QIssue issue = QIssue.issue;
-        BooleanExpression where = issue.project.id.eq(projectId);
+        BooleanExpression where = issue.project.id.eq(projectId)
+                .and(JqlIssueVisibility.visibleTo(issue, ctx.userId(), ctx.role()));
         if (!ast.matchesAll()) {
             where = where.and(JqlQueryTranslator.buildPredicate(ast.where(), issue));
         }

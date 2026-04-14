@@ -6,6 +6,8 @@ import com.pch.mng.global.exception.BusinessException;
 import com.pch.mng.global.exception.ErrorCode;
 import com.pch.mng.issue.Issue;
 import com.pch.mng.issue.IssueRepository;
+import com.pch.mng.issue.IssueSecurityPolicy;
+import com.pch.mng.security.IssueVisibilityEvaluator;
 import com.pch.mng.sprint.Sprint;
 import com.pch.mng.sprint.SprintRepository;
 import com.pch.mng.workflow.WorkflowTransition;
@@ -37,6 +39,7 @@ public class ReportService {
     private final SprintRepository sprintRepository;
     private final IssueRepository issueRepository;
     private final WorkflowTransitionRepository workflowTransitionRepository;
+    private final IssueVisibilityEvaluator issueVisibilityEvaluator;
 
     public ReportResponse.BurndownDTO burndown(Long projectId, Long sprintId) {
         Sprint sprint = sprintRepository.findByIdWithProject(sprintId)
@@ -55,7 +58,10 @@ public class ReportService {
         }
         LocalDate lastDay = end.isAfter(today) ? today : end;
 
-        List<Issue> issues = issueRepository.findByProjectIdAndSprintIdOrderByCreatedAtDesc(projectId, sprintId);
+        var viewCtx = issueVisibilityEvaluator.requiredContextForProject(projectId);
+        List<Issue> issues = issueRepository.findByProjectIdAndSprintIdOrderByCreatedAtDesc(projectId, sprintId).stream()
+                .filter(i -> IssueSecurityPolicy.canView(i, viewCtx.role(), viewCtx.userId()))
+                .toList();
         int totalScope = issues.stream()
                 .mapToInt(i -> i.getStoryPoints() == null ? 0 : i.getStoryPoints())
                 .sum();
@@ -108,6 +114,7 @@ public class ReportService {
 
     public ReportResponse.VelocityDTO velocity(Long projectId, int limit) {
         int cap = Math.min(Math.max(limit, 1), 24);
+        var viewCtx = issueVisibilityEvaluator.requiredContextForProject(projectId);
         List<Sprint> done = sprintRepository.findByProjectIdAndStatusOrderByEndDateDesc(projectId, SprintStatus.COMPLETED);
         List<ReportResponse.VelocityBarDTO> bars = new ArrayList<>();
         int n = 0;
@@ -115,8 +122,11 @@ public class ReportService {
             if (n >= cap) {
                 break;
             }
-            Long sum = issueRepository.sumStoryPointsBySprintIdAndStatus(s.getId(), IssueStatus.DONE);
-            long pts = sum == null ? 0L : sum;
+            long pts = issueRepository.findByProjectIdAndSprintIdOrderByCreatedAtDesc(projectId, s.getId()).stream()
+                    .filter(i -> i.getStatus() == IssueStatus.DONE)
+                    .filter(i -> IssueSecurityPolicy.canView(i, viewCtx.role(), viewCtx.userId()))
+                    .mapToLong(i -> i.getStoryPoints() == null ? 0L : i.getStoryPoints())
+                    .sum();
             bars.add(ReportResponse.VelocityBarDTO.builder()
                     .sprintId(s.getId())
                     .sprintName(s.getName())
@@ -135,6 +145,7 @@ public class ReportService {
         int days = Math.min(Math.max(windowDays, 7), 90);
         LocalDate today = LocalDate.now(SEOUL);
         LocalDate from = today.minusDays(days - 1L);
+        var viewCtx = issueVisibilityEvaluator.requiredContextForProject(projectId);
 
         List<Issue> issues;
         if (sprintId != null) {
@@ -143,9 +154,13 @@ public class ReportService {
             if (!sprint.getProject().getId().equals(projectId)) {
                 throw new BusinessException(ErrorCode.SPRINT_PROJECT_MISMATCH);
             }
-            issues = issueRepository.findByProjectIdAndSprintIdOrderByCreatedAtDesc(projectId, sprintId);
+            issues = issueRepository.findByProjectIdAndSprintIdOrderByCreatedAtDesc(projectId, sprintId).stream()
+                    .filter(i -> IssueSecurityPolicy.canView(i, viewCtx.role(), viewCtx.userId()))
+                    .toList();
         } else {
-            issues = issueRepository.findByProjectIdOrderByCreatedAtDesc(projectId, Pageable.unpaged()).getContent();
+            issues = issueRepository.findByProjectIdOrderByCreatedAtDesc(projectId, Pageable.unpaged()).getContent().stream()
+                    .filter(i -> IssueSecurityPolicy.canView(i, viewCtx.role(), viewCtx.userId()))
+                    .toList();
         }
 
         List<Long> ids = issues.stream().map(Issue::getId).toList();

@@ -7,6 +7,7 @@ import com.pch.mng.global.exception.ErrorCode;
 import com.pch.mng.issue.Issue;
 import com.pch.mng.issue.IssueRepository;
 import com.pch.mng.issue.IssueResponse;
+import com.pch.mng.security.IssueVisibilityEvaluator;
 import com.pch.mng.sprint.SprintRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class BoardService {
     private final SprintRepository sprintRepository;
     private final IssueRepository issueRepository;
     private final SprintBoardRedisCache sprintBoardRedisCache;
+    private final IssueVisibilityEvaluator issueVisibilityEvaluator;
 
     public SprintBoardResponse getSprintBoard(Long sprintId, BoardSwimlane swimlane) {
         if (!sprintBoardRedisCache.isEnabled()) {
@@ -45,7 +47,9 @@ public class BoardService {
         if (!sprintRepository.existsById(sprintId)) {
             throw new BusinessException(ErrorCode.ENTITY_NOT_FOUND);
         }
-        List<Issue> issues = issueRepository.findForSprintBoard(sprintId);
+        List<Issue> issues = issueRepository.findForSprintBoard(sprintId).stream()
+                .filter(issueVisibilityEvaluator::canView)
+                .toList();
         Map<IssueStatus, List<Issue>> byStatus = issues.stream()
                 .collect(Collectors.groupingBy(Issue::getStatus, () -> new EnumMap<>(IssueStatus.class), Collectors.toList()));
 

@@ -29,7 +29,7 @@ public class JqlSearchApiController {
         if (principal == null) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
-        return ResponseEntity.ok(ApiResponse.ok(jqlSearchService.search(projectId, request)));
+        return ResponseEntity.ok(ApiResponse.ok(jqlSearchService.search(projectId, request, principal)));
     }
 
     @PostMapping("/filters")

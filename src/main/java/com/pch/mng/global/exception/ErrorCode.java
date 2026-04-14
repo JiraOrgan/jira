@@ -50,6 +50,7 @@ public enum ErrorCode {
     ISSUE_LINK_SELF(400, "동일 이슈에는 링크를 걸 수 없습니다"),
     ISSUE_LINK_PROJECT_MISMATCH(400, "링크 대상 이슈는 같은 프로젝트에 있어야 합니다"),
     ISSUE_LINK_DUPLICATE(409, "동일한 이슈 링크가 이미 존재합니다"),
+    ISSUE_SECURITY_LEVEL_FORBIDDEN(403, "해당 역할로는 요청한 이슈 보안 레벨을 설정할 수 없습니다"),
 
     // JQL (FR-016)
     JQL_INVALID_VALUE(400, "JQL 값이 올바르지 않습니다"),

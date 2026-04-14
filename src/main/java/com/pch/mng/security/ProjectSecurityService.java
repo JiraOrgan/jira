@@ -30,6 +30,7 @@ import java.util.Optional;
 public class ProjectSecurityService {
 
     private final ProjectMemberRepository projectMemberRepository;
+    private final IssueVisibilityEvaluator issueVisibilityEvaluator;
     private final SprintRepository sprintRepository;
     private final ReleaseVersionRepository releaseVersionRepository;
     private final IssueRepository issueRepository;
@@ -126,7 +127,7 @@ public class ProjectSecurityService {
             return false;
         }
         return issueRepository.findByIssueKeyWithProject(issueKey)
-                .map(i -> isMember(i.getProject().getId()))
+                .map(issueVisibilityEvaluator::canView)
                 .orElse(false);
     }
 
@@ -183,7 +184,7 @@ public class ProjectSecurityService {
             return false;
         }
         return issueRepository.findByIdWithProject(issueId)
-                .map(i -> isMember(i.getProject().getId()))
+                .map(issueVisibilityEvaluator::canView)
                 .orElse(false);
     }
 
