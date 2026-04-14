@@ -12,6 +12,8 @@
 
 ## 2. GitHub Actions (초안)
 
+구현 워크플로: 저장소 루트 [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) — `develop`/`main` **push·PR** 시 백엔드 `./gradlew test`(Redis 서비스 컨테이너)·`apps/web` **ESLint**(`npm run lint:web`).
+
 ### 워크플로 `ci-backend.yml` (develop, PR)
 
 | 단계 | 내용 |

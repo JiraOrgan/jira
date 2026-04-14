@@ -35,3 +35,15 @@ jobs:
           cache: gradle
       - name: Gradle test
         run: chmod +x gradlew && ./gradlew test --no-daemon
+
+  web-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install & lint
+        run: npm ci && npm run lint:web
