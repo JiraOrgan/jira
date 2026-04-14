@@ -308,3 +308,4 @@
 | v1.52 | 2026-04-14 | `IssueIntegrationTest`: 아카이브 이슈 `POST .../transitions` → 409·메시지 검증 — T-617 회귀 방지 |
 | v1.53 | 2026-04-14 | 모바일 이슈 상세: 프로젝트 키·스토리 포인트·부모·보안 레벨·레이블·컴포넌트(칩) 표시 — T-621 보강 |
 | v1.54 | 2026-04-14 | 모노레포: `scripts/run-gradlew.cjs`·`npm run test:api`/`build:api`/`boot:api`·README 안내 — Gradle 전용 워크플로 |
+| v1.55 | 2026-04-14 | `IssueIntegrationTest`: 아카이브 해제 후 `SELECTED` 전환 성공 — T-617·모바일 해제 흐름과 정합 |

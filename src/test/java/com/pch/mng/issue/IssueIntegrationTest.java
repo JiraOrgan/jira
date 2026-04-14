@@ -140,6 +140,35 @@ class IssueIntegrationTest {
     }
 
     @Test
+    @DisplayName("아카이브 해제 후 상태 전환 가능 (T-617)")
+    void transitionWorksAfterUnarchive() throws Exception {
+        String email = "arc-un-" + System.nanoTime() + "@ex.com";
+        String token = registerAndLogin(email);
+        long projectId = createProject(token, "AU" + (System.nanoTime() % 100000));
+        String issueKey = createTaskAndGetKey(token, projectId);
+
+        mockMvc.perform(put("/api/v1/issues/%s".formatted(issueKey))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"archived\":true}"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/v1/issues/%s/transitions".formatted(issueKey))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"toStatus\":\"SELECTED\"}"))
+                .andExpect(status().isConflict());
+
+        mockMvc.perform(put("/api/v1/issues/%s".formatted(issueKey))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"archived\":false}"))
+                .andExpect(status().isOk());
+
+        transitionOk(token, issueKey, "SELECTED");
+    }
+
+    @Test
     @DisplayName("허용되지 않는 워크플로 전환은 409")
     void workflowRejectsIllegalTransition() throws Exception {
         String email = "wf-bad-" + System.nanoTime() + "@ex.com";
