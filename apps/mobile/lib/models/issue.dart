@@ -9,6 +9,7 @@ class IssueMin {
     this.storyPoints,
     required this.backlogRank,
     this.assigneeName,
+    this.archived = false,
   });
 
   final int id;
@@ -20,6 +21,7 @@ class IssueMin {
   final int? storyPoints;
   final int backlogRank;
   final String? assigneeName;
+  final bool archived;
 
   factory IssueMin.fromJson(Map<String, dynamic> j) {
     return IssueMin(
@@ -32,6 +34,7 @@ class IssueMin {
       storyPoints: (j['storyPoints'] as num?)?.toInt(),
       backlogRank: (j['backlogRank'] as num?)?.toInt() ?? 0,
       assigneeName: j['assigneeName'] as String?,
+      archived: j['archived'] as bool? ?? false,
     );
   }
 }
@@ -85,6 +88,7 @@ class IssueDetail {
     required this.updatedAt,
     required this.labels,
     required this.components,
+    this.archived = false,
   });
 
   final int id;
@@ -110,6 +114,7 @@ class IssueDetail {
   final String updatedAt;
   final List<IssueLabelItem> labels;
   final List<IssueComponentItem> components;
+  final bool archived;
 
   factory IssueDetail.fromJson(Map<String, dynamic> j) {
     return IssueDetail(
@@ -140,6 +145,7 @@ class IssueDetail {
       components: (j['components'] as List<dynamic>? ?? [])
           .map((e) => IssueComponentItem.fromJson(e as Map<String, dynamic>))
           .toList(),
+      archived: j['archived'] as bool? ?? false,
     );
   }
 }

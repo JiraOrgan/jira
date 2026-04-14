@@ -131,7 +131,8 @@ class IssueListScreen extends ConsumerWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                             subtitle: Text(
-                              '${it.issueKey} · ${it.status} · ${it.issueType}',
+                              '${it.issueKey} · ${it.status} · ${it.issueType}'
+                              '${it.archived ? ' · 아카이브' : ''}',
                             ),
                             onTap: () {
                               Navigator.of(context).push<void>(
