@@ -435,8 +435,8 @@ DASHBOARD ──N:1── USER_ACCOUNT
 ### 브랜치 전략
 
 ```
-master        ← 운영 배포 (직접 push 금지)
-  └── dev     ← 개발 통합
+master           ← 운영 배포 (직접 push 금지)
+  └── develop    ← 개발 통합
        ├── feat/T-{id}-{설명}   ← 기능 개발
        ├── fix/T-{id}-{설명}    ← 버그 수정
        └── docs/{설명}          ← 문서 작업
@@ -455,10 +455,14 @@ chore:       build.gradle 의존성 업데이트
 
 ### PR 규칙
 
-1. `dev` 브랜치로 PR 생성
+1. `develop` 브랜치로 PR 생성
 2. 제목: `[T-{id}] {요약}` 형식
 3. 리뷰어 1명 이상 승인 후 Squash Merge
 4. CI (빌드 + 테스트) 통과 필수
+
+### Cursor 에이전트 스킬
+
+Cursor 등에서 Flutter·React 환경 작업 시 참고용 스킬이 `.cursor/skills/`에 있습니다 (`flutter-setup`, `react-setup`).
 
 자세한 내용은 [WORKFLOW.md](docs/WORKFLOW.md) 참조
 
