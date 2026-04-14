@@ -49,7 +49,7 @@ final apiDioProvider = Provider<Dio>((ref) {
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) {
-        final token = auth.valueOrNull;
+        final token = auth.value;
         if (token != null) {
           options.headers['Authorization'] = 'Bearer ${token.accessToken}';
         }
@@ -92,7 +92,7 @@ final selectedProjectProvider = StateProvider<ProjectMin?>((ref) => null);
 
 final projectListProvider = FutureProvider<List<ProjectMin>>((ref) async {
   final auth = ref.watch(authNotifierProvider);
-  if (!auth.hasValue || auth.valueOrNull == null) {
+  if (auth.value == null) {
     return [];
   }
   return ref.watch(projectRepositoryProvider).listMine();

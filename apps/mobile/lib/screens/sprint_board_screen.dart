@@ -156,7 +156,7 @@ class _SprintBoardScreenState extends ConsumerState<SprintBoardScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                 child: DropdownButtonFormField<int>(
-                  value: sid,
+                  initialValue: sid,
                   decoration: const InputDecoration(labelText: '스프린트'),
                   items: sprints
                       .map(

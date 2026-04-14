@@ -53,7 +53,7 @@ class IssueListScreen extends ConsumerWidget {
 
         final current = selected != null &&
                 projects.any((p) => p.id == selected.id)
-            ? selected!
+            ? selected
             : projects.first;
 
         final issuesAsync = ref.watch(issueListProvider(current.id));
@@ -88,7 +88,7 @@ class IssueListScreen extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                 child: DropdownButtonFormField<ProjectMin>(
-                  value: current,
+                  initialValue: current,
                   decoration: const InputDecoration(labelText: '프로젝트'),
                   items: projects
                       .map(
