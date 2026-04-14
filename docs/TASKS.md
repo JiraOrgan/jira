@@ -1,8 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.35
+> **버전**: v1.36
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-14 (T-607a Dashboard·Audit·Release 단위 테스트)
+> **최종수정일**: 2026-04-14 (T-622 모바일 스프린트 보드 FR-MOBILE-002)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -174,7 +174,7 @@
 
 | ID | Task | 담당 | 상태 | 관련 FR | 선행 |
 |----|------|------|------|---------|------|
-| T-622 | 모바일 보드·터치 기반 상태 전환 | Mobile | TODO | FR-MOBILE-002 | T-621 |
+| T-622 | 모바일 보드·터치 기반 상태 전환 | Mobile | DONE | FR-MOBILE-002; `SprintBoardScreen`, `SprintRepository`, `workflow_edges`, 이슈 목록 앱바 보드 진입 | T-621 |
 | T-623 | FCM/APNs 푸시 수신 연동 | Mobile | TODO | FR-MOBILE-003 | T-622 |
 
 ---
@@ -289,3 +289,4 @@
 | v1.33 | 2026-04-13 | T-608 이슈 워치 API(`watchers/me`)·`IssueWatcherService`·API-SPEC — FR-025 DONE |
 | v1.34 | 2026-04-14 | T-609 FR-031: `IssueSecurityPolicy`·가시성(목록·보드·JQL·리포트)·Reporter Confidential 설정 제한·`ISSUE_SECURITY_LEVEL_FORBIDDEN` |
 | v1.35 | 2026-04-14 | T-607a: `IssueAuditServiceTest`·`ReleaseVersionServiceTest`·`DashboardServiceTest` 보강(save/update/delete·소유자 조회·reorder 빈 케이스 등) |
+| v1.36 | 2026-04-14 | T-622 Flutter: 스프린트 보드 API·가로 컬럼·탭 시 전환 바텀시트·`IssueRepository.transition`·롱프레스 상세 — FR-MOBILE-002 |
