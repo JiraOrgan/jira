@@ -7,6 +7,13 @@ import {
 } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { errorMessage } from '../lib/axiosErrors'
+import { CommentBody } from '../lib/CommentBody'
+import {
+  createComment,
+  deleteComment,
+  fetchCommentsByIssue,
+  updateComment,
+} from '../lib/commentApi'
 import {
   downloadAttachmentFile,
   fetchAttachments,
@@ -16,6 +23,8 @@ import {
   updateIssue,
   uploadAttachment,
 } from '../lib/issueApi'
+import { parseAccessTokenUserId } from '../lib/jwtSubject'
+import { fetchProjectMembers } from '../lib/projectApi'
 import { priorityLabel, statusLabel } from '../lib/labels'
 import {
   getPlanningPokerVote,
@@ -23,10 +32,13 @@ import {
   setPlanningPokerVote,
 } from '../lib/planningPokerStorage'
 import { allowedNextStatuses } from '../lib/workflow'
+import { useAuthStore } from '../stores/authStore'
 import type {
   AttachmentDetail,
+  CommentDetail,
   IssueDetail,
   IssueStatus,
+  ProjectMember,
   WorkflowTransitionItem,
 } from '../types/domain'
 
@@ -39,10 +51,14 @@ function formatBytes(n: number): string {
 export function IssueDetailPage() {
   const { issueKey: rawKey } = useParams<{ issueKey: string }>()
   const issueKey = rawKey ? decodeURIComponent(rawKey) : ''
+  const accessToken = useAuthStore((s) => s.accessToken)
+  const currentUserId = accessToken ? parseAccessTokenUserId(accessToken) : null
 
   const [issue, setIssue] = useState<IssueDetail | null>(null)
   const [history, setHistory] = useState<WorkflowTransitionItem[]>([])
   const [attachments, setAttachments] = useState<AttachmentDetail[]>([])
+  const [comments, setComments] = useState<CommentDetail[]>([])
+  const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([])
   const [loadError, setLoadError] = useState<string | null>(null)
 
   const [nextStatus, setNextStatus] = useState<IssueStatus | ''>('')
@@ -62,20 +78,41 @@ export function IssueDetailPage() {
   const [pokerError, setPokerError] = useState<string | null>(null)
   const [pokerSaving, setPokerSaving] = useState(false)
 
+  const [newCommentBody, setNewCommentBody] = useState('')
+  const [newCommentError, setNewCommentError] = useState<string | null>(null)
+  const [commentSubmitting, setCommentSubmitting] = useState(false)
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null)
+  const [editCommentDraft, setEditCommentDraft] = useState('')
+  const [commentMutateError, setCommentMutateError] = useState<string | null>(
+    null,
+  )
+  const [savingEditId, setSavingEditId] = useState<number | null>(null)
+  const [deletingCommentId, setDeletingCommentId] = useState<number | null>(
+    null,
+  )
+
   const reload = useCallback(async () => {
     if (!issueKey) return
     setLoadError(null)
     try {
-      const [i, h, a] = await Promise.all([
-        fetchIssue(issueKey),
+      const i = await fetchIssue(issueKey)
+      const [h, a, c, members] = await Promise.all([
         fetchTransitionHistory(issueKey),
         fetchAttachments(issueKey),
+        fetchCommentsByIssue(i.id),
+        fetchProjectMembers(i.projectId),
       ])
       setIssue(i)
       setHistory(h)
       setAttachments(a)
+      setComments(c)
+      setProjectMembers(members)
       setNextStatus('')
       setConditionNote('')
+      setNewCommentBody('')
+      setNewCommentError(null)
+      setEditingCommentId(null)
+      setCommentMutateError(null)
     } catch (e) {
       setLoadError(errorMessage(e))
       setIssue(null)
@@ -188,6 +225,66 @@ export function IssueDetailPage() {
       setUploadError(errorMessage(err))
     } finally {
       setUploading(false)
+    }
+  }
+
+  function insertMentionToken(displayName: string) {
+    const token = displayName.replace(/\s+/g, '')
+    if (!token) return
+    setNewCommentBody((prev) => {
+      const gap = prev && !/\s$/.test(prev) ? ' ' : ''
+      return `${prev}${gap}@${token} `
+    })
+  }
+
+  async function onSubmitComment(e: FormEvent) {
+    e.preventDefault()
+    if (!issue) return
+    const body = newCommentBody.trim()
+    if (!body) return
+    setNewCommentError(null)
+    setCommentSubmitting(true)
+    try {
+      const created = await createComment({ issueId: issue.id, body })
+      setComments((list) => [...list, created])
+      setNewCommentBody('')
+    } catch (err) {
+      setNewCommentError(errorMessage(err))
+    } finally {
+      setCommentSubmitting(false)
+    }
+  }
+
+  async function onSaveCommentEdit(commentId: number) {
+    const body = editCommentDraft.trim()
+    if (!body) return
+    setCommentMutateError(null)
+    setSavingEditId(commentId)
+    try {
+      const updated = await updateComment(commentId, body)
+      setComments((list) =>
+        list.map((row) => (row.id === commentId ? updated : row)),
+      )
+      setEditingCommentId(null)
+    } catch (err) {
+      setCommentMutateError(errorMessage(err))
+    } finally {
+      setSavingEditId(null)
+    }
+  }
+
+  async function onDeleteComment(commentId: number) {
+    if (!window.confirm('이 댓글을 삭제할까요?')) return
+    setCommentMutateError(null)
+    setDeletingCommentId(commentId)
+    try {
+      await deleteComment(commentId)
+      setComments((list) => list.filter((row) => row.id !== commentId))
+      if (editingCommentId === commentId) setEditingCommentId(null)
+    } catch (err) {
+      setCommentMutateError(errorMessage(err))
+    } finally {
+      setDeletingCommentId(null)
     }
   }
 
@@ -493,6 +590,144 @@ export function IssueDetailPage() {
                 </button>
               </li>
             ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="border-t border-slate-800 pt-6">
+        <h2 className="text-sm font-medium text-white">댓글</h2>
+        <p className="mt-1 text-xs text-slate-500">
+          <code className="text-slate-400">@이름</code> 형태는 강조만 됩니다. 멘션
+          알림·파싱 저장은 T-405 이후 백엔드와 연동할 수 있습니다.
+        </p>
+        {projectMembers.length > 0 ? (
+          <div className="mt-3">
+            <p className="text-xs text-slate-500">멘션 삽입 (공백 제거 토큰)</p>
+            <div className="mt-2 flex flex-wrap gap-1">
+              {projectMembers.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => insertMentionToken(m.userName)}
+                  className="rounded border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-300 hover:border-slate-500 hover:text-white"
+                >
+                  @{m.userName.replace(/\s+/g, '')}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+        <form className="mt-4 space-y-2" onSubmit={onSubmitComment}>
+          <textarea
+            value={newCommentBody}
+            onChange={(e) => setNewCommentBody(e.target.value)}
+            rows={3}
+            placeholder="댓글을 입력하세요…"
+            className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white placeholder:text-slate-600"
+          />
+          <div className="flex items-center gap-2">
+            <button
+              type="submit"
+              disabled={commentSubmitting || !newCommentBody.trim()}
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
+            >
+              {commentSubmitting ? '등록 중…' : '댓글 등록'}
+            </button>
+          </div>
+          {newCommentError ? (
+            <p className="text-sm text-red-300">{newCommentError}</p>
+          ) : null}
+        </form>
+        {commentMutateError ? (
+          <p className="mt-3 text-sm text-red-300">{commentMutateError}</p>
+        ) : null}
+        {comments.length === 0 ? (
+          <p className="mt-4 text-sm text-slate-500">댓글 없음</p>
+        ) : (
+          <ul className="mt-4 space-y-3">
+            {comments.map((row) => {
+              const isMine =
+                currentUserId != null && row.authorId === currentUserId
+              const isEditing = editingCommentId === row.id
+              return (
+                <li
+                  key={row.id}
+                  className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 text-sm"
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-2 text-xs text-slate-500">
+                    <span className="font-medium text-slate-300">
+                      {row.authorName ?? '—'}
+                    </span>
+                    <span>
+                      {row.createdAt.replace('T', ' ').slice(0, 19)}
+                      {row.updatedAt !== row.createdAt ? ' · 수정됨' : ''}
+                    </span>
+                  </div>
+                  {isEditing ? (
+                    <div className="mt-2 space-y-2">
+                      <textarea
+                        value={editCommentDraft}
+                        onChange={(e) => setEditCommentDraft(e.target.value)}
+                        rows={3}
+                        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white"
+                      />
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          disabled={
+                            savingEditId === row.id || !editCommentDraft.trim()
+                          }
+                          onClick={() => void onSaveCommentEdit(row.id)}
+                          className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
+                        >
+                          {savingEditId === row.id ? '저장 중…' : '저장'}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={savingEditId === row.id}
+                          onClick={() => setEditingCommentId(null)}
+                          className="rounded-lg border border-slate-600 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-800 disabled:opacity-60"
+                        >
+                          취소
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="mt-2 text-slate-200">
+                        <CommentBody text={row.body} />
+                      </div>
+                      {isMine ? (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            disabled={deletingCommentId === row.id}
+                            onClick={() => {
+                              setCommentMutateError(null)
+                              setEditingCommentId(row.id)
+                              setEditCommentDraft(row.body)
+                            }}
+                            className="text-xs text-indigo-400 hover:text-indigo-300 disabled:opacity-60"
+                          >
+                            편집
+                          </button>
+                          <button
+                            type="button"
+                            disabled={deletingCommentId === row.id}
+                            onClick={() => void onDeleteComment(row.id)}
+                            className="text-xs text-red-400 hover:text-red-300 disabled:opacity-60"
+                          >
+                            {deletingCommentId === row.id
+                              ? '삭제 중…'
+                              : '삭제'}
+                          </button>
+                        </div>
+                      ) : null}
+                    </>
+                  )}
+                </li>
+              )
+            })}
           </ul>
         )}
       </section>

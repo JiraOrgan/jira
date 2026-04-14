@@ -151,6 +151,17 @@ export type SprintDetail = {
 export type IssueLabelItem = { id: number; name: string }
 export type IssueComponentItem = { id: number; name: string }
 
+/** `CommentResponse.DetailDTO` */
+export type CommentDetail = {
+  id: number
+  issueId: number
+  authorId: number
+  authorName: string | null
+  body: string
+  createdAt: string
+  updatedAt: string
+}
+
 export type IssueDetail = {
   id: number
   issueKey: string
