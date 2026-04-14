@@ -546,50 +546,58 @@ export function IssueDetailPage() {
 
       <section className="border-t border-slate-800 pt-6">
         <h2 className="text-sm font-medium text-white">상태 전환</h2>
-        <p className="mt-1 text-xs text-slate-500">
-          허용된 다음 상태만 표시됩니다 (백엔드 워크플로와 동일).
-        </p>
-        {options.length === 0 ? (
-          <p className="mt-3 text-sm text-slate-500">더 이상 전환할 수 없습니다.</p>
+        {issue.archived ? (
+          <p className="mt-3 text-sm text-slate-500">
+            아카이브된 이슈는 상태를 바꿀 수 없습니다. 상단의「아카이브 해제」후 다시 시도하세요.
+          </p>
         ) : (
-          <form className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={onTransition}>
-            <div className="flex-1">
-              <label className="text-xs text-slate-400">다음 상태</label>
-              <select
-                value={nextStatus}
-                onChange={(e) => setNextStatus(e.target.value as IssueStatus | '')}
-                required
-                className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white sm:max-w-xs"
-              >
-                <option value="">선택</option>
-                {options.map((s) => (
-                  <option key={s} value={s}>
-                    {statusLabel[s]}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex-[2]">
-              <label className="text-xs text-slate-400">조건 메모 (선택)</label>
-              <input
-                value={conditionNote}
-                onChange={(e) => setConditionNote(e.target.value)}
-                placeholder="예: PR 승인 완료"
-                className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={transitionLoading || !nextStatus}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
-            >
-              {transitionLoading ? '처리 중…' : '전환'}
-            </button>
-          </form>
+          <>
+            <p className="mt-1 text-xs text-slate-500">
+              허용된 다음 상태만 표시됩니다 (백엔드 워크플로와 동일).
+            </p>
+            {options.length === 0 ? (
+              <p className="mt-3 text-sm text-slate-500">더 이상 전환할 수 없습니다.</p>
+            ) : (
+              <form className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={onTransition}>
+                <div className="flex-1">
+                  <label className="text-xs text-slate-400">다음 상태</label>
+                  <select
+                    value={nextStatus}
+                    onChange={(e) => setNextStatus(e.target.value as IssueStatus | '')}
+                    required
+                    className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white sm:max-w-xs"
+                  >
+                    <option value="">선택</option>
+                    {options.map((s) => (
+                      <option key={s} value={s}>
+                        {statusLabel[s]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex-[2]">
+                  <label className="text-xs text-slate-400">조건 메모 (선택)</label>
+                  <input
+                    value={conditionNote}
+                    onChange={(e) => setConditionNote(e.target.value)}
+                    placeholder="예: PR 승인 완료"
+                    className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={transitionLoading || !nextStatus}
+                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
+                >
+                  {transitionLoading ? '처리 중…' : '전환'}
+                </button>
+              </form>
+            )}
+            {transitionError ? (
+              <p className="mt-2 text-sm text-red-300">{transitionError}</p>
+            ) : null}
+          </>
         )}
-        {transitionError ? (
-          <p className="mt-2 text-sm text-red-300">{transitionError}</p>
-        ) : null}
       </section>
 
       <section className="border-t border-slate-800 pt-6">
