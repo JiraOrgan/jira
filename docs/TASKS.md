@@ -139,7 +139,7 @@
 | ID | Task | 담당 | 상태 | 관련 FR | 선행 |
 |----|------|------|------|---------|------|
 | T-620 | Flutter 앱 프로젝트 초기화 (Riverpod, Dio) | Mobile | DONE | `apps/mobile`, `flutter create .` 로 플랫폼 생성 | T-300 |
-| T-621 | 모바일 이슈 목록·생성·상세 | Mobile | DONE | FR-MOBILE-001; Riverpod·Dio·SharedPreferences, 로그인·프로젝트 선택·이슈 CRUD UI | T-620 |
+| T-621 | 모바일 이슈 목록·생성·상세 | Mobile | DONE | FR-MOBILE-001; Riverpod 3·Dio·SharedPreferences·`riverpod_lint`·FVM(선택), 로그인·프로젝트 선택·이슈 CRUD UI | T-620 |
 
 ---
 
@@ -309,3 +309,4 @@
 | v1.53 | 2026-04-14 | 모바일 이슈 상세: 프로젝트 키·스토리 포인트·부모·보안 레벨·레이블·컴포넌트(칩) 표시 — T-621 보강 |
 | v1.54 | 2026-04-14 | 모노레포: `scripts/run-gradlew.cjs`·`npm run test:api`/`build:api`/`boot:api`·README 안내 — Gradle 전용 워크플로 |
 | v1.55 | 2026-04-14 | `IssueIntegrationTest`: 아카이브 해제 후 `SELECTED` 전환 성공 — T-617·모바일 해제 흐름과 정합 |
+| v1.56 | 2026-04-14 | 모바일: FVM(`stable`)·Flutter Riverpod 3.3·`riverpod_lint`·Dart 3.10+·디버그 `PrettyDioLogger`·`ProviderScope` 재시도 끔 — T-620·T-621 보강 |

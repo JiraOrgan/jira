@@ -7,7 +7,13 @@ import 'screens/login_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProviderScope(child: PchApp()));
+  runApp(
+    ProviderScope(
+      // Riverpod 3 기본 자동 재시도 비활성화(로그인·토큰 로드 등에서 무한 재시도 방지)
+      retry: (retryCount, error) => null,
+      child: const PchApp(),
+    ),
+  );
 }
 
 class PchApp extends ConsumerWidget {

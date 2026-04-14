@@ -195,13 +195,17 @@ Spring 프로필을 넘기려면 예:
 
 ### 모바일 앱 (Flutter)
 
+- **Dart SDK**: `apps/mobile/pubspec.yaml` 기준 **3.10+** (Riverpod 3.3·`riverpod_lint` 3.1과 맞춤).
+- **FVM**(선택): `apps/mobile/.fvm/fvm_config.json`에 `stable` 채널을 두었습니다. 사용 시 [FVM](https://fvm.app/) 설치 후 `cd apps/mobile && fvm install && fvm flutter pub get` — 이후 `fvm flutter run` 등으로 동일 Flutter 버전을 공유합니다.
+- **상태·HTTP**: Flutter Riverpod **3.x**, Dio, 디버그 빌드에서만 요청/응답 로그(`pretty_dio_logger`, `kDebugMode`).
+
 `apps/mobile`에 `android/`·`ios/` 등이 없으면 Flutter SDK로 한 번 생성합니다.
 
 ```bash
 cd apps/mobile
-flutter create .
-flutter pub get
-flutter run
+flutter create .   # 또는 fvm flutter create .
+flutter pub get    # 또는 fvm flutter pub get
+flutter run        # 또는 fvm flutter run
 ```
 
 에뮬레이터에서 호스트 백엔드 접근 시 기본 `API_BASE_URL`은 Android 에뮬 `10.0.2.2:8080` 입니다. 필요 시 `flutter run --dart-define=API_BASE_URL=http://...` 로 바꿉니다.
