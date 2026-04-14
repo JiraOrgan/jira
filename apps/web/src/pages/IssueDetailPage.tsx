@@ -697,6 +697,14 @@ export function IssueDetailPage() {
                       <div className="mt-2 text-slate-200">
                         <CommentBody text={row.body} />
                       </div>
+                      {row.mentionedUsers.length > 0 ? (
+                        <p className="mt-1.5 text-xs text-slate-500">
+                          멘션:{' '}
+                          {row.mentionedUsers
+                            .map((m) => m.userName ?? `#${m.userId}`)
+                            .join(', ')}
+                        </p>
+                      ) : null}
                       {isMine ? (
                         <div className="mt-2 flex flex-wrap gap-2">
                           <button
