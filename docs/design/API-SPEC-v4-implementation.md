@@ -95,6 +95,13 @@
 | PUT | `/api/v1/comments/{id}` | 수정 (멘션 재동기화) |
 | DELETE | `/api/v1/comments/{id}` | 삭제 |
 
+### 알림 (FR-024, REST 엔드포인트 없음)
+
+| 구성요소 | 설명 |
+|----------|------|
+| 댓글 멘션 | 댓글 저장·수정 커밋 **이후** 비동기 전송: Slack Incoming Webhook (`app.notification.slack.webhook-url`), 멘션 대상(작성자 제외)에게 **이메일** (`JavaMailSender` 빈 존재 시 + `spring.mail.*` + `app.notification.mail.from`) |
+| 스위치 | `app.notification.enabled` (테스트는 `application-test.yml`에서 `false`) |
+
 ### 감사 로그 `AuditLogApiController`
 
 | Method | Path | 설명 |

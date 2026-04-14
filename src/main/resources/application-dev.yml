@@ -42,6 +42,12 @@ app:
   board:
     cache:
       enabled: false
+  notification:
+    enabled: true
+    slack:
+      webhook-url: ${SLACK_WEBHOOK_URL:}
+    mail:
+      from: ${NOTIFY_MAIL_FROM:noreply@localhost}
 
 # JWT
 jwt:

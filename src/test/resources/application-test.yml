@@ -31,6 +31,8 @@ app:
   board:
     cache:
       enabled: false
+  notification:
+    enabled: false
   storage:
     type: local
     local:

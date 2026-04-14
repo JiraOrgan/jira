@@ -48,6 +48,12 @@ logging:
       max-history: 30
 
 app:
+  notification:
+    enabled: ${NOTIFY_ENABLED:true}
+    slack:
+      webhook-url: ${SLACK_WEBHOOK_URL:}
+    mail:
+      from: ${NOTIFY_MAIL_FROM:noreply@example.com}
   storage:
     type: s3
     local:
