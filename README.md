@@ -485,6 +485,7 @@ Cursor 등에서 Flutter·React 환경 작업 시 참고용 스킬이 `.cursor/s
 | [WIREFRAME-SPEC.md](docs/WIREFRAME-SPEC.md) | 웹 14화면·모바일 흐름 사양 |
 | [SPRINT-BACKLOG-DRAFT.md](docs/SPRINT-BACKLOG-DRAFT.md) | FR ↔ 개발 Phase 백로그 초안 |
 | [DOR-DOD.md](docs/DOR-DOD.md) | Definition of Ready / Done |
+| [E2E-LIFECYCLE-SCENARIOS.md](docs/E2E-LIFECYCLE-SCENARIOS.md) | 프로젝트 생성~관리 종료 E2E·수동 테스트 시나리오 |
 | [docs/spikes/](docs/spikes/) | JQL·워크플로 기술 스파이크 |
 | [docs/design/](docs/design/) | Phase 2: ERD, DDL, API, 시퀀스, 인프라, CI/CD, UI 시스템 |
 | [rules/human/](rules/human/) | 사람용 Spring 개발 규칙 (7개) |

@@ -318,3 +318,4 @@
 | v1.62 | 2026-04-14 | WORKFLOW v1.5 §6·`DOR-DOD.md` 정본 안내; README PR 규칙에 DoR/DoD·§6 링크 |
 | v1.63 | 2026-04-14 | GitHub Actions `.github/workflows/ci.yml`: 백엔드 `gradlew test`·Redis·웹 ESLint; `CICD.md` 링크 — T-801 진행 |
 | v1.64 | 2026-04-14 | CI: 웹 `build:web`·`mobile-analyze`(Flutter stable); `CICD.md` 향후 과제 갱신 — T-801 진행 |
+| v1.65 | 2026-04-14 | `E2E-LIFECYCLE-SCENARIOS.md`: 프로젝트 생성~관리 종료 E2E·수동 시나리오 — T-700 산출 |
