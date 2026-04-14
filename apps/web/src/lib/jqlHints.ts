@@ -18,6 +18,7 @@ const WHERE_FIELDS = [
   'priority',
   'sprint',
   'text',
+  'archived',
 ]
 
 const KEYWORDS = ['AND', 'OR', 'IN', 'IS', 'EMPTY']
@@ -101,6 +102,8 @@ export function buildJqlSuggestionPool(
     '!=',
     '~',
     `project = "${projectKey}"`,
+    'archived = false',
+    'archived = true',
     'text ~ "검색어"',
     ...ISSUE_STATUSES,
     ...ISSUE_TYPES,

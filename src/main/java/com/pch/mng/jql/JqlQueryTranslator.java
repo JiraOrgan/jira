@@ -32,6 +32,24 @@ public final class JqlQueryTranslator {
         return issue.id.eq(issue.id);
     }
 
+    /**
+     * WHERE 절에 해당 필드를 명시하는 {@link JqlExpression.Clause}가 있는지(하위 AND/OR 포함).
+     */
+    public static boolean mentionsField(JqlExpression expression, JqlField field) {
+        if (expression == null) {
+            return false;
+        }
+        return walkMentionsField(expression, field);
+    }
+
+    private static boolean walkMentionsField(JqlExpression ex, JqlField field) {
+        return switch (ex) {
+            case JqlExpression.And(var l, var r) -> walkMentionsField(l, field) || walkMentionsField(r, field);
+            case JqlExpression.Or(var l, var r) -> walkMentionsField(l, field) || walkMentionsField(r, field);
+            case JqlExpression.Clause c -> c.field() == field;
+        };
+    }
+
     public static void validateProjectClauses(JqlExpression expression, String projectKey) {
         if (expression == null) {
             return;
@@ -102,6 +120,32 @@ public final class JqlQueryTranslator {
             case ASSIGNEE -> assigneeClause(c, issue);
             case SPRINT -> sprintClause(c, issue);
             case TEXT -> textClause(c, issue);
+            case ARCHIVED -> archivedClause(c, issue);
+        };
+    }
+
+    private static BooleanExpression archivedClause(JqlExpression.Clause c, QIssue issue) {
+        return switch (c.operator()) {
+            case IS_EMPTY, CONTAINS -> throw new BusinessException(ErrorCode.JQL_UNSUPPORTED_CLAUSE);
+            case EQ -> issue.archived.eq(parseArchivedBoolean(c.values().get(0)));
+            case NE -> issue.archived.ne(parseArchivedBoolean(c.values().get(0)));
+            case IN -> {
+                BooleanExpression acc = null;
+                for (String v : c.values()) {
+                    BooleanExpression p = issue.archived.eq(parseArchivedBoolean(v));
+                    acc = acc == null ? p : acc.or(p);
+                }
+                yield acc != null ? acc : throwInvalid();
+            }
+        };
+    }
+
+    private static boolean parseArchivedBoolean(String raw) {
+        String v = raw.trim().toLowerCase(Locale.ROOT);
+        return switch (v) {
+            case "true", "1" -> true;
+            case "false", "0" -> false;
+            default -> throw new BusinessException(ErrorCode.JQL_INVALID_VALUE);
         };
     }
 

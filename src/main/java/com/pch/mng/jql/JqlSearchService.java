@@ -6,6 +6,7 @@ import com.pch.mng.issue.Issue;
 import com.pch.mng.auth.CustomUserDetails;
 import com.pch.mng.issue.IssueResponse;
 import com.pch.mng.issue.QIssue;
+import com.pch.mng.jql.ast.JqlField;
 import com.pch.mng.jql.ast.JqlQuery;
 import com.pch.mng.project.Project;
 import com.pch.mng.project.ProjectRepository;
@@ -45,8 +46,10 @@ public class JqlSearchService {
         var ctx = issueVisibilityEvaluator.requiredContextForProject(projectId);
         QIssue issue = QIssue.issue;
         BooleanExpression where = issue.project.id.eq(projectId)
-                .and(issue.archived.eq(false))
                 .and(JqlIssueVisibility.visibleTo(issue, ctx.userId(), ctx.role()));
+        if (!JqlQueryTranslator.mentionsField(ast.where(), JqlField.ARCHIVED)) {
+            where = where.and(issue.archived.eq(false));
+        }
         if (!ast.matchesAll()) {
             where = where.and(JqlQueryTranslator.buildPredicate(ast.where(), issue));
         }

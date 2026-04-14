@@ -1,8 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.47
+> **버전**: v1.48
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-14 (PHASE·WORKFLOW·API-SPEC 문서 동기화)
+> **최종수정일**: 2026-04-14 (JQL archived 필드·API-SPEC·웹 힌트)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -301,3 +301,4 @@
 | v1.45 | 2026-04-14 | 웹 JQL 검색 결과 테이블에 아카이브 이슈 뱃지·행 스타일 — T-617 UX |
 | v1.46 | 2026-04-14 | 웹 이슈 상세: 아카이브 시 상태 전환 폼 숨김·안내 문구 — T-617 UX |
 | v1.47 | 2026-04-14 | docs: PHASE 일정 vs TASKS 안내·Phase 2/3 주석, WORKFLOW v1.2·TASKS 참조, API-SPEC JQL·아카이브 동작 명시 |
+| v1.48 | 2026-04-14 | JQL: `archived` 필드(EQ/NE/IN)·WHERE 미명시 시 비아카이브 고정·통합 테스트·API-SPEC·`SPIKE-JQL-PARSER`·웹 `jqlHints` |
