@@ -86,7 +86,7 @@ public class SprintService {
         if (sprint.getStatus() == SprintStatus.ACTIVE) {
             throw new BusinessException(ErrorCode.SPRINT_DELETE_FORBIDDEN);
         }
-        if (issueRepository.countBySprint_Id(id) > 0) {
+        if (issueRepository.countBySprint_IdAndArchivedFalse(id) > 0) {
             throw new BusinessException(ErrorCode.SPRINT_DELETE_FORBIDDEN);
         }
         sprintBoardRedisCache.evictSprint(id);

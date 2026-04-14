@@ -59,7 +59,8 @@ public class ReportService {
         LocalDate lastDay = end.isAfter(today) ? today : end;
 
         var viewCtx = issueVisibilityEvaluator.requiredContextForProject(projectId);
-        List<Issue> issues = issueRepository.findByProjectIdAndSprintIdOrderByCreatedAtDesc(projectId, sprintId).stream()
+        List<Issue> issues = issueRepository.findByProjectIdAndSprintIdAndArchivedFalseOrderByCreatedAtDesc(
+                        projectId, sprintId).stream()
                 .filter(i -> IssueSecurityPolicy.canView(i, viewCtx.role(), viewCtx.userId()))
                 .toList();
         int totalScope = issues.stream()
@@ -122,7 +123,8 @@ public class ReportService {
             if (n >= cap) {
                 break;
             }
-            long pts = issueRepository.findByProjectIdAndSprintIdOrderByCreatedAtDesc(projectId, s.getId()).stream()
+            long pts = issueRepository.findByProjectIdAndSprintIdAndArchivedFalseOrderByCreatedAtDesc(
+                            projectId, s.getId()).stream()
                     .filter(i -> i.getStatus() == IssueStatus.DONE)
                     .filter(i -> IssueSecurityPolicy.canView(i, viewCtx.role(), viewCtx.userId()))
                     .mapToLong(i -> i.getStoryPoints() == null ? 0L : i.getStoryPoints())
@@ -154,11 +156,17 @@ public class ReportService {
             if (!sprint.getProject().getId().equals(projectId)) {
                 throw new BusinessException(ErrorCode.SPRINT_PROJECT_MISMATCH);
             }
-            issues = issueRepository.findByProjectIdAndSprintIdOrderByCreatedAtDesc(projectId, sprintId).stream()
+            issues = issueRepository.findByProjectIdAndSprintIdAndArchivedFalseOrderByCreatedAtDesc(
+                        projectId, sprintId).stream()
                     .filter(i -> IssueSecurityPolicy.canView(i, viewCtx.role(), viewCtx.userId()))
                     .toList();
         } else {
-            issues = issueRepository.findByProjectIdOrderByCreatedAtDesc(projectId, Pageable.unpaged()).getContent().stream()
+            issues =
+                    issueRepository
+                            .findByProjectIdAndArchivedFalseOrderByCreatedAtDesc(
+                                    projectId, Pageable.unpaged())
+                            .getContent()
+                            .stream()
                     .filter(i -> IssueSecurityPolicy.canView(i, viewCtx.role(), viewCtx.userId()))
                     .toList();
         }

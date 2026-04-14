@@ -50,6 +50,8 @@ public class IssueRequest {
         private Boolean patchEpicDates;
         private LocalDate epicStartDate;
         private LocalDate epicEndDate;
+        /** null이면 유지. true/false로 이슈 아카이브 토글. */
+        private Boolean archived;
     }
 
     @Data

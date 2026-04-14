@@ -35,6 +35,8 @@ public enum ErrorCode {
     COMPONENT_PROJECT_MISMATCH(400, "컴포넌트는 이슈와 같은 프로젝트에 속해야 합니다"),
     WORKFLOW_VIOLATION(409, "허용되지 않는 워크플로 전환입니다"),
     WIP_LIMIT_EXCEEDED(409, "해당 워크플로 상태 열의 WIP 한도를 초과했습니다"),
+    ISSUE_ARCHIVED(409, "아카이브된 이슈에서는 이 작업을 수행할 수 없습니다"),
+    AUTO_ARCHIVE_NOT_CONFIGURED(400, "DONE 자동 아카이브 일수가 프로젝트에 설정되지 않았습니다"),
 
     // Sprint (FR-011)
     SPRINT_INVALID_TRANSITION(409, "허용되지 않는 스프린트 상태 전환입니다"),

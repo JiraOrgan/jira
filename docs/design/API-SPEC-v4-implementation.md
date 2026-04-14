@@ -42,7 +42,8 @@
 | GET | `/api/v1/projects/by-key/{key}` | 단건(멤버만, 아카이브 포함) |
 | GET | `/api/v1/projects/{id}` | 단건 |
 | POST | `/api/v1/projects` | 생성 |
-| PUT | `/api/v1/projects/{id}` | 수정 (`UpdateDTO`: `name`, `description`, `leadId`, `archived` 선택) |
+| PUT | `/api/v1/projects/{id}` | 수정 (`UpdateDTO`: `name`, `description`, `leadId`, `archived`, `autoArchiveDoneAfterDays` 선택; ≤0 또는 생략 시 자동 아카이브 비활성) |
+| POST | `/api/v1/projects/{projectId}/issues/auto-archive-done` | 관리자: 설정된 일수 기준 DONE 이슈 일괄 아카이브(건수 반환); 규칙 미설정 시 `AUTO_ARCHIVE_NOT_CONFIGURED` |
 | DELETE | `/api/v1/projects/{id}` | 삭제 |
 | GET | `/api/v1/projects/{projectId}/members` | 멤버 목록 |
 | POST | `/api/v1/projects/{projectId}/members` | 멤버 추가 |
@@ -53,11 +54,11 @@
 
 | Method | Path | 설명 |
 |--------|------|------|
-| GET | `/api/v1/issues/project/{projectId}` | 페이징 목록 |
-| GET | `/api/v1/issues/project/{projectId}/backlog` | 백로그 |
-| GET | `/api/v1/issues/{issueKey}` | 상세 |
+| GET | `/api/v1/issues/project/{projectId}` | 페이징 목록 (`MinDTO.archived`; 비아카이브만 집계) |
+| GET | `/api/v1/issues/project/{projectId}/backlog` | 백로그 (비아카이브만) |
+| GET | `/api/v1/issues/{issueKey}` | 상세 (`DetailDTO.archived`) |
 | POST | `/api/v1/issues` | 생성 (`IssueRequest.SaveDTO`; Epic만 `epicStartDate`/`epicEndDate` 선택) |
-| PUT | `/api/v1/issues/{issueKey}` | 수정 (`IssueRequest.UpdateDTO`; Epic만 `patchEpicDates`+기간·`clearEpicDates`) |
+| PUT | `/api/v1/issues/{issueKey}` | 수정 (`IssueRequest.UpdateDTO`: `archived` 선택; Epic만 `patchEpicDates`+기간·`clearEpicDates`) |
 | DELETE | `/api/v1/issues/{issueKey}` | 삭제 |
 | POST | `/api/v1/issues/{issueKey}/transitions` | 상태 전환 (`IssueRequest.TransitionDTO`) |
 | GET | `/api/v1/issues/{issueKey}/watchers` | 워처 목록 + 현재 사용자 구독 여부 (`IssueWatcherResponse.ListDTO`, FR-025) |

@@ -73,6 +73,7 @@ class IssueSecurityPolicyTest {
                 .assignee(asg)
                 .backlogRank(0L)
                 .securityLevel(level)
+                .archived(false)
                 .build();
         ReflectionTestUtils.setField(issue, "id", id);
         return issue;

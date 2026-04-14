@@ -7,6 +7,7 @@ import {
   fetchProjectByKey,
   fetchProjectMembers,
   removeProjectMember,
+  runProjectAutoArchiveDone,
   updateProject,
 } from '../lib/projectApi'
 import { fetchUsers } from '../lib/userApi'
@@ -57,6 +58,9 @@ export function ProjectSettingsPage() {
   const [deleteBusy, setDeleteBusy] = useState(false)
 
   const [archived, setArchived] = useState(false)
+  const [autoArchiveDaysStr, setAutoArchiveDaysStr] = useState('')
+  const [archiveRunBusy, setArchiveRunBusy] = useState(false)
+  const [archiveRunMsg, setArchiveRunMsg] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     if (!projectKey) return
@@ -75,6 +79,10 @@ export function ProjectSettingsPage() {
       setDescription(d.description ?? '')
       setLeadIdStr(d.leadId != null ? String(d.leadId) : '')
       setArchived(d.archived)
+      setAutoArchiveDaysStr(
+        d.autoArchiveDoneAfterDays != null ? String(d.autoArchiveDoneAfterDays) : '',
+      )
+      setArchiveRunMsg(null)
     } catch (e) {
       setDetail(null)
       setMembers([])
@@ -111,12 +119,22 @@ export function ProjectSettingsPage() {
       setSaveError('프로젝트 이름을 입력하세요.')
       return
     }
+    const advTrim = autoArchiveDaysStr.trim()
+    let autoArchiveDoneAfterDays = 0
+    if (advTrim !== '') {
+      autoArchiveDoneAfterDays = parseInt(advTrim, 10)
+      if (!Number.isFinite(autoArchiveDoneAfterDays) || autoArchiveDoneAfterDays < 0) {
+        setSaveError('DONE 자동 아카이브 일수는 0 이상 정수이거나 비워 비활성만 가능합니다.')
+        return
+      }
+    }
     setSaving(true)
     try {
       const body: ProjectUpdateBody = {
         name: trimmed,
         description: description.trim() === '' ? null : description.trim(),
         archived,
+        autoArchiveDoneAfterDays,
       }
       if (leadIdStr) {
         body.leadId = Number(leadIdStr)
@@ -127,6 +145,11 @@ export function ProjectSettingsPage() {
       setDescription(updated.description ?? '')
       setLeadIdStr(updated.leadId != null ? String(updated.leadId) : '')
       setArchived(updated.archived)
+      setAutoArchiveDaysStr(
+        updated.autoArchiveDoneAfterDays != null
+          ? String(updated.autoArchiveDoneAfterDays)
+          : '',
+      )
       await reload()
       setSaveMsg('저장했습니다.')
     } catch (err) {
@@ -135,6 +158,22 @@ export function ProjectSettingsPage() {
       )
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleRunAutoArchiveDone() {
+    if (!detail) return
+    setArchiveRunMsg(null)
+    setArchiveRunBusy(true)
+    try {
+      const n = await runProjectAutoArchiveDone(detail.id)
+      setArchiveRunMsg(`아카이브 처리된 DONE 이슈: ${n}건`)
+    } catch (err) {
+      setArchiveRunMsg(
+        err instanceof Error ? err.message : '자동 아카이브 실행에 실패했습니다',
+      )
+    } finally {
+      setArchiveRunBusy(false)
     }
   }
 
@@ -240,8 +279,8 @@ export function ProjectSettingsPage() {
         <h1 className="text-xl font-semibold text-white">프로젝트 설정</h1>
         <p className="mt-1 font-mono text-sm text-indigo-300">{detail.key}</p>
         <p className="mt-2 text-sm text-slate-500">
-          이름·설명·담당자·아카이브를 수정하고, 멤버를 관리합니다. (멤버 추가·삭제·프로젝트
-          삭제는 프로젝트 관리자만 가능합니다.)
+          이름·설명·담당자·아카이브·DONE 자동 아카이브 규칙을 수정하고, 멤버를 관리합니다.
+          (멤버 추가·삭제·프로젝트 삭제는 프로젝트 관리자만 가능합니다.)
         </p>
         {detail.archived ? (
           <p className="mt-3 rounded-lg border border-amber-800/60 bg-amber-950/30 px-3 py-2 text-sm text-amber-200">
@@ -342,6 +381,44 @@ export function ProjectSettingsPage() {
                 체크 후 저장하면 대시보드·사이드바 비아카이브 목록에서 숨깁니다. 해제 후
                 저장으로 다시 표시할 수 있습니다.
               </p>
+            </div>
+          </div>
+          <div className="space-y-3 rounded-lg border border-slate-800 bg-slate-950/50 p-3">
+            <div>
+              <label
+                htmlFor="proj-auto-arch-days"
+                className="text-sm font-medium text-slate-200"
+              >
+                DONE 이슈 자동 아카이브 (일)
+              </label>
+              <p className="mt-1 text-xs text-slate-500">
+                DONE 상태이며 마지막 갱신일로부터 이 일수가 지난 이슈를 아카이브합니다.
+                비우면 비활성입니다. 저장한 뒤 아래 &quot;지금 실행&quot;으로 즉시 일괄
+                처리할 수 있습니다.
+              </p>
+              <input
+                id="proj-auto-arch-days"
+                type="number"
+                min={0}
+                step={1}
+                value={autoArchiveDaysStr}
+                onChange={(ev) => setAutoArchiveDaysStr(ev.target.value)}
+                placeholder="비활성"
+                className="mt-2 w-40 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-indigo-500"
+              />
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                disabled={archiveRunBusy}
+                onClick={() => void handleRunAutoArchiveDone()}
+                className="rounded-lg border border-slate-600 px-3 py-1.5 text-sm text-slate-200 hover:bg-slate-800 disabled:opacity-50"
+              >
+                {archiveRunBusy ? '실행 중…' : 'DONE 자동 아카이브 지금 실행'}
+              </button>
+              {archiveRunMsg ? (
+                <p className="text-sm text-slate-400">{archiveRunMsg}</p>
+              ) : null}
             </div>
           </div>
           {saveError ? (

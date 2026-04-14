@@ -66,6 +66,9 @@ export function IssueDetailPage() {
   const [transitionError, setTransitionError] = useState<string | null>(null)
   const [transitionLoading, setTransitionLoading] = useState(false)
 
+  const [unarchiveError, setUnarchiveError] = useState<string | null>(null)
+  const [unarchiveBusy, setUnarchiveBusy] = useState(false)
+
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
 
@@ -273,6 +276,20 @@ export function IssueDetailPage() {
     }
   }
 
+  async function onUnarchiveIssue() {
+    if (!issueKey) return
+    setUnarchiveError(null)
+    setUnarchiveBusy(true)
+    try {
+      const upd = await updateIssue(issueKey, { archived: false })
+      setIssue(upd)
+    } catch (err) {
+      setUnarchiveError(errorMessage(err))
+    } finally {
+      setUnarchiveBusy(false)
+    }
+  }
+
   async function onDeleteComment(commentId: number) {
     if (!window.confirm('이 댓글을 삭제할까요?')) return
     setCommentMutateError(null)
@@ -311,6 +328,26 @@ export function IssueDetailPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
+      {issue.archived ? (
+        <div className="rounded-lg border border-amber-800/60 bg-amber-950/30 px-4 py-3 text-sm text-amber-100">
+          <p className="font-medium">아카이브된 이슈입니다.</p>
+          <p className="mt-1 text-xs text-amber-200/90">
+            상태 전환·스프린트 배정 등 일부 작업은 제한됩니다. 아래에서 아카이브를 해제할 수
+            있습니다.
+          </p>
+          {unarchiveError ? (
+            <p className="mt-2 text-xs text-red-300">{unarchiveError}</p>
+          ) : null}
+          <button
+            type="button"
+            disabled={unarchiveBusy}
+            onClick={() => void onUnarchiveIssue()}
+            className="mt-3 rounded-lg border border-amber-700/80 bg-amber-900/40 px-3 py-1.5 text-xs font-medium text-amber-100 hover:bg-amber-900/60 disabled:opacity-50"
+          >
+            {unarchiveBusy ? '처리 중…' : '아카이브 해제'}
+          </button>
+        </div>
+      ) : null}
       <div>
         <p className="font-mono text-sm text-indigo-300">{issue.issueKey}</p>
         <h1 className="mt-1 text-2xl font-semibold text-white">{issue.summary}</h1>
@@ -327,6 +364,11 @@ export function IssueDetailPage() {
           {issue.storyPoints != null ? (
             <span className="rounded bg-slate-800 px-2 py-1 text-slate-300">
               SP {issue.storyPoints}
+            </span>
+          ) : null}
+          {issue.archived ? (
+            <span className="rounded border border-amber-800/50 bg-amber-950/40 px-2 py-1 text-amber-200">
+              아카이브
             </span>
           ) : null}
         </div>

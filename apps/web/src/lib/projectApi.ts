@@ -44,6 +44,16 @@ export async function updateProject(
   return unwrapApi(data)
 }
 
+/** 관리자: 설정된 일수 기준으로 DONE 이슈 일괄 아카이브. 반환값은 갱신된 건수. */
+export async function runProjectAutoArchiveDone(
+  projectId: number,
+): Promise<number> {
+  const { data } = await api.post<ApiResponse<number>>(
+    `/api/v1/projects/${projectId}/issues/auto-archive-done`,
+  )
+  return unwrapApi(data)
+}
+
 export async function deleteProject(projectId: number): Promise<void> {
   const { data } = await api.delete<ApiResponse<unknown>>(
     `/api/v1/projects/${projectId}`,

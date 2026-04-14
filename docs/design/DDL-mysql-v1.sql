@@ -52,6 +52,7 @@ CREATE TABLE project_tb (
     lead_id BIGINT NULL,
     archived TINYINT(1) NOT NULL DEFAULT 0,
     issue_sequence BIGINT NOT NULL DEFAULT 0,
+    auto_archive_done_after_days INT NULL,
     created_at DATETIME(6) NULL,
     updated_at DATETIME(6) NULL,
     CONSTRAINT fk_project_lead FOREIGN KEY (lead_id) REFERENCES user_account_tb (id)
@@ -126,6 +127,7 @@ CREATE TABLE issue_tb (
     security_level VARCHAR(50) NULL,
     epic_start_date DATE NULL,
     epic_end_date DATE NULL,
+    archived TINYINT(1) NOT NULL DEFAULT 0,
     created_at DATETIME(6) NULL,
     updated_at DATETIME(6) NULL,
     CONSTRAINT fk_issue_project FOREIGN KEY (project_id) REFERENCES project_tb (id),
@@ -275,3 +277,6 @@ CREATE TABLE saved_jql_filter_tb (
 -- ALTER TABLE issue_tb ADD COLUMN epic_start_date DATE NULL AFTER security_level;
 -- ALTER TABLE issue_tb ADD COLUMN epic_end_date DATE NULL AFTER epic_start_date;
 -- CREATE INDEX idx_issue_project_type_epic_start ON issue_tb (project_id, issue_type, epic_start_date);
+-- T-617: 이슈 아카이브·프로젝트 자동 아카이브 일수 (기존 DB 마이그레이션용)
+-- ALTER TABLE project_tb ADD COLUMN auto_archive_done_after_days INT NULL AFTER issue_sequence;
+-- ALTER TABLE issue_tb ADD COLUMN archived TINYINT(1) NOT NULL DEFAULT 0 AFTER epic_end_date;

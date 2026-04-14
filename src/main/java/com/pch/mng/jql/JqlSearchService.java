@@ -45,6 +45,7 @@ public class JqlSearchService {
         var ctx = issueVisibilityEvaluator.requiredContextForProject(projectId);
         QIssue issue = QIssue.issue;
         BooleanExpression where = issue.project.id.eq(projectId)
+                .and(issue.archived.eq(false))
                 .and(JqlIssueVisibility.visibleTo(issue, ctx.userId(), ctx.role()));
         if (!ast.matchesAll()) {
             where = where.and(JqlQueryTranslator.buildPredicate(ast.where(), issue));

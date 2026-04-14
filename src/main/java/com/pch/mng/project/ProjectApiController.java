@@ -95,6 +95,12 @@ public class ProjectApiController {
         return ResponseEntity.ok(ApiResponse.ok(issueService.listRoadmapEpics(projectId)));
     }
 
+    @PostMapping("/{projectId}/issues/auto-archive-done")
+    @PreAuthorize("@projectSecurity.isProjectAdmin(#projectId)")
+    public ResponseEntity<ApiResponse<Integer>> runAutoArchiveDone(@PathVariable Long projectId) {
+        return ResponseEntity.ok(ApiResponse.ok(issueService.autoArchiveDoneForProject(projectId)));
+    }
+
     @GetMapping("/{projectId}/wip-limits")
     @PreAuthorize("@projectSecurity.isMember(#projectId)")
     public ResponseEntity<ApiResponse<List<ProjectResponse.WipLimitDTO>>> findWipLimits(

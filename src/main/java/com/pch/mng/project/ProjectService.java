@@ -110,6 +110,10 @@ public class ProjectService {
         if (reqDTO.getArchived() != null) {
             project.setArchived(reqDTO.getArchived());
         }
+        if (reqDTO.getAutoArchiveDoneAfterDays() != null) {
+            int v = reqDTO.getAutoArchiveDoneAfterDays();
+            project.setAutoArchiveDoneAfterDays(v <= 0 ? null : v);
+        }
         return ProjectResponse.DetailDTO.of(project);
     }
 

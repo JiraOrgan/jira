@@ -45,6 +45,12 @@ public class Project {
     @Column(name = "issue_sequence", nullable = false)
     private long issueSequence = 0L;
 
+    /**
+     * DONE 이슈 자동 아카이브: {@code updatedAt} 기준 경과 일수. null 또는 0 이하면 비활성.
+     */
+    @Column(name = "auto_archive_done_after_days")
+    private Integer autoArchiveDoneAfterDays;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
