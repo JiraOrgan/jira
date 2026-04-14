@@ -21,7 +21,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * {@code application-dev} + {@code db/dev/dev-data.sql} 시드의 관리자 테스트 계정 검증.
- * (H2 in-memory, 전체 스위트의 {@code test} 프로파일과 별도)
  */
 @SpringBootTest
 @ActiveProfiles("dev")
