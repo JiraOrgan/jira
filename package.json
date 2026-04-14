@@ -8,6 +8,9 @@
     "dev:web": "npm run dev -w web",
     "build:web": "npm run build -w web",
     "lint:web": "npm run lint -w web",
-    "preview:web": "npm run preview -w web"
+    "preview:web": "npm run preview -w web",
+    "test:api": "node scripts/run-gradlew.cjs test",
+    "build:api": "node scripts/run-gradlew.cjs bootJar",
+    "boot:api": "node scripts/run-gradlew.cjs bootRun"
   }
 }
