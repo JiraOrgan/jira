@@ -305,3 +305,4 @@
 | v1.49 | 2026-04-14 | 웹 `JqlSearchPage`: 비아카이브 기본·`archived = true` 등 안내 문구 — T-611 UX |
 | v1.50 | 2026-04-14 | 모바일: 이슈 `archived` 필드·`IssueRepository.update`·상세 아카이브 안내·해제·목록 부제목 표시 — T-617·T-621 보강 |
 | v1.51 | 2026-04-14 | 모바일 스프린트 보드: 아카이브 이슈 탭 시 전환 차단(SnackBar)·부제목·아이콘·강조 낮춤 — T-617·T-622 UX |
+| v1.52 | 2026-04-14 | `IssueIntegrationTest`: 아카이브 이슈 `POST .../transitions` → 409·메시지 검증 — T-617 회귀 방지 |
