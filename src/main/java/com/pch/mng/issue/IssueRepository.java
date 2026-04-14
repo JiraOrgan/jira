@@ -31,10 +31,10 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
     @Query("SELECT i FROM Issue i JOIN FETCH i.project JOIN FETCH i.reporter LEFT JOIN FETCH i.assignee LEFT JOIN FETCH i.sprint WHERE i.issueKey = :key")
     Optional<Issue> findByIssueKeyWithProject(@Param("key") String issueKey);
 
-    @Query("SELECT i FROM Issue i JOIN FETCH i.project LEFT JOIN FETCH i.sprint WHERE i.id = :id")
+    @Query("SELECT i FROM Issue i JOIN FETCH i.project JOIN FETCH i.reporter LEFT JOIN FETCH i.assignee LEFT JOIN FETCH i.sprint WHERE i.id = :id")
     Optional<Issue> findByIdWithProject(@Param("id") Long id);
 
-    @Query("SELECT DISTINCT i FROM Issue i LEFT JOIN FETCH i.assignee WHERE i.sprint.id = :sid")
+    @Query("SELECT DISTINCT i FROM Issue i JOIN FETCH i.reporter LEFT JOIN FETCH i.assignee WHERE i.sprint.id = :sid")
     List<Issue> findForSprintBoard(@Param("sid") Long sprintId);
 
     List<Issue> findByProjectIdAndIssueTypeOrderByEpicStartDateAscIdAsc(Long projectId, IssueType issueType);

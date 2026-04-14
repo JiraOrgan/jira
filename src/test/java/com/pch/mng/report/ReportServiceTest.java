@@ -2,15 +2,20 @@ package com.pch.mng.report;
 
 import com.pch.mng.global.enums.BoardType;
 import com.pch.mng.global.enums.IssueStatus;
+import com.pch.mng.global.enums.Priority;
+import com.pch.mng.global.enums.ProjectRole;
 import com.pch.mng.global.enums.SprintStatus;
 import com.pch.mng.global.exception.BusinessException;
 import com.pch.mng.global.exception.ErrorCode;
 import com.pch.mng.issue.Issue;
 import com.pch.mng.issue.IssueRepository;
 import com.pch.mng.project.Project;
+import com.pch.mng.security.IssueVisibilityEvaluator;
+import com.pch.mng.user.UserAccount;
 import com.pch.mng.sprint.Sprint;
 import com.pch.mng.sprint.SprintRepository;
 import com.pch.mng.workflow.WorkflowTransitionRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +33,9 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,9 +47,17 @@ class ReportServiceTest {
     private IssueRepository issueRepository;
     @Mock
     private WorkflowTransitionRepository workflowTransitionRepository;
+    @Mock
+    private IssueVisibilityEvaluator issueVisibilityEvaluator;
 
     @InjectMocks
     private ReportService reportService;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(issueVisibilityEvaluator.requiredContextForProject(anyLong()))
+                .thenReturn(new IssueVisibilityEvaluator.MemberViewContext(1L, ProjectRole.ADMIN));
+    }
 
     @Test
     @DisplayName("burndown: 스프린트 없으면 ENTITY_NOT_FOUND")
@@ -84,7 +99,21 @@ class ReportServiceTest {
 
         when(sprintRepository.findByProjectIdAndStatusOrderByEndDateDesc(1L, SprintStatus.COMPLETED))
                 .thenReturn(List.of(s1));
-        when(issueRepository.sumStoryPointsBySprintIdAndStatus(10L, IssueStatus.DONE)).thenReturn(13L);
+        UserAccount rep = UserAccount.builder().email("r@x.com").password("x").name("R").build();
+        ReflectionTestUtils.setField(rep, "id", 1L);
+        Issue done = Issue.builder()
+                .issueKey("A-1")
+                .project(p)
+                .issueType(com.pch.mng.global.enums.IssueType.TASK)
+                .summary("done")
+                .status(IssueStatus.DONE)
+                .priority(Priority.MEDIUM)
+                .reporter(rep)
+                .storyPoints(13)
+                .backlogRank(0)
+                .build();
+        ReflectionTestUtils.setField(done, "id", 100L);
+        when(issueRepository.findByProjectIdAndSprintIdOrderByCreatedAtDesc(1L, 10L)).thenReturn(List.of(done));
 
         ReportResponse.VelocityDTO dto = reportService.velocity(1L, 6);
         assertThat(dto.getSprints()).hasSize(1);

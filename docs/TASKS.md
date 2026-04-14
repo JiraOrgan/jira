@@ -1,8 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.33
+> **버전**: v1.34
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-13 (T-608 이슈 워치 구독 API FR-025)
+> **최종수정일**: 2026-04-14 (T-609 이슈 보안 레벨 정책 FR-031)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -156,7 +156,7 @@
 | T-601 | 번다운/속도/CFD 차트 데이터 API | Backend | DONE | FR-022; `ReportService`·`/projects/{id}/reports/*`·전환 이력 기반 일별 상태·`ReportServiceTest` | T-600 |
 | T-604 | 릴리즈 노트 자동 생성 | Backend | DONE | FR-020; `GET .../versions/{id}/release-notes`, Fix 연결 이슈 집계·마크다운·`ReleaseVersionServiceReleaseNotesTest` | T-408 |
 | T-608 | 워치(Watch) 구독 API | Backend | DONE | FR-025; `GET/POST/DELETE .../issues/{key}/watchers`, `IssueWatcherService`, `IssueWatcherServiceTest` | T-400 |
-| T-609 | 이슈 보안 레벨·정책 API 보강 | Backend | TODO | FR-031 | T-305 |
+| T-609 | 이슈 보안 레벨·정책 API 보강 | Backend | DONE | FR-031 | T-305 |
 | T-607a | 단위 테스트 (Dashboard, Audit, Release) | Backend | TODO | - | T-601 |
 
 ### Frontend
@@ -287,3 +287,4 @@
 | v1.31 | 2026-04-13 | 웹: 리포트 페이지(`ReportsPage`·`/reports`)·`reportApi`·사이드바/개요 링크 — T-614 SCR-012 DONE |
 | v1.32 | 2026-04-13 | T-604 `GET /api/v1/versions/{id}/release-notes`·웹 릴리즈 화면 미리보기·API-SPEC — FR-020 DONE |
 | v1.33 | 2026-04-13 | T-608 이슈 워치 API(`watchers/me`)·`IssueWatcherService`·API-SPEC — FR-025 DONE |
+| v1.34 | 2026-04-14 | T-609 FR-031: `IssueSecurityPolicy`·가시성(목록·보드·JQL·리포트)·Reporter Confidential 설정 제한·`ISSUE_SECURITY_LEVEL_FORBIDDEN` |

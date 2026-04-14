@@ -12,7 +12,10 @@ import com.pch.mng.label.LabelRepository;
 import com.pch.mng.project.Project;
 import com.pch.mng.project.ProjectComponent;
 import com.pch.mng.project.ProjectComponentRepository;
+import com.pch.mng.project.ProjectMember;
+import com.pch.mng.project.ProjectMemberRepository;
 import com.pch.mng.project.ProjectRepository;
+import com.pch.mng.security.IssueVisibilityEvaluator;
 import com.pch.mng.project.WipLimitRepository;
 import com.pch.mng.sprint.Sprint;
 import com.pch.mng.sprint.SprintRepository;
@@ -26,6 +29,7 @@ import com.pch.mng.audit.IssueAuditService;
 import com.pch.mng.board.SprintBoardRedisCache;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,14 +58,29 @@ public class IssueService {
     private final WipLimitRepository wipLimitRepository;
     private final SprintBoardRedisCache sprintBoardRedisCache;
     private final IssueAuditService issueAuditService;
+    private final IssueVisibilityEvaluator issueVisibilityEvaluator;
+    private final ProjectMemberRepository projectMemberRepository;
 
     public Page<IssueResponse.MinDTO> findByProject(Long projectId, Pageable pageable) {
-        return issueRepository.findByProjectIdOrderByCreatedAtDesc(projectId, pageable)
-                .map(IssueResponse.MinDTO::of);
+        var ctx = issueVisibilityEvaluator.requiredContextForProject(projectId);
+        List<Issue> visible = issueRepository.findByProjectIdOrderByCreatedAtDesc(projectId, Pageable.unpaged()).getContent().stream()
+                .filter(i -> IssueSecurityPolicy.canView(i, ctx.role(), ctx.userId()))
+                .toList();
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), visible.size());
+        if (start >= visible.size()) {
+            return new PageImpl<>(List.of(), pageable, visible.size());
+        }
+        List<IssueResponse.MinDTO> slice = visible.subList(start, end).stream()
+                .map(IssueResponse.MinDTO::of)
+                .toList();
+        return new PageImpl<>(slice, pageable, visible.size());
     }
 
     public List<IssueResponse.MinDTO> findBacklog(Long projectId) {
+        var ctx = issueVisibilityEvaluator.requiredContextForProject(projectId);
         return issueRepository.findByProjectIdAndSprintIsNullOrderByBacklogRankAscIdAsc(projectId).stream()
+                .filter(i -> IssueSecurityPolicy.canView(i, ctx.role(), ctx.userId()))
                 .map(IssueResponse.MinDTO::of)
                 .toList();
     }
@@ -70,6 +89,7 @@ public class IssueService {
         return issueRepository
                 .findByProjectIdAndIssueTypeOrderByEpicStartDateAscIdAsc(projectId, IssueType.EPIC)
                 .stream()
+                .filter(issueVisibilityEvaluator::canView)
                 .map(RoadmapEpicResponse::of)
                 .toList();
     }
@@ -110,6 +130,14 @@ public class IssueService {
 
         assertEpicDatesOnlyForEpicType(reqDTO.getIssueType(), reqDTO.getEpicStartDate(), reqDTO.getEpicEndDate());
         validateEpicStartEndOrder(reqDTO.getEpicStartDate(), reqDTO.getEpicEndDate());
+
+        ProjectMember membership = projectMemberRepository
+                .findByProjectIdAndUserId(project.getId(), reporterId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.FORBIDDEN));
+        if (reqDTO.getSecurityLevel() != null
+                && !IssueSecurityPolicy.canSetSecurityLevel(membership.getRole(), reqDTO.getSecurityLevel())) {
+            throw new BusinessException(ErrorCode.ISSUE_SECURITY_LEVEL_FORBIDDEN);
+        }
 
         long nextSeq = project.getIssueSequence() + 1;
         project.setIssueSequence(nextSeq);
@@ -218,6 +246,10 @@ public class IssueService {
                     String.valueOf(reqDTO.getStoryPoints()));
         }
         if (reqDTO.getSecurityLevel() != null && issue.getSecurityLevel() != reqDTO.getSecurityLevel()) {
+            var ctx = issueVisibilityEvaluator.requiredContextForProject(issue.getProject().getId());
+            if (!IssueSecurityPolicy.canSetSecurityLevel(ctx.role(), reqDTO.getSecurityLevel())) {
+                throw new BusinessException(ErrorCode.ISSUE_SECURITY_LEVEL_FORBIDDEN);
+            }
             var old = issue.getSecurityLevel();
             issue.setSecurityLevel(reqDTO.getSecurityLevel());
             issueAuditService.recordFromContext(issue, "securityLevel",

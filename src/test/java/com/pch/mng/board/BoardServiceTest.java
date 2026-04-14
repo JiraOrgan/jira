@@ -6,6 +6,7 @@ import com.pch.mng.global.enums.IssueType;
 import com.pch.mng.global.enums.Priority;
 import com.pch.mng.issue.Issue;
 import com.pch.mng.issue.IssueRepository;
+import com.pch.mng.security.IssueVisibilityEvaluator;
 import com.pch.mng.sprint.SprintRepository;
 import com.pch.mng.user.UserAccount;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,12 +45,17 @@ class BoardServiceTest {
     @Mock
     SprintBoardRedisCache sprintBoardRedisCache;
 
+    @Mock
+    IssueVisibilityEvaluator issueVisibilityEvaluator;
+
     BoardService boardService;
 
     @BeforeEach
     void setUp() {
         org.mockito.Mockito.when(sprintBoardRedisCache.isEnabled()).thenReturn(false);
-        boardService = new BoardService(sprintRepository, issueRepository, sprintBoardRedisCache);
+        lenient().when(issueVisibilityEvaluator.canView(any(Issue.class))).thenReturn(true);
+        boardService = new BoardService(sprintRepository, issueRepository, sprintBoardRedisCache,
+                issueVisibilityEvaluator);
     }
 
     @Test
