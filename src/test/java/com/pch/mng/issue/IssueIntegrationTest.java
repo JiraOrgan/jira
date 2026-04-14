@@ -112,6 +112,34 @@ class IssueIntegrationTest {
     }
 
     @Test
+    @DisplayName("아카이브된 이슈는 상태 전환 시 409 (T-617)")
+    void transitionRejectsArchivedIssue() throws Exception {
+        String email = "arc-tr-" + System.nanoTime() + "@ex.com";
+        String token = registerAndLogin(email);
+        long projectId = createProject(token, "AR" + (System.nanoTime() % 100000));
+        String issueKey = createTaskAndGetKey(token, projectId);
+
+        mockMvc.perform(put("/api/v1/issues/%s".formatted(issueKey))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"archived\":true}"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/v1/issues/%s/transitions".formatted(issueKey))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"toStatus\":\"SELECTED\"}"))
+                .andExpect(status().isConflict())
+                .andExpect(result -> {
+                    JsonNode root = objectMapper.readTree(result.getResponse().getContentAsString());
+                    assertThat(root.path("success").asBoolean()).isFalse();
+                    assertThat(root.path("status").asInt()).isEqualTo(409);
+                    assertThat(root.path("message").asText())
+                            .isEqualTo("아카이브된 이슈에서는 이 작업을 수행할 수 없습니다");
+                });
+    }
+
+    @Test
     @DisplayName("허용되지 않는 워크플로 전환은 409")
     void workflowRejectsIllegalTransition() throws Exception {
         String email = "wf-bad-" + System.nanoTime() + "@ex.com";
