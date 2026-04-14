@@ -5,6 +5,7 @@ import '../models/project_min.dart';
 import '../providers/providers.dart';
 import 'issue_create_screen.dart';
 import 'issue_detail_screen.dart';
+import 'sprint_board_screen.dart';
 
 class IssueListScreen extends ConsumerWidget {
   const IssueListScreen({super.key});
@@ -61,6 +62,18 @@ class IssueListScreen extends ConsumerWidget {
           appBar: AppBar(
             title: const Text('이슈'),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.view_kanban_outlined),
+                tooltip: '스프린트 보드',
+                onPressed: () {
+                  Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          SprintBoardScreen(projectId: current.id),
+                    ),
+                  );
+                },
+              ),
               IconButton(
                 icon: const Icon(Icons.logout),
                 tooltip: '로그아웃',

@@ -57,4 +57,24 @@ class IssueRepository {
     );
     return unwrapData(body);
   }
+
+  Future<IssueDetail> transition(
+    String issueKey,
+    String toStatus, {
+    String? conditionNote,
+  }) async {
+    final res = await _dio.post<Map<String, dynamic>>(
+      '/api/v1/issues/${Uri.encodeComponent(issueKey)}/transitions',
+      data: {
+        'toStatus': toStatus,
+        if (conditionNote != null && conditionNote.isNotEmpty)
+          'conditionNote': conditionNote,
+      },
+    );
+    final body = ApiResponse.fromJson(
+      res.data!,
+      (d) => IssueDetail.fromJson(d! as Map<String, dynamic>),
+    );
+    return unwrapData(body);
+  }
 }

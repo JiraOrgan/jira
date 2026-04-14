@@ -5,9 +5,12 @@ import '../core/api_client.dart';
 import '../models/auth_token.dart';
 import '../models/issue.dart';
 import '../models/project_min.dart';
+import '../models/sprint_board.dart';
+import '../models/sprint_min.dart';
 import '../services/auth_repository.dart';
 import '../services/issue_repository.dart';
 import '../services/project_repository.dart';
+import '../services/sprint_repository.dart';
 
 final bareDioProvider = Provider<Dio>((ref) => createBaseDio());
 
@@ -69,6 +72,20 @@ final projectRepositoryProvider = Provider<ProjectRepository>(
 final issueRepositoryProvider = Provider<IssueRepository>(
   (ref) => IssueRepository(ref.watch(apiDioProvider)),
 );
+
+final sprintRepositoryProvider = Provider<SprintRepository>(
+  (ref) => SprintRepository(ref.watch(apiDioProvider)),
+);
+
+final sprintListProvider =
+    FutureProvider.family<List<SprintMin>, int>((ref, projectId) async {
+  return ref.watch(sprintRepositoryProvider).listByProject(projectId);
+});
+
+final sprintBoardProvider =
+    FutureProvider.family<SprintBoardData, int>((ref, sprintId) async {
+  return ref.watch(sprintRepositoryProvider).fetchBoard(sprintId);
+});
 
 final selectedProjectProvider = StateProvider<ProjectMin?>((ref) => null);
 
