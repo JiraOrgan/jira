@@ -135,13 +135,13 @@
 - Java 21 이상
 - MySQL 8.0
 - Redis 7.x
-- Gradle 9.x
+- Gradle Wrapper (`./gradlew` / Windows `gradlew.bat`) — 백엔드는 **Maven(`pom.xml`) 미사용**, 별도 Maven 설치 불필요
 - Node.js 20 이상 (웹 앱)
 - Flutter SDK 3.x (모바일 앱, 선택)
 
 ### 모노레포 레이아웃
 
-- **백엔드**: 저장소 루트 Gradle Spring Boot
+- **백엔드**: 저장소 루트 **Gradle 전용** Spring Boot (`build.gradle`, Wrapper만 사용)
 - **웹**: `apps/web` — React 19, Vite 8, Zustand, Tailwind CSS 4 (`npm` workspaces)
 - **모바일**: `apps/mobile` — Flutter, `flutter_riverpod`, Dio
 
