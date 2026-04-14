@@ -35,6 +35,8 @@ jobs:
           cache: gradle
       - name: Gradle test
         run: chmod +x gradlew && ./gradlew test --no-daemon
+      - name: Gradle bootJar
+        run: ./gradlew bootJar --no-daemon
 
   web:
     runs-on: ubuntu-latest
