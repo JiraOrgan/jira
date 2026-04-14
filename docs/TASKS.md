@@ -313,3 +313,4 @@
 | v1.57 | 2026-04-14 | README: FVM 선택 사항·Windows `dart pub global activate fvm`·PATH·`fvm` 없이 `flutter`만 사용 안내 |
 | v1.58 | 2026-04-14 | 모바일: Riverpod 3 `AsyncValue.value`·Flutter 3.35 `DropdownButtonFormField.initialValue`·`pubspec.lock` — PR #78 |
 | v1.59 | 2026-04-14 | `.cursor/skills/`: Flutter·React 에이전트 스킬(flutter-setup·react-setup) 저장소 포함 — PR #79 |
+| v1.60 | 2026-04-14 | WORKFLOW v1.4: §3.2·DoD·§7.3 등 `develop(또는 dev)` → `develop`; PRD DoD 동일 정리 |
