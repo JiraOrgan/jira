@@ -219,6 +219,17 @@ export function JqlSearchPage() {
               placeholder='예: type = TASK AND text ~ "버그"'
               spellCheck={false}
             />
+            <p className="mt-2 text-xs text-slate-500">
+              조건에 <span className="font-mono text-slate-400">archived</span>를 쓰지 않으면
+              서버가 비아카이브 이슈만 검색합니다(
+              <span className="font-mono text-slate-400">archived = false</span>와 동일). 아카이브
+              포함·만 보려면{' '}
+              <span className="font-mono text-slate-400">archived = true</span>를 명시하세요. (
+              <span className="font-mono text-slate-400">true</span>/<span className="font-mono text-slate-400">false</span>,{' '}
+              <span className="font-mono text-slate-400">1</span>/<span className="font-mono text-slate-400">0</span>,{' '}
+              <span className="font-mono text-slate-400">!=</span>,{' '}
+              <span className="font-mono text-slate-400">IN (...)</span> 지원)
+            </p>
           </label>
 
           <div>
