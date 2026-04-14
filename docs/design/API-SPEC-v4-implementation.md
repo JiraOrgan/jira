@@ -90,9 +90,9 @@
 
 | Method | Path | 설명 |
 |--------|------|------|
-| GET | `/api/v1/comments/issue/{issueId}` | 이슈별 목록 |
-| POST | `/api/v1/comments` | 생성 |
-| PUT | `/api/v1/comments/{id}` | 수정 |
+| GET | `/api/v1/comments/issue/{issueId}` | 이슈별 목록 (`DetailDTO`: `mentionedUsers` — 본문 `@토큰`이 프로젝트 멤버로 해석된 사용자) |
+| POST | `/api/v1/comments` | 생성 (저장 시 멘션 동기화) |
+| PUT | `/api/v1/comments/{id}` | 수정 (멘션 재동기화) |
 | DELETE | `/api/v1/comments/{id}` | 삭제 |
 
 ### 감사 로그 `AuditLogApiController`

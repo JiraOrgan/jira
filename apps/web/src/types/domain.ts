@@ -153,6 +153,12 @@ export type SprintDetail = {
 export type IssueLabelItem = { id: number; name: string }
 export type IssueComponentItem = { id: number; name: string }
 
+/** `CommentResponse.MentionDTO` */
+export type CommentMentionUser = {
+  userId: number
+  userName: string | null
+}
+
 /** `CommentResponse.DetailDTO` */
 export type CommentDetail = {
   id: number
@@ -162,6 +168,7 @@ export type CommentDetail = {
   body: string
   createdAt: string
   updatedAt: string
+  mentionedUsers: CommentMentionUser[]
 }
 
 export type IssueDetail = {
