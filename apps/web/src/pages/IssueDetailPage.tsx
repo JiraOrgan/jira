@@ -17,6 +17,11 @@ import {
   uploadAttachment,
 } from '../lib/issueApi'
 import { priorityLabel, statusLabel } from '../lib/labels'
+import {
+  getPlanningPokerVote,
+  PLANNING_POKER_VALUES,
+  setPlanningPokerVote,
+} from '../lib/planningPokerStorage'
 import { allowedNextStatuses } from '../lib/workflow'
 import type {
   AttachmentDetail,
@@ -53,6 +58,10 @@ export function IssueDetailPage() {
   const [epicError, setEpicError] = useState<string | null>(null)
   const [epicSaving, setEpicSaving] = useState(false)
 
+  const [pokerPick, setPokerPick] = useState<number | null>(null)
+  const [pokerError, setPokerError] = useState<string | null>(null)
+  const [pokerSaving, setPokerSaving] = useState(false)
+
   const reload = useCallback(async () => {
     if (!issueKey) return
     setLoadError(null)
@@ -83,6 +92,14 @@ export function IssueDetailPage() {
       setEpicEndEdit(issue.epicEndDate ?? '')
     }
   }, [issue])
+
+  useEffect(() => {
+    if (!issueKey) {
+      setPokerPick(null)
+      return
+    }
+    setPokerPick(getPlanningPokerVote(issueKey))
+  }, [issueKey])
 
   async function onSaveEpicDates(e: FormEvent) {
     e.preventDefault()
@@ -140,6 +157,21 @@ export function IssueDetailPage() {
       setTransitionError(errorMessage(err))
     } finally {
       setTransitionLoading(false)
+    }
+  }
+
+  async function onApplyPokerPoints(e: FormEvent) {
+    e.preventDefault()
+    if (!issue || pokerPick == null) return
+    setPokerError(null)
+    setPokerSaving(true)
+    try {
+      const updated = await updateIssue(issue.issueKey, { storyPoints: pokerPick })
+      setIssue(updated)
+    } catch (err) {
+      setPokerError(errorMessage(err))
+    } finally {
+      setPokerSaving(false)
     }
   }
 
@@ -310,6 +342,67 @@ export function IssueDetailPage() {
               : '—'}
           </p>
         </div>
+      </section>
+
+      <section className="border-t border-slate-800 pt-6">
+        <h2 className="text-sm font-medium text-white">Planning Poker</h2>
+        <p className="mt-1 text-xs text-slate-500">
+          FR-018 비동기 추정: 카드 선택은 이 브라우저(localStorage)에만 저장됩니다. 합의 후
+          「이슈 SP로 반영」으로 서버에 기록하세요. 팀원 간 실시간 공유는 후속에서 API로
+          확장할 수 있습니다.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {PLANNING_POKER_VALUES.map((v) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => {
+                setPokerPick(v)
+                setPlanningPokerVote(issue.issueKey, v)
+              }}
+              className={`rounded-lg border px-4 py-2 text-sm font-medium transition ${
+                pokerPick === v
+                  ? 'border-indigo-500 bg-indigo-600 text-white'
+                  : 'border-slate-600 text-slate-300 hover:border-slate-500 hover:bg-slate-800'
+              }`}
+            >
+              {v}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => {
+              setPokerPick(null)
+              setPlanningPokerVote(issue.issueKey, null)
+            }}
+            className="rounded-lg border border-slate-600 px-3 py-2 text-sm text-slate-400 hover:bg-slate-800"
+          >
+            로컬 지우기
+          </button>
+        </div>
+        <form
+          className="mt-4 flex flex-wrap items-end gap-3"
+          onSubmit={onApplyPokerPoints}
+        >
+          <button
+            type="submit"
+            disabled={pokerSaving || pokerPick == null}
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
+          >
+            {pokerSaving ? '반영 중…' : '선택 값을 이슈 SP로 반영'}
+          </button>
+          {issue.storyPoints != null ? (
+            <span className="text-sm text-slate-400">
+              현재 이슈 SP:{' '}
+              <strong className="text-slate-200">{issue.storyPoints}</strong>
+            </span>
+          ) : (
+            <span className="text-sm text-slate-500">이슈에 SP 없음</span>
+          )}
+        </form>
+        {pokerError ? (
+          <p className="mt-2 text-sm text-red-300">{pokerError}</p>
+        ) : null}
       </section>
 
       <section className="border-t border-slate-800 pt-6">
