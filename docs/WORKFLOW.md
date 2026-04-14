@@ -1,10 +1,12 @@
 # Project Control Hub - 개발 워크플로우
 
-> **버전**: v1.1
+> **버전**: v1.2
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-09
+> **최종수정일**: 2026-04-14 (TASKS 참조·Phase 일정 안내 연계)
 > **연결 문서**: [PHASE.md](PHASE.md) | [TASKS.md](TASKS.md) | [PRD.md](PRD.md)
 > **Git 정본**: `C:\workspace\phs-prj\documents\08-Git규칙정의서_v3.0.md` — 본 파일은 코드 저장소용 요약이며, 세부·예외는 해당 문서를 따른다.
+
+기능 완료·Task 상태·릴리즈 단위 진척은 **[TASKS.md](TASKS.md) 변경 이력** 및 Phase 로드맵의 **「일정 vs 저장소 진척」** 안내([PHASE.md](PHASE.md))를 본다.
 
 ---
 

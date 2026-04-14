@@ -1,6 +1,7 @@
 # API 정의서 v4 — 현재 구현 매핑
 
 > **작성일**: 2026-04-09  
+> **최종 갱신**: 2026-04-14 (JQL 검색·아카이브 동작 주석)  
 > **Task**: T-201  
 > **OpenAPI**: 앱 기동 후 `/v3/api-docs`, Swagger UI `/swagger-ui.html`  
 > **외부 정본**: `04-API정의서_v4.0.md` (Jira 스타일 `/rest/api/3` 등) — 점진 정렬 예정
@@ -130,6 +131,18 @@
 | GET | `/api/v1/projects/{projectId}/reports/sprints/{sprintId}/burndown` | 스프린트 번다운(전환 이력 기준 일별 잔량·이상선) |
 | GET | `/api/v1/projects/{projectId}/reports/velocity` | 완료 스프린트별 DONE 스토리 포인트 (`limit` 기본 6, 최대 24) |
 | GET | `/api/v1/projects/{projectId}/reports/cfd` | 누적 흐름용 일별 상태별 이슈 수 (`days` 기본 30, 7~90; `sprintId` 선택) |
+
+### JQL 검색·저장 필터 `JqlSearchApiController` (FR-016, T-603)
+
+| Method | Path | 설명 |
+|--------|------|------|
+| POST | `/api/v1/projects/{projectId}/jql/search` | JQL 검색(페이징). 응답 `IssueResponse.MinDTO`에 `archived` 포함 |
+| GET | `/api/v1/projects/{projectId}/jql/filters` | 저장 필터 목록(소유자별) |
+| POST | `/api/v1/projects/{projectId}/jql/filters` | 저장 필터 생성 |
+| DELETE | `/api/v1/projects/{projectId}/jql/filters/{filterId}` | 저장 필터 삭제 |
+
+**아카이브와 JQL**: `JqlSearchService`는 파싱된 조건에 더해 **항상 비아카이브**(`issue.archived = false`)를 적용한다.  
+MVP 파서의 `JqlField`에는 **`archived` 필드가 없음** — 사용자 JQL에서 `archived = true` 등을 쓰는 것은 현재 미지원(후속 확장 시 스파이크·필드 enum 정합 필요).
 
 ## 다음 작업 (구현 대비)
 
