@@ -17,11 +17,13 @@
 ## 2. 문법 범위 (MVP → 확장)
 
 **MVP (Phase 4)**  
-- 필드: `project`, `status`, `type`, `assignee`, `priority`, `sprint`, `text`(summary/description 검색)  
+- 필드: `project`, `status`, `type`, `assignee`, `priority`, `sprint`, `text`(summary/description 검색), `archived`(불리언: `true`/`false`, `1`/`0`; `=`, `!=`, `IN` — `IS EMPTY`·`~` 미지원)  
 - 연산: `=`, `!=`, `IN`, `~`(contains), `IS EMPTY`  
 - 논리: `AND`, `OR`, 괄호  
 - 정렬: `ORDER BY` 단일·복합 필드, `ASC`/`DESC`  
 - 페이징: `startAt`, `maxResults`는 API 파라미터로 분리 권장(문법 외)
+
+**구현 메모 (저장소, 2026-04)**: WHERE에 `archived` 절이 없으면 `JqlSearchService`가 `archived = false`를 자동 AND한다. 동작·엔드포인트는 [API-SPEC-v4-implementation.md](../design/API-SPEC-v4-implementation.md) JQL 절 참고.
 
 **확장 (후속)**  
 - 함수: `updated()`, `created()`, `currentUser()`  

@@ -21,6 +21,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -144,6 +145,76 @@ class JqlSearchIntegrationTest {
         mockMvc.perform(delete("/api/v1/projects/%d/jql/filters/%d".formatted(projectId, filterId))
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("JQL: archived 미명시 시 비아카이브만, archived=true면 아카이브 포함")
+    void jqlArchivedExplicitClause() throws Exception {
+        String email = "jql-a-" + System.nanoTime() + "@ex.com";
+        String token = registerAndLogin(email);
+        String pk = "JA" + (System.nanoTime() % 100000);
+        long projectId = createProject(token, pk);
+
+        String marker = "marker-arch-jql-" + System.nanoTime();
+        MvcResult create = mockMvc.perform(post("/api/v1/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"projectId":%d,"issueType":"TASK","summary":"%s","priority":"MEDIUM"}
+                                """.formatted(projectId, marker)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        String issueKey = objectMapper.readTree(create.getResponse().getContentAsString())
+                .path("data").path("issueKey").asText();
+
+        mockMvc.perform(put("/api/v1/issues/%s".formatted(issueKey))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"archived\":true}"))
+                .andExpect(status().isOk());
+
+        JqlSearchRequest hidden = new JqlSearchRequest();
+        hidden.setJql("text ~ \"" + marker + "\"");
+        hidden.setStartAt(0);
+        hidden.setMaxResults(10);
+        mockMvc.perform(post("/api/v1/projects/%d/jql/search".formatted(projectId))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(hidden)))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    JsonNode data = objectMapper.readTree(result.getResponse().getContentAsString()).path("data");
+                    assertThat(data.path("total").asLong()).isEqualTo(0L);
+                });
+
+        JqlSearchRequest shown = new JqlSearchRequest();
+        shown.setJql("archived = true AND text ~ \"" + marker + "\"");
+        shown.setStartAt(0);
+        shown.setMaxResults(10);
+        mockMvc.perform(post("/api/v1/projects/%d/jql/search".formatted(projectId))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(shown)))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    JsonNode data = objectMapper.readTree(result.getResponse().getContentAsString()).path("data");
+                    assertThat(data.path("total").asLong()).isEqualTo(1L);
+                    assertThat(data.path("issues").get(0).path("issueKey").asText()).isEqualTo(issueKey);
+                });
+
+        JqlSearchRequest explicitFalse = new JqlSearchRequest();
+        explicitFalse.setJql("archived = false AND text ~ \"" + marker + "\"");
+        explicitFalse.setStartAt(0);
+        explicitFalse.setMaxResults(10);
+        mockMvc.perform(post("/api/v1/projects/%d/jql/search".formatted(projectId))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(explicitFalse)))
+                .andExpect(status().isOk())
+                .andExpect(result -> {
+                    JsonNode data = objectMapper.readTree(result.getResponse().getContentAsString()).path("data");
+                    assertThat(data.path("total").asLong()).isEqualTo(0L);
+                });
     }
 
     @Test

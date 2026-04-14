@@ -13,7 +13,9 @@ public enum JqlField {
     ASSIGNEE,
     PRIORITY,
     SPRINT,
-    TEXT;
+    TEXT,
+    /** 이슈 아카이브 여부 (`true` / `false`, `1` / `0`). */
+    ARCHIVED;
 
     public static JqlField fromLexeme(String raw, int pos) {
         String k = raw.toLowerCase(Locale.ROOT);

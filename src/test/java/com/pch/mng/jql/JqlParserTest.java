@@ -56,6 +56,16 @@ class JqlParserTest {
     }
 
     @Test
+    @DisplayName("archived 불리언")
+    void archivedEq() {
+        JqlQuery q = JqlParser.parse("archived = true");
+        JqlExpression.Clause c = (JqlExpression.Clause) q.where();
+        assertThat(c.field()).isEqualTo(JqlField.ARCHIVED);
+        assertThat(c.operator()).isEqualTo(JqlOperator.EQ);
+        assertThat(c.values()).containsExactly("true");
+    }
+
+    @Test
     @DisplayName("text contains ~")
     void textContains() {
         JqlQuery q = JqlParser.parse("text ~ \"login\"");

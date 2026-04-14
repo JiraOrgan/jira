@@ -141,8 +141,8 @@
 | POST | `/api/v1/projects/{projectId}/jql/filters` | 저장 필터 생성 |
 | DELETE | `/api/v1/projects/{projectId}/jql/filters/{filterId}` | 저장 필터 삭제 |
 
-**아카이브와 JQL**: `JqlSearchService`는 파싱된 조건에 더해 **항상 비아카이브**(`issue.archived = false`)를 적용한다.  
-MVP 파서의 `JqlField`에는 **`archived` 필드가 없음** — 사용자 JQL에서 `archived = true` 등을 쓰는 것은 현재 미지원(후속 확장 시 스파이크·필드 enum 정합 필요).
+**아카이브와 JQL**: WHERE에 **`archived` 절이 없으면** `JqlSearchService`가 **비아카이브**(`issue.archived = false`)를 자동 AND한다.  
+`archived = true` / `false`(또는 `1` / `0`) 및 `!=`, `IN (...)` 조합은 `JqlField.ARCHIVED`로 해석된다(`IS EMPTY`·`~`는 미지원).
 
 ## 다음 작업 (구현 대비)
 
