@@ -1,8 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.36
+> **버전**: v1.37
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-14 (T-622 모바일 스프린트 보드 FR-MOBILE-002)
+> **최종수정일**: 2026-04-14 (T-616 Planning Poker UI, 이슈 상세)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -168,7 +168,7 @@
 | T-613 | 릴리즈 관리 화면 | Frontend | DONE | SCR-011 | T-610 |
 | T-614 | 리포트 화면 (차트) | Frontend | DONE | SCR-012; `/project/:key/reports`, `reportApi`, 번다운·속도·CFD 탭(SVG) | T-601 |
 | T-615 | Audit Log 화면 | Frontend | DONE | SCR-014; `/project/:key/audit`, `GET /api/v1/audit-logs/project/{id}` (ADMIN) | T-610 |
-| T-616 | Planning Poker UI (선택) | Frontend | TODO | SCR-006 | T-610 |
+| T-616 | Planning Poker UI (선택) | Frontend | DONE | SCR-006; `IssueDetailPage` 피보나치 카드·localStorage·`storyPoints` 반영, `planningPokerStorage` | T-610 |
 
 ### Mobile (Flutter)
 
@@ -290,3 +290,4 @@
 | v1.34 | 2026-04-14 | T-609 FR-031: `IssueSecurityPolicy`·가시성(목록·보드·JQL·리포트)·Reporter Confidential 설정 제한·`ISSUE_SECURITY_LEVEL_FORBIDDEN` |
 | v1.35 | 2026-04-14 | T-607a: `IssueAuditServiceTest`·`ReleaseVersionServiceTest`·`DashboardServiceTest` 보강(save/update/delete·소유자 조회·reorder 빈 케이스 등) |
 | v1.36 | 2026-04-14 | T-622 Flutter: 스프린트 보드 API·가로 컬럼·탭 시 전환 바텀시트·`IssueRepository.transition`·롱프레스 상세 — FR-MOBILE-002 |
+| v1.37 | 2026-04-14 | T-616: 웹 이슈 상세 Planning Poker UI (`planningPokerStorage`, 피보나치 선택·로컬 저장·SP 반영) — FR-018 보조 |
