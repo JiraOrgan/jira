@@ -48,6 +48,9 @@ dependencies {
     // -- Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
+    // -- 알림 (이메일: spring.mail.host 설정 시에만 빈 활성화)
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
     // -- API 문서화 (Spring Boot 4 전용)
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0'
 

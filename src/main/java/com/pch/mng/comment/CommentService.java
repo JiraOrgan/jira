@@ -4,9 +4,11 @@ import com.pch.mng.global.exception.BusinessException;
 import com.pch.mng.global.exception.ErrorCode;
 import com.pch.mng.issue.Issue;
 import com.pch.mng.issue.IssueRepository;
+import com.pch.mng.notification.CommentMentionNotificationEvent;
 import com.pch.mng.user.UserAccount;
 import com.pch.mng.user.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,7 @@ public class CommentService {
     private final CommentMentionResolver commentMentionResolver;
     private final IssueRepository issueRepository;
     private final UserAccountRepository userAccountRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public List<CommentResponse.DetailDTO> findByIssue(Long issueId) {
         List<Comment> comments = commentRepository.findByIssueIdWithAuthor(issueId);
@@ -74,7 +77,9 @@ public class CommentService {
                         .body(reqDTO.getBody())
                         .build();
         commentRepository.save(comment);
-        replaceMentions(comment.getId(), issue.getProject().getId(), comment.getBody());
+        Set<Long> mentioned =
+                replaceMentions(comment.getId(), issue.getProject().getId(), comment.getBody());
+        publishMentionEventIfNeeded(issue, author, comment.getBody(), mentioned);
         return CommentResponse.DetailDTO.of(
                 comment, mentionDtosForComment(comment.getId()));
     }
@@ -91,7 +96,8 @@ public class CommentService {
                 commentRepository
                         .findIssueProjectIdByCommentId(id)
                         .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
-        replaceMentions(id, projectId, comment.getBody());
+        Set<Long> mentioned = replaceMentions(id, projectId, comment.getBody());
+        publishMentionEventIfNeeded(comment.getIssue(), comment.getAuthor(), comment.getBody(), mentioned);
         return CommentResponse.DetailDTO.of(comment, mentionDtosForComment(id));
     }
 
@@ -105,11 +111,11 @@ public class CommentService {
         commentRepository.delete(comment);
     }
 
-    private void replaceMentions(Long commentId, Long projectId, String body) {
+    private Set<Long> replaceMentions(Long commentId, Long projectId, String body) {
         commentMentionRepository.deleteByComment_Id(commentId);
         Set<Long> userIds = commentMentionResolver.resolveMentionedUserIds(projectId, body);
         if (userIds.isEmpty()) {
-            return;
+            return Set.of();
         }
         Comment ref = commentRepository.getReferenceById(commentId);
         List<CommentMention> rows = new ArrayList<>();
@@ -121,6 +127,22 @@ public class CommentService {
                             .build());
         }
         commentMentionRepository.saveAll(rows);
+        return Set.copyOf(userIds);
+    }
+
+    private void publishMentionEventIfNeeded(
+            Issue issue, UserAccount author, String body, Set<Long> mentionedUserIds) {
+        if (mentionedUserIds.isEmpty()) {
+            return;
+        }
+        eventPublisher.publishEvent(
+                new CommentMentionNotificationEvent(
+                        issue.getIssueKey(),
+                        issue.getProject().getKey(),
+                        author.getId(),
+                        author.getName(),
+                        CommentBodyPreview.of(body),
+                        Set.copyOf(mentionedUserIds)));
     }
 
     private List<CommentResponse.MentionDTO> mentionDtosForComment(Long commentId) {

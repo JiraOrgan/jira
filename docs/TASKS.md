@@ -1,8 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.40
+> **버전**: v1.41
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-14 (T-405 댓글 @멘션 파싱·저장)
+> **최종수정일**: 2026-04-14 (T-605 댓글 멘션 알림)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -188,7 +188,7 @@
 | ID | Task | 담당 | 상태 | 관련 FR | 선행 |
 |----|------|------|------|---------|------|
 | T-405 | 댓글 CRUD + @멘션 파싱 | Backend | DONE | FR-023; `CommentMention`·`CommentMentionResolver`(프로젝트 멤버 매칭)·`DetailDTO.mentionedUsers`, 웹 멘션 요약 표시 | T-400 |
-| T-605 | 알림 서비스 (이메일/Slack) | Backend | TODO | FR-024 | T-405 |
+| T-605 | 알림 서비스 (이메일/Slack) | Backend | DONE | FR-024; `NotificationService`·Slack Webhook·`JavaMailSender`(선택)·댓글 멘션 `AFTER_COMMIT` 비동기 | T-405 |
 | T-606 | 자동화 엔진 (Trigger→Condition→Action) | Backend | TODO | FR-015 | T-402 |
 | T-617 | 아카이브·자동 아카이브 규칙 API | Backend | TODO | FR-026, FR-027 | T-400 |
 | T-625 | GitHub/GitLab 커밋·PR 연동 | Backend | TODO | FR-033 | T-400 |
@@ -294,3 +294,4 @@
 | v1.38 | 2026-04-14 | T-628: 웹 이슈 상세 댓글 목록·등록·편집·삭제, 멘션 토큰 삽입·표시 — FR-023 UI (백엔드 멘션 파싱 T-405) |
 | v1.39 | 2026-04-14 | T-629: 프로젝트 `UpdateDTO.archived`·`GET /api/v1/projects/by-key/{key}`, 웹 설정 아카이브·연동 안내 — FR-026 UI (자동 규칙 T-617) |
 | v1.40 | 2026-04-14 | T-405: 댓글 `@토큰` 파싱·`comment_mention_tb`·API `mentionedUsers` — FR-023 (알림 T-605) |
+| v1.41 | 2026-04-14 | T-605: 댓글 멘션 알림(Slack Webhook·선택 이메일)·`app.notification` — FR-024 |
