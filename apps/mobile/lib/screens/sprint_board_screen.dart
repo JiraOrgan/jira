@@ -33,6 +33,19 @@ class _SprintBoardScreenState extends ConsumerState<SprintBoardScreen> {
     IssueMin issue,
     int sprintId,
   ) async {
+    if (issue.archived) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              '아카이브된 이슈는 보드에서 상태를 바꿀 수 없습니다. '
+              '상세 화면에서 아카이브를 해제한 뒤 다시 시도하세요.',
+            ),
+          ),
+        );
+      }
+      return;
+    }
     final targets = allowedWorkflowTargets(issue.status);
     if (targets.isEmpty) {
       if (context.mounted) {
@@ -246,16 +259,21 @@ class _BoardPane extends ConsumerWidget {
                                         itemCount: issues.length,
                                         itemBuilder: (context, j) {
                                           final iss = issues[j];
-                                          return ListTile(
+                                          final tile = ListTile(
                                             dense: true,
                                             title: Text(
                                               iss.summary,
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
                                             ),
-                                            subtitle: Text(iss.issueKey),
-                                            trailing: const Icon(
-                                              Icons.swap_horiz,
+                                            subtitle: Text(
+                                              '${iss.issueKey}'
+                                              '${iss.archived ? ' · 아카이브' : ''}',
+                                            ),
+                                            trailing: Icon(
+                                              iss.archived
+                                                  ? Icons.inventory_2_outlined
+                                                  : Icons.swap_horiz,
                                               size: 20,
                                             ),
                                             onTap: () => onIssueTap(iss),
@@ -269,6 +287,11 @@ class _BoardPane extends ConsumerWidget {
                                                 ),
                                               );
                                             },
+                                          );
+                                          if (!iss.archived) return tile;
+                                          return Opacity(
+                                            opacity: 0.72,
+                                            child: tile,
                                           );
                                         },
                                       ),
