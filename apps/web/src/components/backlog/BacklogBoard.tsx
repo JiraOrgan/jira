@@ -54,6 +54,7 @@ function SortableIssueRow({
   issue: IssueMin
   disabled: boolean
 }) {
+  const rowDisabled = disabled || issue.archived
   const {
     attributes,
     listeners,
@@ -63,7 +64,7 @@ function SortableIssueRow({
     isDragging,
   } = useSortable({
     id: issueDndId(issue.id),
-    disabled,
+    disabled: rowDisabled,
   })
 
   const style = {
@@ -77,6 +78,7 @@ function SortableIssueRow({
       style={style}
       className={[
         'flex items-start gap-3 rounded-lg border border-slate-800 bg-slate-900/60 p-3',
+        issue.archived ? 'opacity-80' : '',
         isDragging ? 'z-10 opacity-60 shadow-lg ring-2 ring-indigo-500/40' : '',
       ].join(' ')}
     >
@@ -84,7 +86,7 @@ function SortableIssueRow({
         type="button"
         className="mt-0.5 cursor-grab touch-none text-slate-500 hover:text-slate-300 active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-40"
         aria-label="순서 변경"
-        disabled={disabled}
+        disabled={rowDisabled}
         {...attributes}
         {...listeners}
       >
@@ -107,6 +109,11 @@ function SortableIssueRow({
           {issue.storyPoints != null ? (
             <span className="text-[10px] text-slate-500">SP {issue.storyPoints}</span>
           ) : null}
+          {issue.archived ? (
+            <span className="rounded border border-amber-800/50 bg-amber-950/40 px-1.5 py-0.5 text-[10px] text-amber-200">
+              아카이브
+            </span>
+          ) : null}
         </div>
         <p className="mt-1 text-sm text-slate-200">{issue.summary}</p>
         <p className="mt-1 text-xs text-slate-500">
@@ -122,7 +129,14 @@ function IssueRowPreview({ issue }: { issue: IssueMin }) {
     <div className="flex items-start gap-3 rounded-lg border border-indigo-500/50 bg-slate-900 p-3 shadow-xl">
       <span className="mt-0.5 text-slate-500">⋮⋮</span>
       <div className="min-w-0 flex-1">
-        <span className="font-mono text-sm text-indigo-300">{issue.issueKey}</span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-mono text-sm text-indigo-300">{issue.issueKey}</span>
+          {issue.archived ? (
+            <span className="rounded border border-amber-800/50 bg-amber-950/40 px-1.5 py-0.5 text-[10px] text-amber-200">
+              아카이브
+            </span>
+          ) : null}
+        </div>
         <p className="mt-1 text-sm text-slate-200">{issue.summary}</p>
       </div>
     </div>

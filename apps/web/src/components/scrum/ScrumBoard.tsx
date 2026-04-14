@@ -71,10 +71,11 @@ function BoardIssueCard({
   issue: IssueMin
   disabled: boolean
 }) {
+  const cardDisabled = disabled || issue.archived
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: boardIssueDndId(issue.issueKey),
-      disabled,
+      disabled: cardDisabled,
     })
 
   const style = transform
@@ -89,6 +90,7 @@ function BoardIssueCard({
       style={style}
       className={[
         'rounded-lg border border-slate-800 bg-slate-900/80 p-2 shadow-sm',
+        issue.archived ? 'opacity-80' : '',
         isDragging ? 'opacity-50 ring-2 ring-indigo-500/30' : '',
       ].join(' ')}
     >
@@ -97,7 +99,7 @@ function BoardIssueCard({
           type="button"
           className="shrink-0 cursor-grab touch-none text-slate-500 hover:text-slate-300 active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-40"
           aria-label="보드로 이동"
-          disabled={disabled}
+          disabled={cardDisabled}
           {...listeners}
           {...attributes}
         >
@@ -115,6 +117,11 @@ function BoardIssueCard({
             <span className="rounded bg-slate-800 px-1 py-0.5 text-[9px] uppercase text-slate-500">
               {issueTypeLabel[issue.issueType]}
             </span>
+            {issue.archived ? (
+              <span className="rounded border border-amber-800/50 bg-amber-950/40 px-1 py-0.5 text-[9px] text-amber-200">
+                아카이브
+              </span>
+            ) : null}
           </div>
           <p className="mt-1 line-clamp-2 text-xs text-slate-200">
             {issue.summary}
@@ -132,7 +139,14 @@ function BoardIssueCard({
 function CardPreview({ issue }: { issue: IssueMin }) {
   return (
     <div className="w-64 rounded-lg border border-indigo-500/40 bg-slate-900 p-2 shadow-xl">
-      <span className="font-mono text-xs text-indigo-300">{issue.issueKey}</span>
+      <div className="flex flex-wrap items-center gap-1">
+        <span className="font-mono text-xs text-indigo-300">{issue.issueKey}</span>
+        {issue.archived ? (
+          <span className="rounded border border-amber-800/50 bg-amber-950/40 px-1 py-0.5 text-[9px] text-amber-200">
+            아카이브
+          </span>
+        ) : null}
+      </div>
       <p className="mt-1 line-clamp-2 text-xs text-slate-200">{issue.summary}</p>
     </div>
   )

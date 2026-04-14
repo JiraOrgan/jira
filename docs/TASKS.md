@@ -1,8 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.42
+> **버전**: v1.43
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-14 (T-617 이슈 아카이브·자동 아카이브 API + 웹 연동)
+> **최종수정일**: 2026-04-14 (웹 보드·백로그 아카이브 뱃지)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -296,3 +296,4 @@
 | v1.40 | 2026-04-14 | T-405: 댓글 `@토큰` 파싱·`comment_mention_tb`·API `mentionedUsers` — FR-023 (알림 T-605) |
 | v1.41 | 2026-04-14 | T-605: 댓글 멘션 알림(Slack Webhook·선택 이메일)·`app.notification` — FR-024 |
 | v1.42 | 2026-04-14 | T-617: 이슈 `archived`·프로젝트 자동 아카이브 일수·일괄 실행 API; 웹 타입·설정·이슈 상세; API-SPEC·DDL·H2 시드 반영 — FR-026~027 |
+| v1.43 | 2026-04-14 | 웹: 백로그·칸반·스프린트 보드 카드에 아카이브 뱃지·드래그 비활성 — T-617 UX 보강 |
