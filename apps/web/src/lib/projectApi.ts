@@ -1,5 +1,6 @@
 import type { ApiResponse } from '../types/api'
 import type {
+  ProjectCreateBody,
   ProjectDetail,
   ProjectMember,
   ProjectMin,
@@ -11,6 +12,16 @@ import { api } from './api'
 
 export async function fetchProjects(): Promise<ProjectMin[]> {
   const { data } = await api.get<ApiResponse<ProjectMin[]>>('/api/v1/projects')
+  return unwrapApi(data)
+}
+
+export async function createProject(
+  body: ProjectCreateBody,
+): Promise<ProjectDetail> {
+  const { data } = await api.post<ApiResponse<ProjectDetail>>(
+    '/api/v1/projects',
+    body,
+  )
   return unwrapApi(data)
 }
 

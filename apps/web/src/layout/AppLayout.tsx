@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import {
   NavLink,
   Outlet,
@@ -5,6 +6,7 @@ import {
   useNavigate,
   useParams,
 } from 'react-router-dom'
+import { fetchIssue } from '../lib/issueApi'
 import { useAuthStore } from '../stores/authStore'
 
 const navCls = ({ isActive }: { isActive: boolean }) =>
@@ -24,6 +26,38 @@ export function AppLayout() {
     ? decodeURIComponent(issueMatch.params.issueKey)
     : null
 
+  const [[issueNavForKey, issueNavProjectKey], setIssueNavResolved] = useState<
+    [string | null, string | null]
+  >([null, null])
+
+  useEffect(() => {
+    if (!headerIssueKey) return
+    let cancelled = false
+    void fetchIssue(headerIssueKey)
+      .then((issue) => {
+        if (!cancelled) {
+          setIssueNavResolved([headerIssueKey, issue.projectKey])
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setIssueNavResolved([headerIssueKey, null])
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [headerIssueKey])
+
+  const sidebarFromIssue =
+    headerIssueKey &&
+    issueNavForKey === headerIssueKey &&
+    issueNavProjectKey != null
+      ? issueNavProjectKey
+      : null
+
+  const sidebarProjectKey = projectKey ?? sidebarFromIssue
+
   function logout() {
     clear()
     navigate('/login', { replace: true })
@@ -42,68 +76,80 @@ export function AppLayout() {
           <NavLink to="/" end className={navCls}>
             대시보드
           </NavLink>
-          {projectKey ? (
+          {sidebarProjectKey ? (
             <>
               <div className="my-2 border-t border-slate-800" />
               <p className="px-3 text-[10px] font-medium uppercase tracking-wider text-slate-500">
-                프로젝트 {projectKey}
+                프로젝트 {sidebarProjectKey}
               </p>
               <NavLink
-                to={`/project/${projectKey}`}
+                to={`/project/${sidebarProjectKey}`}
                 className={navCls}
               >
                 개요
               </NavLink>
               <NavLink
-                to={`/project/${projectKey}/settings`}
+                to={`/project/${sidebarProjectKey}/settings`}
                 className={navCls}
               >
                 설정
               </NavLink>
-              <NavLink to={`/project/${projectKey}/board`} className={navCls}>
+              <NavLink
+                to={`/project/${sidebarProjectKey}/board`}
+                className={navCls}
+              >
                 스크럼 보드
               </NavLink>
               <NavLink
-                to={`/project/${projectKey}/kanban`}
+                to={`/project/${sidebarProjectKey}/kanban`}
                 className={navCls}
               >
                 칸반
               </NavLink>
               <NavLink
-                to={`/project/${projectKey}/sprints`}
+                to={`/project/${sidebarProjectKey}/sprints`}
                 className={navCls}
               >
                 스프린트
               </NavLink>
               <NavLink
-                to={`/project/${projectKey}/backlog`}
+                to={`/project/${sidebarProjectKey}/backlog`}
                 className={navCls}
               >
                 백로그
               </NavLink>
-              <NavLink to={`/project/${projectKey}/jql`} className={navCls}>
+              <NavLink
+                to={`/project/${sidebarProjectKey}/jql`}
+                className={navCls}
+              >
                 JQL
               </NavLink>
               <NavLink
-                to={`/project/${projectKey}/roadmap`}
+                to={`/project/${sidebarProjectKey}/roadmap`}
                 className={navCls}
               >
                 로드맵
               </NavLink>
               <NavLink
-                to={`/project/${projectKey}/releases`}
+                to={`/project/${sidebarProjectKey}/releases`}
                 className={navCls}
               >
                 릴리즈
               </NavLink>
-              <NavLink to={`/project/${projectKey}/reports`} className={navCls}>
+              <NavLink
+                to={`/project/${sidebarProjectKey}/reports`}
+                className={navCls}
+              >
                 리포트
               </NavLink>
-              <NavLink to={`/project/${projectKey}/audit`} className={navCls}>
+              <NavLink
+                to={`/project/${sidebarProjectKey}/audit`}
+                className={navCls}
+              >
                 감사 로그
               </NavLink>
               <NavLink
-                to={`/project/${projectKey}/issues/new`}
+                to={`/project/${sidebarProjectKey}/issues/new`}
                 className={navCls}
               >
                 새 이슈
@@ -123,10 +169,12 @@ export function AppLayout() {
                   {headerIssueKey}
                 </span>
               </span>
-            ) : projectKey ? (
+            ) : sidebarProjectKey ? (
               <span>
                 <span className="text-slate-500">프로젝트</span>{' '}
-                <span className="font-medium text-slate-200">{projectKey}</span>
+                <span className="font-medium text-slate-200">
+                  {sidebarProjectKey}
+                </span>
               </span>
             ) : (
               <span className="text-slate-500">프로젝트를 선택하세요</span>

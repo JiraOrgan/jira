@@ -198,18 +198,18 @@ export function SprintsPage() {
                     {s.startDate ?? '—'} ~ {s.endDate ?? '—'}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button
-                      type="button"
-                      disabled={
-                        busyId === s.id || s.status !== 'PLANNING'
-                      }
-                      onClick={() =>
-                        void run(s.id, () => startSprint(s.id))
-                      }
-                      className="mr-2 text-xs text-indigo-400 hover:text-indigo-300 disabled:opacity-40"
-                    >
-                      시작
-                    </button>
+                    {s.status === 'PLANNING' ? (
+                      <button
+                        type="button"
+                        disabled={busyId === s.id}
+                        onClick={() =>
+                          void run(s.id, () => startSprint(s.id))
+                        }
+                        className="mr-2 text-xs text-indigo-400 hover:text-indigo-300 disabled:opacity-40"
+                      >
+                        시작
+                      </button>
+                    ) : null}
                     <button
                       type="button"
                       disabled={

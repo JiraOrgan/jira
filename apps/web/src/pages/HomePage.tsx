@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useProjects } from '../hooks/useProjects'
 import { createDashboard, fetchDashboards } from '../lib/dashboardApi'
+import { createProject } from '../lib/projectApi'
 import type { DashboardMin } from '../types/domain'
 
 export function HomePage() {
@@ -16,6 +17,15 @@ export function HomePage() {
   const [newShared, setNewShared] = useState(false)
   const [createBusy, setCreateBusy] = useState(false)
   const [createErr, setCreateErr] = useState<string | null>(null)
+
+  const [npKey, setNpKey] = useState('')
+  const [npName, setNpName] = useState('')
+  const [npDesc, setNpDesc] = useState('')
+  const [npBoard, setNpBoard] = useState<'SCRUM' | 'KANBAN'>('SCRUM')
+  const [npBusy, setNpBusy] = useState(false)
+  const [npErr, setNpErr] = useState<string | null>(null)
+
+  const PROJECT_KEY_RE = /^[A-Z][A-Z0-9_]{1,9}$/
 
   const reloadDashboards = useCallback(async () => {
     setDashLoading(true)
@@ -44,6 +54,10 @@ export function HomePage() {
       setCreateErr('대시보드 이름을 입력하세요.')
       return
     }
+    if (name.length > 100) {
+      setCreateErr('대시보드 이름은 100자 이하로 입력하세요.')
+      return
+    }
     setCreateErr(null)
     setCreateBusy(true)
     try {
@@ -58,6 +72,44 @@ export function HomePage() {
       )
     } finally {
       setCreateBusy(false)
+    }
+  }
+
+  async function handleCreateProject(e: React.FormEvent) {
+    e.preventDefault()
+    const key = npKey.trim().toUpperCase()
+    const name = npName.trim()
+    setNpErr(null)
+    if (!PROJECT_KEY_RE.test(key)) {
+      setNpErr(
+        '프로젝트 키는 대문자로 시작하는 영문 대문자·숫자·밑줄 2~10자여야 합니다.',
+      )
+      return
+    }
+    if (!name) {
+      setNpErr('프로젝트 이름을 입력하세요.')
+      return
+    }
+    setNpBusy(true)
+    try {
+      await createProject({
+        key,
+        name,
+        description: npDesc.trim() === '' ? null : npDesc.trim(),
+        boardType: npBoard,
+      })
+      setNpKey('')
+      setNpName('')
+      setNpDesc('')
+      setNpBoard('SCRUM')
+      await reload()
+      navigate(`/project/${encodeURIComponent(key)}`)
+    } catch (err) {
+      setNpErr(
+        err instanceof Error ? err.message : '프로젝트를 만들지 못했습니다',
+      )
+    } finally {
+      setNpBusy(false)
     }
   }
 
@@ -144,6 +196,7 @@ export function HomePage() {
               value={newName}
               onChange={(ev) => setNewName(ev.target.value)}
               placeholder="이름"
+              maxLength={100}
               className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-indigo-500"
             />
           </div>
@@ -177,6 +230,63 @@ export function HomePage() {
           참여 중인 프로젝트입니다. 키를 눌러 개요 또는 새 이슈로 이동합니다.
         </p>
 
+        <form
+          onSubmit={handleCreateProject}
+          className="space-y-3 rounded-xl border border-slate-800 bg-slate-900/40 p-4"
+        >
+          <h3 className="text-sm font-medium text-slate-300">새 프로젝트</h3>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <label className="block text-xs text-slate-400">
+              키 * (대문자 2~10자)
+              <input
+                value={npKey}
+                onChange={(ev) => setNpKey(ev.target.value.toUpperCase())}
+                placeholder="예: E2E01"
+                maxLength={10}
+                className="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-2 py-1.5 font-mono text-sm text-white"
+              />
+            </label>
+            <label className="block text-xs text-slate-400 sm:col-span-2">
+              이름 *
+              <input
+                value={npName}
+                onChange={(ev) => setNpName(ev.target.value)}
+                className="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-2 py-1.5 text-sm text-white"
+              />
+            </label>
+            <label className="block text-xs text-slate-400">
+              보드
+              <select
+                value={npBoard}
+                onChange={(ev) =>
+                  setNpBoard(ev.target.value as 'SCRUM' | 'KANBAN')
+                }
+                className="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-2 py-1.5 text-sm text-white"
+              >
+                <option value="SCRUM">SCRUM</option>
+                <option value="KANBAN">KANBAN</option>
+              </select>
+            </label>
+          </div>
+          <label className="block text-xs text-slate-400">
+            설명
+            <textarea
+              value={npDesc}
+              onChange={(ev) => setNpDesc(ev.target.value)}
+              rows={2}
+              className="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-2 py-1.5 text-sm text-white"
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={npBusy}
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+          >
+            {npBusy ? '만드는 중…' : '프로젝트 만들기'}
+          </button>
+          {npErr ? <p className="text-sm text-red-400">{npErr}</p> : null}
+        </form>
+
         {loading ? (
           <p className="text-sm text-slate-500">불러오는 중…</p>
         ) : error ? (
@@ -192,7 +302,7 @@ export function HomePage() {
           </div>
         ) : projects.length === 0 ? (
           <p className="text-sm text-slate-500">
-            프로젝트가 없습니다. API로 프로젝트를 먼저 생성하세요.
+            아직 참여 중인 프로젝트가 없습니다. 위 양식으로 생성하세요.
           </p>
         ) : (
           <div className="overflow-hidden rounded-xl border border-slate-800">

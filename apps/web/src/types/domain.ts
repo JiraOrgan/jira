@@ -54,6 +54,15 @@ export type ProjectMember = {
   joinedAt: string
 }
 
+/** `POST /api/v1/projects` — `ProjectRequest.SaveDTO` */
+export type ProjectCreateBody = {
+  key: string
+  name: string
+  description?: string | null
+  boardType: 'SCRUM' | 'KANBAN'
+  leadId?: number | null
+}
+
 export type ProjectUpdateBody = {
   name: string
   description?: string | null
