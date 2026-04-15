@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useState,
   type ChangeEvent,
   type FormEvent,
@@ -15,6 +16,8 @@ import {
   updateComment,
 } from '../lib/commentApi'
 import {
+  addIssueVcsLink,
+  deleteIssueVcsLink,
   downloadAttachmentFile,
   fetchAttachments,
   fetchIssue,
@@ -39,6 +42,7 @@ import type {
   IssueDetail,
   IssueStatus,
   ProjectMember,
+  VcsLinkKind,
   WorkflowTransitionItem,
 } from '../types/domain'
 
@@ -46,6 +50,10 @@ function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`
   return `${(n / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function vcsKindLabel(k: VcsLinkKind): string {
+  return k === 'COMMIT' ? '커밋' : 'PR'
 }
 
 export function IssueDetailPage() {
@@ -94,6 +102,13 @@ export function IssueDetailPage() {
     null,
   )
 
+  const [vcsUrl, setVcsUrl] = useState('')
+  const [vcsTitle, setVcsTitle] = useState('')
+  const [vcsKind, setVcsKind] = useState<VcsLinkKind>('PULL_REQUEST')
+  const [vcsBusy, setVcsBusy] = useState(false)
+  const [vcsError, setVcsError] = useState<string | null>(null)
+  const [vcsDeletingId, setVcsDeletingId] = useState<number | null>(null)
+
   const reload = useCallback(async () => {
     if (!issueKey) return
     setLoadError(null)
@@ -140,6 +155,17 @@ export function IssueDetailPage() {
     }
     setPokerPick(getPlanningPokerVote(issueKey))
   }, [issueKey])
+
+  const canMutateVcs = useMemo(() => {
+    if (!issue || issue.archived || currentUserId == null) {
+      return false
+    }
+    const row = projectMembers.find((m) => m.userId === currentUserId)
+    if (!row) {
+      return false
+    }
+    return row.role !== 'VIEWER'
+  }, [issue, projectMembers, currentUserId])
 
   async function onSaveEpicDates(e: FormEvent) {
     e.preventDefault()
@@ -305,6 +331,54 @@ export function IssueDetailPage() {
     }
   }
 
+  async function onAddVcsLink(e: FormEvent) {
+    e.preventDefault()
+    if (!issue) return
+    const url = vcsUrl.trim()
+    if (!url) {
+      setVcsError('URL을 입력하세요.')
+      return
+    }
+    setVcsError(null)
+    setVcsBusy(true)
+    try {
+      const created = await addIssueVcsLink(issue.issueKey, {
+        provider: 'GITHUB',
+        linkKind: vcsKind,
+        url,
+        title: vcsTitle.trim() === '' ? null : vcsTitle.trim(),
+      })
+      setIssue({
+        ...issue,
+        vcsLinks: [...(issue.vcsLinks ?? []), created],
+      })
+      setVcsUrl('')
+      setVcsTitle('')
+    } catch (err) {
+      setVcsError(errorMessage(err))
+    } finally {
+      setVcsBusy(false)
+    }
+  }
+
+  async function onDeleteVcsLink(linkId: number) {
+    if (!issue) return
+    if (!window.confirm('이 VCS 링크를 삭제할까요?')) return
+    setVcsError(null)
+    setVcsDeletingId(linkId)
+    try {
+      await deleteIssueVcsLink(issue.issueKey, linkId)
+      setIssue({
+        ...issue,
+        vcsLinks: (issue.vcsLinks ?? []).filter((l) => l.id !== linkId),
+      })
+    } catch (err) {
+      setVcsError(errorMessage(err))
+    } finally {
+      setVcsDeletingId(null)
+    }
+  }
+
   if (!issueKey) {
     return <p className="text-slate-500">이슈 키가 없습니다.</p>
   }
@@ -391,6 +465,104 @@ export function IssueDetailPage() {
           </pre>
         </section>
       ) : null}
+
+      <section className="border-t border-slate-800 pt-6">
+        <h2 className="text-sm font-medium text-white">Git / VCS 링크</h2>
+        <p className="mt-1 text-xs text-slate-500">
+          GitHub 커밋·PR URL입니다. 프로젝트 설정에서 GitHub 웹훅을 켜 두면 메시지에
+          이슈 키가 있을 때 여기에 자동으로 추가됩니다.
+        </p>
+        {vcsError ? (
+          <p className="mt-2 text-sm text-red-300">{vcsError}</p>
+        ) : null}
+        <ul className="mt-3 space-y-2">
+          {(issue.vcsLinks ?? []).length === 0 ? (
+            <li className="text-sm text-slate-500">등록된 링크가 없습니다.</li>
+          ) : (
+            (issue.vcsLinks ?? []).map((row) => (
+              <li
+                key={row.id}
+                className="flex flex-wrap items-start justify-between gap-2 rounded-lg border border-slate-800 bg-slate-900/40 px-3 py-2 text-sm"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-slate-500">
+                    {row.provider} · {vcsKindLabel(row.linkKind)}
+                  </p>
+                  {row.title ? (
+                    <p className="mt-0.5 text-slate-200">{row.title}</p>
+                  ) : null}
+                  <a
+                    href={row.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1 block truncate font-mono text-xs text-indigo-400 hover:text-indigo-300"
+                  >
+                    {row.url}
+                  </a>
+                  <p className="mt-1 text-xs text-slate-600">
+                    {row.createdByName ?? '—'} · {row.createdAt}
+                  </p>
+                </div>
+                {canMutateVcs ? (
+                  <button
+                    type="button"
+                    disabled={vcsDeletingId === row.id}
+                    onClick={() => void onDeleteVcsLink(row.id)}
+                    className="shrink-0 text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
+                  >
+                    {vcsDeletingId === row.id ? '삭제 중…' : '삭제'}
+                  </button>
+                ) : null}
+              </li>
+            ))
+          )}
+        </ul>
+        {canMutateVcs ? (
+          <form
+            onSubmit={onAddVcsLink}
+            className="mt-4 space-y-3 rounded-lg border border-slate-800 bg-slate-950/40 p-4"
+          >
+            <p className="text-xs text-slate-500">수동 추가 (GitHub 기준)</p>
+            <div className="flex flex-wrap gap-3">
+              <div>
+                <label className="text-xs text-slate-400">종류</label>
+                <select
+                  value={vcsKind}
+                  onChange={(ev) => setVcsKind(ev.target.value as VcsLinkKind)}
+                  className="mt-1 block rounded-lg border border-slate-700 bg-slate-950 px-2 py-1.5 text-sm text-white"
+                >
+                  <option value="PULL_REQUEST">PR</option>
+                  <option value="COMMIT">커밋</option>
+                </select>
+              </div>
+              <div className="min-w-[200px] flex-1">
+                <label className="text-xs text-slate-400">URL (https…)</label>
+                <input
+                  value={vcsUrl}
+                  onChange={(ev) => setVcsUrl(ev.target.value)}
+                  placeholder="https://github.com/org/repo/pull/1"
+                  className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm text-white outline-none focus:border-indigo-500"
+                />
+              </div>
+              <div className="min-w-[140px] flex-1">
+                <label className="text-xs text-slate-400">제목 (선택)</label>
+                <input
+                  value={vcsTitle}
+                  onChange={(ev) => setVcsTitle(ev.target.value)}
+                  className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-indigo-500"
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={vcsBusy}
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+            >
+              {vcsBusy ? '추가 중…' : '링크 추가'}
+            </button>
+          </form>
+        ) : null}
+      </section>
 
       {issue.issueType === 'EPIC' ? (
         <section className="border-t border-slate-800 pt-6">

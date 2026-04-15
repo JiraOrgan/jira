@@ -167,6 +167,28 @@ export type SprintDetail = {
 export type IssueLabelItem = { id: number; name: string }
 export type IssueComponentItem = { id: number; name: string }
 
+export type VcsProvider = 'GITHUB' | 'GITLAB'
+export type VcsLinkKind = 'COMMIT' | 'PULL_REQUEST'
+
+/** `IssueResponse.VcsLinkItemDTO` */
+export type IssueVcsLinkItem = {
+  id: number
+  provider: VcsProvider
+  linkKind: VcsLinkKind
+  url: string
+  title: string | null
+  createdById: number
+  createdByName: string | null
+  createdAt: string
+}
+
+/** `GithubIntegrationResponse.StatusDTO` */
+export type GithubIntegrationStatus = {
+  oauthComplete: boolean
+  githubRepoFullName: string | null
+  githubWebhookId: number | null
+}
+
 /** `CommentResponse.MentionDTO` */
 export type CommentMentionUser = {
   userId: number
@@ -212,6 +234,7 @@ export type IssueDetail = {
   archived: boolean
   labels: IssueLabelItem[]
   components: IssueComponentItem[]
+  vcsLinks?: IssueVcsLinkItem[]
 }
 
 export type IssueSaveBody = {

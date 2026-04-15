@@ -1,5 +1,7 @@
 package com.pch.mng.issue;
 
+import com.pch.mng.global.enums.VcsLinkKind;
+import com.pch.mng.global.enums.VcsProvider;
 import com.pch.mng.global.exception.BusinessException;
 import com.pch.mng.global.exception.ErrorCode;
 import com.pch.mng.user.UserAccount;
@@ -70,6 +72,30 @@ public class IssueVcsLinkService {
         issueVcsLinkRepository.delete(link);
     }
 
+    /**
+     * GitHub 웹훅 등 자동화 경로에서 VCS 링크를 추가한다. URL이 이미 있으면 무시한다.
+     */
+    @Transactional
+    public void ensureGithubLinkFromAutomation(Issue issue, VcsLinkKind linkKind, String url, String title) {
+        if (issue.isArchived()) {
+            return;
+        }
+        assertValidHttpUrl(url);
+        if (issueVcsLinkRepository.existsByIssue_IdAndUrl(issue.getId(), url)) {
+            return;
+        }
+        String t = title != null && !title.isBlank() ? truncate(title.trim(), 500) : null;
+        IssueVcsLink link = IssueVcsLink.builder()
+                .issue(issue)
+                .provider(VcsProvider.GITHUB)
+                .linkKind(linkKind)
+                .url(url)
+                .title(t)
+                .createdBy(issue.getReporter())
+                .build();
+        issueVcsLinkRepository.save(link);
+    }
+
     private static void assertValidHttpUrl(String url) {
         try {
             URI u = URI.create(url);
@@ -86,5 +112,9 @@ public class IssueVcsLinkService {
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.VCS_LINK_INVALID_URL);
         }
+    }
+
+    private static String truncate(String s, int max) {
+        return s.length() <= max ? s : s.substring(0, max);
     }
 }
