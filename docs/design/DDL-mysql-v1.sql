@@ -310,3 +310,18 @@ CREATE TABLE automation_execution_log_tb (
     KEY idx_automation_log_project_rule (rule_id),
     KEY idx_automation_log_issue (issue_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- FR-033 이슈별 GitHub/GitLab 커밋·PR URL (T-625 MVP)
+CREATE TABLE issue_vcs_link_tb (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    issue_id BIGINT NOT NULL,
+    provider VARCHAR(32) NOT NULL,
+    link_kind VARCHAR(32) NOT NULL,
+    url VARCHAR(2000) NOT NULL,
+    title VARCHAR(500) NULL,
+    created_by BIGINT NOT NULL,
+    created_at DATETIME(6) NULL,
+    CONSTRAINT fk_issue_vcs_issue FOREIGN KEY (issue_id) REFERENCES issue_tb (id),
+    CONSTRAINT fk_issue_vcs_author FOREIGN KEY (created_by) REFERENCES user_account_tb (id),
+    KEY idx_issue_vcs_issue (issue_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

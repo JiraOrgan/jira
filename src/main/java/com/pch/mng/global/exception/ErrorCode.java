@@ -65,6 +65,10 @@ public enum ErrorCode {
     // Automation (FR-015)
     AUTOMATION_INVALID_SPEC(400, "자동화 규칙의 조건·액션 JSON이 올바르지 않습니다"),
 
+    // VCS / Git 연동 (FR-033)
+    VCS_LINK_INVALID_URL(400, "http(s) URL 형식이 올바르지 않습니다"),
+    VCS_LINK_DUPLICATE(409, "동일 이슈에 같은 URL의 VCS 링크가 이미 있습니다"),
+
     // Attachment
     FILE_REQUIRED(400, "업로드할 파일이 필요합니다"),
     FILE_TOO_LARGE(413, "파일 크기 제한(20MB)을 초과했습니다"),

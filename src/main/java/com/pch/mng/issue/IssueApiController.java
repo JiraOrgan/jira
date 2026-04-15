@@ -25,6 +25,7 @@ public class IssueApiController {
     private final IssueService issueService;
     private final IssueLinkService issueLinkService;
     private final IssueWatcherService issueWatcherService;
+    private final IssueVcsLinkService issueVcsLinkService;
 
     @GetMapping("/project/{projectId}")
     @PreAuthorize("@projectSecurity.isMember(#projectId)")
@@ -122,6 +123,33 @@ public class IssueApiController {
             @PathVariable String issueKey,
             @Valid @RequestBody IssueLinkRequest.SaveDTO reqDTO) {
         return ResponseEntity.status(201).body(ApiResponse.created(issueLinkService.create(issueKey, reqDTO)));
+    }
+
+    @GetMapping("/{issueKey}/vcs-links")
+    @PreAuthorize("@projectSecurity.canReadIssue(#issueKey)")
+    public ResponseEntity<ApiResponse<List<IssueVcsLinkResponse.DetailDTO>>> listVcsLinks(@PathVariable String issueKey) {
+        return ResponseEntity.ok(ApiResponse.ok(issueVcsLinkService.findByIssueKey(issueKey)));
+    }
+
+    @PostMapping("/{issueKey}/vcs-links")
+    @PreAuthorize("@projectSecurity.canUpdateIssue(#issueKey)")
+    public ResponseEntity<ApiResponse<IssueVcsLinkResponse.DetailDTO>> addVcsLink(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @PathVariable String issueKey,
+            @Valid @RequestBody IssueVcsLinkRequest.SaveDTO reqDTO) {
+        if (principal == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+        return ResponseEntity.status(201)
+                .body(ApiResponse.created(issueVcsLinkService.add(issueKey, principal.getId(), reqDTO)));
+    }
+
+    @DeleteMapping("/{issueKey}/vcs-links/{linkId}")
+    @PreAuthorize("@projectSecurity.canUpdateIssue(#issueKey)")
+    public ResponseEntity<ApiResponse<Void>> deleteVcsLink(
+            @PathVariable String issueKey, @PathVariable Long linkId) {
+        issueVcsLinkService.delete(issueKey, linkId);
+        return ResponseEntity.ok(ApiResponse.noContent());
     }
 
     @PostMapping("/{issueKey}/labels")

@@ -55,6 +55,19 @@ public class IssueResponse {
         private String name;
     }
 
+    /** FR-033: GitHub/GitLab 커밋·PR URL 메타데이터. */
+    @Data
+    public static class VcsLinkItemDTO {
+        private Long id;
+        private VcsProvider provider;
+        private VcsLinkKind linkKind;
+        private String url;
+        private String title;
+        private Long createdById;
+        private String createdByName;
+        private LocalDateTime createdAt;
+    }
+
     @Data
     public static class DetailDTO {
         private Long id;
@@ -83,6 +96,7 @@ public class IssueResponse {
         private boolean archived;
         private List<LabelItemDTO> labels = Collections.emptyList();
         private List<ComponentItemDTO> components = Collections.emptyList();
+        private List<VcsLinkItemDTO> vcsLinks = Collections.emptyList();
 
         private DetailDTO() {}
 
@@ -91,6 +105,14 @@ public class IssueResponse {
         }
 
         public static DetailDTO of(Issue issue, List<IssueLabel> issueLabels, List<IssueComponent> issueComponents) {
+            return of(issue, issueLabels, issueComponents, Collections.emptyList());
+        }
+
+        public static DetailDTO of(
+                Issue issue,
+                List<IssueLabel> issueLabels,
+                List<IssueComponent> issueComponents,
+                List<IssueVcsLink> vcsLinkEntities) {
             DetailDTO dto = new DetailDTO();
             dto.id = issue.getId();
             dto.issueKey = issue.getIssueKey();
@@ -138,7 +160,21 @@ public class IssueResponse {
                 c.setName(ic.getComponent().getName());
                 return c;
             }).toList();
+            dto.vcsLinks = vcsLinkEntities.stream().map(IssueResponse::toVcsLinkItem).toList();
             return dto;
         }
+    }
+
+    private static VcsLinkItemDTO toVcsLinkItem(IssueVcsLink link) {
+        VcsLinkItemDTO d = new VcsLinkItemDTO();
+        d.setId(link.getId());
+        d.setProvider(link.getProvider());
+        d.setLinkKind(link.getLinkKind());
+        d.setUrl(link.getUrl());
+        d.setTitle(link.getTitle());
+        d.setCreatedById(link.getCreatedBy().getId());
+        d.setCreatedByName(link.getCreatedBy().getName());
+        d.setCreatedAt(link.getCreatedAt());
+        return d;
     }
 }
