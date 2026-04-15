@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { KanbanBoard } from '../components/kanban/KanbanBoard'
 import { useProjectByKey } from '../hooks/useProjects'
+import { errorMessage } from '../lib/axiosErrors'
 import { fetchAllProjectIssues } from '../lib/issueApi'
 import { fetchWipLimits, replaceWipLimits } from '../lib/projectApi'
 import { statusLabel } from '../lib/labels'
@@ -36,7 +37,7 @@ export function KanbanPage() {
       for (const w of wip) d[w.status] = String(w.maxIssues)
       setWipDraft(d)
     } catch (e) {
-      setLoadError(e instanceof Error ? e.message : '불러오기 실패')
+      setLoadError(errorMessage(e) || '불러오기 실패')
       setIssues([])
       setWipLimits([])
     } finally {
@@ -67,7 +68,7 @@ export function KanbanPage() {
       const next = await replaceWipLimits(project.id, limits)
       setWipLimits(next)
     } catch (e) {
-      setWipError(e instanceof Error ? e.message : 'WIP 저장 실패')
+      setWipError(errorMessage(e) || 'WIP 저장 실패')
     } finally {
       setWipSaving(false)
     }

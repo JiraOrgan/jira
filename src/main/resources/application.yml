@@ -51,6 +51,9 @@ app:
       enabled: true
       ttl-seconds: 60
   security:
+    cors:
+      # 쉼표 구분. 운영은 APP_CORS_ORIGINS 등 환경 변수로 덮어쓴다.
+      allowed-origins: ${APP_CORS_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
     login:
       max-attempts: 5
       lock-minutes: 30

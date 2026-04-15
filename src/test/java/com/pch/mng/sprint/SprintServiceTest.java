@@ -1,10 +1,16 @@
 package com.pch.mng.sprint;
 
 import com.pch.mng.board.SprintBoardRedisCache;
+import com.pch.mng.global.enums.IssueStatus;
+import com.pch.mng.global.enums.IssueType;
+import com.pch.mng.global.enums.Priority;
+import com.pch.mng.global.enums.SprintIncompleteIssueDisposition;
 import com.pch.mng.global.enums.SprintStatus;
 import com.pch.mng.global.exception.BusinessException;
 import com.pch.mng.global.exception.ErrorCode;
+import com.pch.mng.issue.Issue;
 import com.pch.mng.issue.IssueRepository;
+import com.pch.mng.user.UserAccount;
 import com.pch.mng.project.Project;
 import com.pch.mng.project.ProjectRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -134,7 +141,7 @@ class SprintServiceTest {
         Sprint sprint = sprintEntity(4L, 10L, SprintStatus.ACTIVE);
         when(sprintRepository.findByIdWithProject(4L)).thenReturn(Optional.of(sprint));
 
-        SprintResponse.DetailDTO res = sprintService.complete(4L);
+        SprintResponse.DetailDTO res = sprintService.complete(4L, null);
 
         assertThat(res.getStatus()).isEqualTo(SprintStatus.COMPLETED);
         verify(sprintBoardRedisCache).evictSprint(4L);
@@ -146,11 +153,102 @@ class SprintServiceTest {
         Sprint sprint = sprintEntity(4L, 10L, SprintStatus.PLANNING);
         when(sprintRepository.findByIdWithProject(4L)).thenReturn(Optional.of(sprint));
 
-        assertThatThrownBy(() -> sprintService.complete(4L))
+        assertThatThrownBy(() -> sprintService.complete(4L, null))
                 .isInstanceOf(BusinessException.class)
                 .extracting(ex -> ((BusinessException) ex).getErrorCode())
                 .isEqualTo(ErrorCode.SPRINT_INVALID_TRANSITION);
         verify(sprintBoardRedisCache, never()).evictSprint(any());
+    }
+
+    @Test
+    @DisplayName("complete: 미완료 이슈는 기본적으로 제품 백로그로 이동")
+    void completeMovesIncompleteIssuesToBacklog() {
+        Sprint sprint = sprintEntity(4L, 10L, SprintStatus.ACTIVE);
+        when(sprintRepository.findByIdWithProject(4L)).thenReturn(Optional.of(sprint));
+        UserAccount reporter = UserAccount.builder()
+                .email("u@x.com")
+                .password("p")
+                .name("U")
+                .build();
+        ReflectionTestUtils.setField(reporter, "id", 1L);
+        Project project = sprint.getProject();
+        Issue open = Issue.builder()
+                .issueKey("P-9")
+                .project(project)
+                .issueType(IssueType.TASK)
+                .summary("t")
+                .status(IssueStatus.IN_PROGRESS)
+                .priority(Priority.MEDIUM)
+                .reporter(reporter)
+                .sprint(sprint)
+                .backlogRank(0L)
+                .archived(false)
+                .build();
+        ReflectionTestUtils.setField(open, "id", 90L);
+        Issue done = Issue.builder()
+                .issueKey("P-10")
+                .project(project)
+                .issueType(IssueType.TASK)
+                .summary("d")
+                .status(IssueStatus.DONE)
+                .priority(Priority.MEDIUM)
+                .reporter(reporter)
+                .sprint(sprint)
+                .backlogRank(0L)
+                .archived(false)
+                .build();
+        when(issueRepository.findBySprint_IdAndArchivedFalse(4L)).thenReturn(List.of(open, done));
+        when(issueRepository.maxBacklogRankForProjectBacklog(10L)).thenReturn(2000L);
+
+        SprintResponse.DetailDTO res = sprintService.complete(4L, null);
+
+        assertThat(res.getStatus()).isEqualTo(SprintStatus.COMPLETED);
+        assertThat(open.getSprint()).isNull();
+        assertThat(open.getStatus()).isEqualTo(IssueStatus.BACKLOG);
+        assertThat(open.getBacklogRank()).isEqualTo(3000L);
+        assertThat(done.getSprint()).isSameAs(sprint);
+        verify(issueRepository).saveAll(List.of(open));
+        verify(sprintBoardRedisCache).evictSprint(4L);
+    }
+
+    @Test
+    @DisplayName("complete: NEXT_SPRINT이면 nextSprintId 필수")
+    void completeNextSprintRequiresTarget() {
+        Sprint sprint = sprintEntity(4L, 10L, SprintStatus.ACTIVE);
+        when(sprintRepository.findByIdWithProject(4L)).thenReturn(Optional.of(sprint));
+        Issue open = incompleteIssue(sprint, IssueStatus.SELECTED);
+        when(issueRepository.findBySprint_IdAndArchivedFalse(4L)).thenReturn(List.of(open));
+        SprintRequest.CompleteDTO dto = new SprintRequest.CompleteDTO();
+        dto.setDisposition(SprintIncompleteIssueDisposition.NEXT_SPRINT);
+
+        assertThatThrownBy(() -> sprintService.complete(4L, dto))
+                .isInstanceOf(BusinessException.class)
+                .extracting(ex -> ((BusinessException) ex).getErrorCode())
+                .isEqualTo(ErrorCode.SPRINT_COMPLETE_NEXT_REQUIRED);
+        verify(issueRepository, never()).saveAll(any());
+    }
+
+    @Test
+    @DisplayName("complete: NEXT_SPRINT — PLANNING 스프린트로 미완료 이슈 이관")
+    void completeMovesIncompleteToPlanningSprint() {
+        Sprint active = sprintEntity(4L, 10L, SprintStatus.ACTIVE);
+        Sprint next = sprintEntity(5L, 10L, SprintStatus.PLANNING);
+        when(sprintRepository.findByIdWithProject(4L)).thenReturn(Optional.of(active));
+        when(sprintRepository.findByIdWithProject(5L)).thenReturn(Optional.of(next));
+        Issue open = incompleteIssue(active, IssueStatus.CODE_REVIEW);
+        when(issueRepository.findBySprint_IdAndArchivedFalse(4L)).thenReturn(List.of(open));
+
+        SprintRequest.CompleteDTO dto = new SprintRequest.CompleteDTO();
+        dto.setDisposition(SprintIncompleteIssueDisposition.NEXT_SPRINT);
+        dto.setNextSprintId(5L);
+
+        sprintService.complete(4L, dto);
+
+        assertThat(open.getSprint()).isSameAs(next);
+        assertThat(open.getStatus()).isEqualTo(IssueStatus.CODE_REVIEW);
+        verify(issueRepository).saveAll(List.of(open));
+        verify(sprintBoardRedisCache).evictSprint(5L);
+        verify(sprintBoardRedisCache, times(1)).evictSprint(4L);
     }
 
     @Test
@@ -232,5 +330,29 @@ class SprintServiceTest {
                 .build();
         ReflectionTestUtils.setField(sprint, "id", sprintId);
         return sprint;
+    }
+
+    private static Issue incompleteIssue(Sprint sprint, IssueStatus status) {
+        Project project = sprint.getProject();
+        UserAccount reporter = UserAccount.builder()
+                .email("u@x.com")
+                .password("p")
+                .name("U")
+                .build();
+        ReflectionTestUtils.setField(reporter, "id", 1L);
+        Issue issue = Issue.builder()
+                .issueKey("P-1")
+                .project(project)
+                .issueType(IssueType.TASK)
+                .summary("s")
+                .status(status)
+                .priority(Priority.MEDIUM)
+                .reporter(reporter)
+                .sprint(sprint)
+                .backlogRank(0L)
+                .archived(false)
+                .build();
+        ReflectionTestUtils.setField(issue, "id", 77L);
+        return issue;
     }
 }

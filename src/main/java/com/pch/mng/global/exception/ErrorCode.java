@@ -43,6 +43,8 @@ public enum ErrorCode {
     SPRINT_ACTIVE_ALREADY_EXISTS(409, "해당 프로젝트에 이미 진행 중인 스프린트가 있습니다"),
     SPRINT_DELETE_FORBIDDEN(409, "진행 중이거나 이슈가 배정된 스프린트는 삭제할 수 없습니다"),
     SPRINT_NOT_ASSIGNABLE(409, "완료된 스프린트에는 이슈를 배정할 수 없습니다"),
+    SPRINT_COMPLETE_NEXT_REQUIRED(400, "미완료 이슈를 다음 스프린트로 옮기려면 nextSprintId가 필요합니다"),
+    SPRINT_COMPLETE_NEXT_INVALID(400, "이관 대상 스프린트는 같은 프로젝트의 PLANNING 상태이며, 완료하려는 스프린트와 달라야 합니다"),
 
     // Backlog (FR-010)
     BACKLOG_REORDER_INVALID(400, "백로그 순서가 올바르지 않습니다. 스프린트에 미배정인 이슈 ID 집합과 일치해야 합니다"),

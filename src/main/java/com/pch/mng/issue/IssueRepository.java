@@ -37,6 +37,8 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 
     long countBySprint_IdAndArchivedFalse(Long sprintId);
 
+    List<Issue> findBySprint_IdAndArchivedFalse(Long sprintId);
+
     @Query(
             "SELECT i FROM Issue i JOIN FETCH i.project LEFT JOIN FETCH i.assignee LEFT JOIN FETCH i.reporter WHERE i.issueKey = :key")
     Optional<Issue> findByIssueKeyWithDetails(@Param("key") String issueKey);

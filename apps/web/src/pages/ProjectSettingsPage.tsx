@@ -115,9 +115,7 @@ export function ProjectSettingsPage() {
       setDetail(null)
       setMembers([])
       setUsers([])
-      setLoadError(
-        e instanceof Error ? e.message : '설정을 불러오지 못했습니다',
-      )
+      setLoadError(errorMessage(e) || '설정을 불러오지 못했습니다')
     } finally {
       setLoading(false)
     }
@@ -192,7 +190,7 @@ export function ProjectSettingsPage() {
       setSaveMsg('저장했습니다.')
     } catch (err) {
       setSaveError(
-        err instanceof Error ? err.message : '저장하지 못했습니다',
+        errorMessage(err) || '저장하지 못했습니다',
       )
     } finally {
       setSaving(false)
@@ -208,7 +206,7 @@ export function ProjectSettingsPage() {
       setArchiveRunMsg(`아카이브 처리된 DONE 이슈: ${n}건`)
     } catch (err) {
       setArchiveRunMsg(
-        err instanceof Error ? err.message : '자동 아카이브 실행에 실패했습니다',
+        errorMessage(err) || '자동 아카이브 실행에 실패했습니다',
       )
     } finally {
       setArchiveRunBusy(false)
@@ -235,7 +233,7 @@ export function ProjectSettingsPage() {
       setNewRole('DEVELOPER')
     } catch (err) {
       setMemberError(
-        err instanceof Error ? err.message : '멤버를 추가하지 못했습니다',
+        errorMessage(err) || '멤버를 추가하지 못했습니다',
       )
     } finally {
       setMemberBusy(false)
@@ -258,7 +256,7 @@ export function ProjectSettingsPage() {
       setMembers((prev) => prev.filter((m) => m.id !== member.id))
     } catch (err) {
       setMemberError(
-        err instanceof Error ? err.message : '멤버를 제거하지 못했습니다',
+        errorMessage(err) || '멤버를 제거하지 못했습니다',
       )
     } finally {
       setMemberBusy(false)
@@ -341,7 +339,7 @@ export function ProjectSettingsPage() {
       navigate('/', { replace: true })
     } catch (err) {
       alert(
-        err instanceof Error ? err.message : '프로젝트를 삭제하지 못했습니다',
+        errorMessage(err) || '프로젝트를 삭제하지 못했습니다',
       )
     } finally {
       setDeleteBusy(false)

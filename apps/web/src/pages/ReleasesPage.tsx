@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useProjectByKey } from '../hooks/useProjects'
+import { errorMessage } from '../lib/axiosErrors'
 import {
   createReleaseVersion,
   deleteReleaseVersion,
@@ -53,7 +54,7 @@ export function ReleasesPage() {
     } catch (e) {
       setRows([])
       setLoadError(
-        e instanceof Error ? e.message : '버전 목록을 불러오지 못했습니다',
+        errorMessage(e) || '버전 목록을 불러오지 못했습니다',
       )
     } finally {
       setLoading(false)
@@ -91,7 +92,7 @@ export function ReleasesPage() {
       await load()
     } catch (err) {
       setCreateErr(
-        err instanceof Error ? err.message : '버전을 만들지 못했습니다',
+        errorMessage(err) || '버전을 만들지 못했습니다',
       )
     } finally {
       setCreateBusy(false)
@@ -108,7 +109,7 @@ export function ReleasesPage() {
       await load()
     } catch (err) {
       setActionErr(
-        err instanceof Error ? err.message : '릴리즈 처리하지 못했습니다',
+        errorMessage(err) || '릴리즈 처리하지 못했습니다',
       )
     } finally {
       setBusyId(null)
@@ -134,7 +135,7 @@ export function ReleasesPage() {
     } catch (err) {
       if (notesRequestSeq.current !== seq) return
       setNotesErr(
-        err instanceof Error ? err.message : '릴리즈 노트를 불러오지 못했습니다',
+        errorMessage(err) || '릴리즈 노트를 불러오지 못했습니다',
       )
     } finally {
       if (notesRequestSeq.current === seq) {
@@ -161,7 +162,7 @@ export function ReleasesPage() {
       await load()
     } catch (err) {
       setActionErr(
-        err instanceof Error ? err.message : '삭제하지 못했습니다',
+        errorMessage(err) || '삭제하지 못했습니다',
       )
     } finally {
       setBusyId(null)

@@ -20,6 +20,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -177,6 +178,86 @@ class SprintIntegrationTest {
         mockMvc.perform(delete("/api/v1/sprints/{id}", sprintId)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    @DisplayName("스프린트 완료 시 미완료 이슈는 기본적으로 제품 백로그로 이동")
+    void completeMovesOpenIssuesToBacklog() throws Exception {
+        String email = "sp-bk-" + System.nanoTime() + "@ex.com";
+        String token = registerAndLogin(email);
+        long projectId = createProject(token, "SB" + (System.nanoTime() % 100000));
+        long sprintId = createSprint(token, projectId, "ActiveRun");
+
+        mockMvc.perform(post("/api/v1/sprints/{id}/start", sprintId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+
+        MvcResult issueRes = mockMvc.perform(post("/api/v1/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"projectId":%d,"issueType":"TASK","summary":"Open","priority":"MEDIUM","sprintId":%d}
+                                """.formatted(projectId, sprintId)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        String issueKey = objectMapper.readTree(issueRes.getResponse().getContentAsString())
+                .path("data")
+                .path("issueKey")
+                .asText();
+
+        mockMvc.perform(post("/api/v1/sprints/{id}/complete", sprintId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("COMPLETED"));
+
+        mockMvc.perform(get("/api/v1/issues/{key}", issueKey)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("BACKLOG"))
+                .andExpect(jsonPath("$.data.sprintId").value(nullValue()));
+    }
+
+    @Test
+    @DisplayName("스프린트 완료 시 NEXT_SPRINT로 PLANNING 스프린트에 이관")
+    void completeMovesOpenIssuesToNextPlanningSprint() throws Exception {
+        String email = "sp-nx-" + System.nanoTime() + "@ex.com";
+        String token = registerAndLogin(email);
+        long projectId = createProject(token, "SN" + (System.nanoTime() % 100000));
+        long sprintActive = createSprint(token, projectId, "Cur");
+        long sprintNext = createSprint(token, projectId, "Next");
+
+        mockMvc.perform(post("/api/v1/sprints/{id}/start", sprintActive)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+
+        MvcResult issueRes = mockMvc.perform(post("/api/v1/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"projectId":%d,"issueType":"TASK","summary":"Carry","priority":"MEDIUM","sprintId":%d}
+                                """.formatted(projectId, sprintActive)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        String issueKey = objectMapper.readTree(issueRes.getResponse().getContentAsString())
+                .path("data")
+                .path("issueKey")
+                .asText();
+
+        String body = """
+                {"disposition":"NEXT_SPRINT","nextSprintId":%d}
+                """.formatted(sprintNext);
+        mockMvc.perform(post("/api/v1/sprints/{id}/complete", sprintActive)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/v1/issues/{key}", issueKey)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.sprintId").value((int) sprintNext));
     }
 
     @Test

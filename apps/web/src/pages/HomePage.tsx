@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useProjects } from '../hooks/useProjects'
 import { createDashboard, fetchDashboards } from '../lib/dashboardApi'
+import { errorMessage } from '../lib/axiosErrors'
 import { createProject } from '../lib/projectApi'
 import type { DashboardMin } from '../types/domain'
 
@@ -34,9 +35,7 @@ export function HomePage() {
       const list = await fetchDashboards()
       setDashboards(list)
     } catch (e) {
-      setDashError(
-        e instanceof Error ? e.message : '대시보드 목록을 불러오지 못했습니다',
-      )
+      setDashError(errorMessage(e) || '대시보드 목록을 불러오지 못했습니다')
       setDashboards([])
     } finally {
       setDashLoading(false)
@@ -67,9 +66,7 @@ export function HomePage() {
       await reloadDashboards()
       navigate(`/dashboard/${d.id}`)
     } catch (err) {
-      setCreateErr(
-        err instanceof Error ? err.message : '대시보드를 만들지 못했습니다',
-      )
+      setCreateErr(errorMessage(err) || '대시보드를 만들지 못했습니다')
     } finally {
       setCreateBusy(false)
     }
@@ -105,9 +102,7 @@ export function HomePage() {
       await reload()
       navigate(`/project/${encodeURIComponent(key)}`)
     } catch (err) {
-      setNpErr(
-        err instanceof Error ? err.message : '프로젝트를 만들지 못했습니다',
-      )
+      setNpErr(errorMessage(err) || '프로젝트를 만들지 못했습니다')
     } finally {
       setNpBusy(false)
     }
