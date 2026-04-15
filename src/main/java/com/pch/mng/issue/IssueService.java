@@ -63,6 +63,7 @@ public class IssueService {
     private final IssueVisibilityEvaluator issueVisibilityEvaluator;
     private final ProjectMemberRepository projectMemberRepository;
     private final AutomationEngine automationEngine;
+    private final IssueVcsLinkRepository issueVcsLinkRepository;
 
     public Page<IssueResponse.MinDTO> findByProject(Long projectId, Pageable pageable) {
         var ctx = issueVisibilityEvaluator.requiredContextForProject(projectId);
@@ -407,6 +408,7 @@ public class IssueService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
         Long sprintId = issue.getSprint() != null ? issue.getSprint().getId() : null;
         issueAuditService.deleteAllForIssue(issue.getId());
+        issueVcsLinkRepository.deleteByIssue_Id(issue.getId());
         issueRepository.delete(issue);
         sprintBoardRedisCache.evictSprint(sprintId);
     }
@@ -603,6 +605,7 @@ public class IssueService {
     private IssueResponse.DetailDTO toDetail(Issue issue) {
         List<IssueLabel> labels = issueLabelRepository.findByIssueIdWithLabel(issue.getId());
         List<IssueComponent> components = issueComponentRepository.findByIssueIdWithComponent(issue.getId());
-        return IssueResponse.DetailDTO.of(issue, labels, components);
+        List<IssueVcsLink> vcsLinks = issueVcsLinkRepository.findByIssue_IdOrderByIdDesc(issue.getId());
+        return IssueResponse.DetailDTO.of(issue, labels, components, vcsLinks);
     }
 }

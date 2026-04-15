@@ -1,7 +1,7 @@
 # API 정의서 v4 — 현재 구현 매핑
 
 > **작성일**: 2026-04-09  
-> **최종 갱신**: 2026-04-15 (FR-015 자동화 API)  
+> **최종 갱신**: 2026-04-15 (FR-033 이슈 VCS 링크 API)  
 > **Task**: T-201  
 > **OpenAPI**: 앱 기동 후 `/v3/api-docs`, Swagger UI `/swagger-ui.html`  
 > **외부 정본**: `04-API정의서_v4.0.md` (Jira 스타일 `/rest/api/3` 등) — 점진 정렬 예정
@@ -72,7 +72,7 @@
 |--------|------|------|
 | GET | `/api/v1/issues/project/{projectId}` | 페이징 목록 (`MinDTO.archived`; 비아카이브만 집계) |
 | GET | `/api/v1/issues/project/{projectId}/backlog` | 백로그 (비아카이브만) |
-| GET | `/api/v1/issues/{issueKey}` | 상세 (`DetailDTO.archived`) |
+| GET | `/api/v1/issues/{issueKey}` | 상세 (`DetailDTO.archived`, `vcsLinks` GitHub/GitLab 커밋·PR URL 목록 FR-033) |
 | POST | `/api/v1/issues` | 생성 (`IssueRequest.SaveDTO`; Epic만 `epicStartDate`/`epicEndDate` 선택) |
 | PUT | `/api/v1/issues/{issueKey}` | 수정 (`IssueRequest.UpdateDTO`: `archived` 선택; Epic만 `patchEpicDates`+기간·`clearEpicDates`) |
 | DELETE | `/api/v1/issues/{issueKey}` | 삭제 |
@@ -80,6 +80,9 @@
 | GET | `/api/v1/issues/{issueKey}/watchers` | 워처 목록 + 현재 사용자 구독 여부 (`IssueWatcherResponse.ListDTO`, FR-025) |
 | POST | `/api/v1/issues/{issueKey}/watchers/me` | 현재 사용자 워치 구독 (멱등) |
 | DELETE | `/api/v1/issues/{issueKey}/watchers/me` | 현재 사용자 워치 해제 (멱등) |
+| GET | `/api/v1/issues/{issueKey}/vcs-links` | VCS 링크 목록 (`IssueVcsLinkResponse.DetailDTO`, FR-033) |
+| POST | `/api/v1/issues/{issueKey}/vcs-links` | 링크 추가 (`IssueVcsLinkRequest.SaveDTO`: `provider` GITHUB/GITLAB, `linkKind` COMMIT/PULL_REQUEST, `url` http(s), `title` 선택). 동일 URL 중복 시 `VCS_LINK_DUPLICATE`(409), URL 오류 시 `VCS_LINK_INVALID_URL`(400) |
+| DELETE | `/api/v1/issues/{issueKey}/vcs-links/{linkId}` | 링크 삭제 |
 
 ### 스프린트 `SprintApiController`
 
