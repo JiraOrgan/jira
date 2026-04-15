@@ -8,7 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -25,9 +28,17 @@ public class DashboardService {
                 .toList();
     }
 
-    public DashboardResponse.DetailDTO findById(Long id) {
+    /**
+     * 대시보드 단건. 없으면 404, 소유자도 아니고 공유도 아니면 403.
+     * (존재하지 않는 ID를 Spring Security SpEL만으로 막으면 403으로만 응답되는 문제를 피한다.)
+     */
+    public DashboardResponse.DetailDTO findById(Long id, Long viewerUserId) {
         Dashboard dashboard = dashboardRepository.findByIdWithGadgets(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        boolean owner = dashboard.getOwner().getId().equals(viewerUserId);
+        if (!owner && !dashboard.isShared()) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
         return DashboardResponse.DetailDTO.of(dashboard);
     }
 
@@ -62,11 +73,14 @@ public class DashboardService {
 
     @Transactional
     public DashboardResponse.DetailDTO addGadget(Long dashboardId, DashboardRequest.GadgetDTO reqDTO) {
+        if (!DashboardGadgetType.isValid(reqDTO.getGadgetType())) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+        }
         Dashboard dashboard = dashboardRepository.findByIdWithGadgets(dashboardId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
         DashboardGadget gadget = DashboardGadget.builder()
                 .dashboard(dashboard)
-                .gadgetType(reqDTO.getGadgetType())
+                .gadgetType(reqDTO.getGadgetType().trim())
                 .position(reqDTO.getPosition())
                 .configJson(reqDTO.getConfigJson())
                 .build();
@@ -75,9 +89,67 @@ public class DashboardService {
     }
 
     @Transactional
-    public void removeGadget(Long dashboardId, Long gadgetId) {
-        DashboardGadget gadget = dashboardGadgetRepository.findById(gadgetId)
+    public DashboardResponse.DetailDTO updateGadget(Long dashboardId, Long gadgetId, DashboardRequest.GadgetUpdateDTO reqDTO) {
+        if (reqDTO.getGadgetType() == null && reqDTO.getPosition() == null && reqDTO.getConfigJson() == null) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+        }
+        DashboardGadget gadget = dashboardGadgetRepository.findByIdAndDashboard_Id(gadgetId, dashboardId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.DASHBOARD_GADGET_MISMATCH));
+        if (reqDTO.getGadgetType() != null) {
+            if (!DashboardGadgetType.isValid(reqDTO.getGadgetType())) {
+                throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+            }
+            gadget.setGadgetType(reqDTO.getGadgetType().trim());
+        }
+        if (reqDTO.getPosition() != null) {
+            gadget.setPosition(reqDTO.getPosition());
+        }
+        if (reqDTO.getConfigJson() != null) {
+            gadget.setConfigJson(reqDTO.getConfigJson());
+        }
+        Dashboard dashboard = dashboardRepository.findByIdWithGadgets(dashboardId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        return DashboardResponse.DetailDTO.of(dashboard);
+    }
+
+    @Transactional
+    public DashboardResponse.DetailDTO reorderGadgets(Long dashboardId, DashboardRequest.GadgetReorderDTO reqDTO) {
+        Dashboard dashboard = dashboardRepository.findByIdWithGadgets(dashboardId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        List<DashboardGadget> gadgets = dashboard.getGadgets();
+        if (gadgets == null || gadgets.isEmpty()) {
+            if (!reqDTO.getPositions().isEmpty()) {
+                throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+            }
+            return DashboardResponse.DetailDTO.of(dashboard);
+        }
+        Set<Long> owned = new HashSet<>();
+        for (DashboardGadget g : gadgets) {
+            owned.add(g.getId());
+        }
+        if (reqDTO.getPositions().size() != owned.size()) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+        }
+        Set<Long> seen = new HashSet<>();
+        for (DashboardRequest.GadgetPositionDTO slot : reqDTO.getPositions()) {
+            if (!owned.contains(slot.getGadgetId()) || !seen.add(slot.getGadgetId())) {
+                throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+            }
+        }
+        for (DashboardRequest.GadgetPositionDTO slot : reqDTO.getPositions()) {
+            DashboardGadget g = gadgets.stream()
+                    .filter(x -> Objects.equals(x.getId(), slot.getGadgetId()))
+                    .findFirst()
+                    .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_INPUT_VALUE));
+            g.setPosition(slot.getPosition());
+        }
+        return DashboardResponse.DetailDTO.of(dashboard);
+    }
+
+    @Transactional
+    public void removeGadget(Long dashboardId, Long gadgetId) {
+        DashboardGadget gadget = dashboardGadgetRepository.findByIdAndDashboard_Id(gadgetId, dashboardId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.DASHBOARD_GADGET_MISMATCH));
         dashboardGadgetRepository.delete(gadget);
     }
 }

@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
@@ -69,8 +70,23 @@ public class Issue {
     @JoinColumn(name = "sprint_id")
     private Sprint sprint;
 
+    /** 스프린트 미배정(backlog) 이슈 정렬용. 스프린트에 넣은 이슈는 0으로 둘 수 있다. */
+    @Column(nullable = false)
+    private long backlogRank;
+
     @Enumerated(EnumType.STRING)
     private SecurityLevel securityLevel;
+
+    /** Epic 전용 로드맵 기간 (FR-012). 비-Epic는 null 유지. */
+    @Column(name = "epic_start_date")
+    private LocalDate epicStartDate;
+
+    @Column(name = "epic_end_date")
+    private LocalDate epicEndDate;
+
+    /** 이슈 아카이브(보드·백로그·JQL 기본 목록에서 제외). */
+    @Column(nullable = false)
+    private boolean archived = false;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -82,7 +98,8 @@ public class Issue {
     public Issue(String issueKey, Project project, IssueType issueType, String summary,
                  String description, IssueStatus status, Priority priority, Integer storyPoints,
                  UserAccount assignee, UserAccount reporter, Issue parent, Sprint sprint,
-                 SecurityLevel securityLevel) {
+                 long backlogRank, SecurityLevel securityLevel,
+                 LocalDate epicStartDate, LocalDate epicEndDate, boolean archived) {
         this.issueKey = issueKey;
         this.project = project;
         this.issueType = issueType;
@@ -95,6 +112,10 @@ public class Issue {
         this.reporter = reporter;
         this.parent = parent;
         this.sprint = sprint;
+        this.backlogRank = backlogRank;
         this.securityLevel = securityLevel;
+        this.epicStartDate = epicStartDate;
+        this.epicEndDate = epicEndDate;
+        this.archived = archived;
     }
 }

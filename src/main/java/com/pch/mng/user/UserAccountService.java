@@ -3,6 +3,7 @@ package com.pch.mng.user;
 import com.pch.mng.global.exception.BusinessException;
 import com.pch.mng.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,7 @@ import java.util.List;
 public class UserAccountService {
 
     private final UserAccountRepository userAccountRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public List<UserAccountResponse.MinDTO> findAll() {
         return userAccountRepository.findAll().stream()
@@ -34,7 +36,7 @@ public class UserAccountService {
         }
         UserAccount user = UserAccount.builder()
                 .email(reqDTO.getEmail())
-                .password(reqDTO.getPassword()) // TODO: BCrypt 암호화 적용 필요
+                .password(passwordEncoder.encode(reqDTO.getPassword()))
                 .name(reqDTO.getName())
                 .build();
         userAccountRepository.save(user);

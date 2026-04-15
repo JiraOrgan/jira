@@ -1,14 +1,21 @@
 package com.pch.mng.project;
 
+import com.pch.mng.auth.CustomUserDetails;
+import com.pch.mng.global.enums.BoardType;
+import com.pch.mng.global.enums.IssueStatus;
+import com.pch.mng.global.enums.ProjectRole;
 import com.pch.mng.global.exception.BusinessException;
 import com.pch.mng.global.exception.ErrorCode;
 import com.pch.mng.user.UserAccount;
 import com.pch.mng.user.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -18,10 +25,14 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
     private final UserAccountRepository userAccountRepository;
+    private final WipLimitRepository wipLimitRepository;
 
-    public List<ProjectResponse.MinDTO> findAll() {
-        return projectRepository.findByArchivedFalseOrderByCreatedAtDesc().stream()
+    public List<ProjectResponse.MinDTO> findAllForUser(Long userId) {
+        return projectMemberRepository.findByUser_Id(userId).stream()
+                .map(ProjectMember::getProject)
+                .filter(p -> !p.isArchived())
                 .map(ProjectResponse.MinDTO::of)
+                .distinct()
                 .toList();
     }
 
@@ -31,16 +42,33 @@ public class ProjectService {
         return ProjectResponse.DetailDTO.of(project);
     }
 
+    /** 멤버만 조회 가능. 아카이브 프로젝트 포함(설정 화면 진입용). */
+    public ProjectResponse.DetailDTO findDetailByKeyForUser(String key, Long userId) {
+        Project project = projectRepository.findByKey(key)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        if (!projectMemberRepository.existsByProjectIdAndUserId(project.getId(), userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+        return ProjectResponse.DetailDTO.of(project);
+    }
+
     @Transactional
     public ProjectResponse.DetailDTO save(ProjectRequest.SaveDTO reqDTO) {
         if (projectRepository.existsByKey(reqDTO.getKey())) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE);
         }
-        UserAccount lead = null;
+        CustomUserDetails principal = currentUserDetails();
+        UserAccount creator = userAccountRepository.findById(principal.getId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        UserAccount lead;
         if (reqDTO.getLeadId() != null) {
             lead = userAccountRepository.findById(reqDTO.getLeadId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        } else {
+            lead = creator;
         }
+
         Project project = Project.builder()
                 .key(reqDTO.getKey())
                 .name(reqDTO.getName())
@@ -49,6 +77,22 @@ public class ProjectService {
                 .lead(lead)
                 .build();
         projectRepository.save(project);
+
+        projectMemberRepository.save(ProjectMember.builder()
+                .project(project)
+                .user(creator)
+                .role(ProjectRole.ADMIN)
+                .build());
+
+        if (!lead.getId().equals(creator.getId())
+                && !projectMemberRepository.existsByProjectIdAndUserId(project.getId(), lead.getId())) {
+            projectMemberRepository.save(ProjectMember.builder()
+                    .project(project)
+                    .user(lead)
+                    .role(ProjectRole.DEVELOPER)
+                    .build());
+        }
+
         return ProjectResponse.DetailDTO.of(project);
     }
 
@@ -59,9 +103,16 @@ public class ProjectService {
         project.setName(reqDTO.getName());
         project.setDescription(reqDTO.getDescription());
         if (reqDTO.getLeadId() != null) {
-            UserAccount lead = userAccountRepository.findById(reqDTO.getLeadId())
+            UserAccount newLead = userAccountRepository.findById(reqDTO.getLeadId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-            project.setLead(lead);
+            project.setLead(newLead);
+        }
+        if (reqDTO.getArchived() != null) {
+            project.setArchived(reqDTO.getArchived());
+        }
+        if (reqDTO.getAutoArchiveDoneAfterDays() != null) {
+            int v = reqDTO.getAutoArchiveDoneAfterDays();
+            project.setAutoArchiveDoneAfterDays(v <= 0 ? null : v);
         }
         return ProjectResponse.DetailDTO.of(project);
     }
@@ -103,6 +154,50 @@ public class ProjectService {
     public void removeMember(Long projectId, Long memberId) {
         ProjectMember member = projectMemberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        if (!member.getProject().getId().equals(projectId)) {
+            throw new BusinessException(ErrorCode.ENTITY_NOT_FOUND);
+        }
         projectMemberRepository.delete(member);
+    }
+
+    public List<ProjectResponse.WipLimitDTO> findWipLimits(Long projectId) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new BusinessException(ErrorCode.ENTITY_NOT_FOUND);
+        }
+        return wipLimitRepository.findByProjectId(projectId).stream()
+                .map(ProjectResponse.WipLimitDTO::of)
+                .toList();
+    }
+
+    @Transactional
+    public List<ProjectResponse.WipLimitDTO> replaceWipLimits(Long projectId, ProjectRequest.WipLimitsReplaceDTO dto) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        if (project.getBoardType() != BoardType.KANBAN) {
+            throw new BusinessException(ErrorCode.WIP_LIMITS_KANBAN_ONLY);
+        }
+        Set<IssueStatus> seen = new HashSet<>();
+        for (ProjectRequest.WipLimitItemDTO item : dto.getLimits()) {
+            if (!seen.add(item.getStatus())) {
+                throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+            }
+        }
+        wipLimitRepository.deleteByProjectId(projectId);
+        for (ProjectRequest.WipLimitItemDTO item : dto.getLimits()) {
+            wipLimitRepository.save(WipLimit.builder()
+                    .project(project)
+                    .status(item.getStatus())
+                    .maxIssues(item.getMaxIssues())
+                    .build());
+        }
+        return findWipLimits(projectId);
+    }
+
+    private static CustomUserDetails currentUserDetails() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getPrincipal() instanceof CustomUserDetails cd)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+        return cd;
     }
 }

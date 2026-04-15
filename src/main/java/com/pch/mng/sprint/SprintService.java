@@ -1,8 +1,13 @@
 package com.pch.mng.sprint;
 
+import com.pch.mng.global.enums.IssueStatus;
+import com.pch.mng.global.enums.SprintIncompleteIssueDisposition;
 import com.pch.mng.global.enums.SprintStatus;
 import com.pch.mng.global.exception.BusinessException;
 import com.pch.mng.global.exception.ErrorCode;
+import com.pch.mng.board.SprintBoardRedisCache;
+import com.pch.mng.issue.Issue;
+import com.pch.mng.issue.IssueRepository;
 import com.pch.mng.project.Project;
 import com.pch.mng.project.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +23,8 @@ public class SprintService {
 
     private final SprintRepository sprintRepository;
     private final ProjectRepository projectRepository;
+    private final IssueRepository issueRepository;
+    private final SprintBoardRedisCache sprintBoardRedisCache;
 
     public List<SprintResponse.MinDTO> findByProject(Long projectId) {
         return sprintRepository.findByProjectIdOrderByCreatedAtDesc(projectId).stream()
@@ -26,7 +33,7 @@ public class SprintService {
     }
 
     public SprintResponse.DetailDTO findById(Long id) {
-        Sprint sprint = sprintRepository.findById(id)
+        Sprint sprint = sprintRepository.findByIdWithProject(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
         return SprintResponse.DetailDTO.of(sprint);
     }
@@ -49,24 +56,88 @@ public class SprintService {
 
     @Transactional
     public SprintResponse.DetailDTO start(Long id) {
-        Sprint sprint = sprintRepository.findById(id)
+        Sprint sprint = sprintRepository.findByIdWithProject(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        if (sprint.getStatus() != SprintStatus.PLANNING) {
+            throw new BusinessException(ErrorCode.SPRINT_INVALID_TRANSITION);
+        }
+        Long projectId = sprint.getProject().getId();
+        if (sprintRepository.existsByProjectIdAndStatusAndIdNot(projectId, SprintStatus.ACTIVE, id)) {
+            throw new BusinessException(ErrorCode.SPRINT_ACTIVE_ALREADY_EXISTS);
+        }
         sprint.setStatus(SprintStatus.ACTIVE);
+        sprintBoardRedisCache.evictSprint(id);
         return SprintResponse.DetailDTO.of(sprint);
     }
 
     @Transactional
-    public SprintResponse.DetailDTO complete(Long id) {
-        Sprint sprint = sprintRepository.findById(id)
+    public SprintResponse.DetailDTO complete(Long id, SprintRequest.CompleteDTO reqDTO) {
+        Sprint sprint = sprintRepository.findByIdWithProject(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        if (sprint.getStatus() != SprintStatus.ACTIVE) {
+            throw new BusinessException(ErrorCode.SPRINT_INVALID_TRANSITION);
+        }
+        SprintIncompleteIssueDisposition disposition =
+                reqDTO == null || reqDTO.getDisposition() == null
+                        ? SprintIncompleteIssueDisposition.BACKLOG
+                        : reqDTO.getDisposition();
+
+        var project = sprint.getProject();
+        List<Issue> inSprint = issueRepository.findBySprint_IdAndArchivedFalse(id);
+        List<Issue> incomplete =
+                inSprint.stream().filter(i -> i.getStatus() != IssueStatus.DONE).toList();
+
+        if (!incomplete.isEmpty()) {
+            if (disposition == SprintIncompleteIssueDisposition.NEXT_SPRINT) {
+                if (reqDTO == null || reqDTO.getNextSprintId() == null) {
+                    throw new BusinessException(ErrorCode.SPRINT_COMPLETE_NEXT_REQUIRED);
+                }
+                Long nextId = reqDTO.getNextSprintId();
+                if (nextId.equals(id)) {
+                    throw new BusinessException(ErrorCode.SPRINT_COMPLETE_NEXT_INVALID);
+                }
+                Sprint next = sprintRepository.findByIdWithProject(nextId)
+                        .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+                if (!next.getProject().getId().equals(project.getId())) {
+                    throw new BusinessException(ErrorCode.SPRINT_COMPLETE_NEXT_INVALID);
+                }
+                if (next.getStatus() != SprintStatus.PLANNING) {
+                    throw new BusinessException(ErrorCode.SPRINT_COMPLETE_NEXT_INVALID);
+                }
+                for (Issue issue : incomplete) {
+                    issue.setSprint(next);
+                    issue.setBacklogRank(0L);
+                }
+                issueRepository.saveAll(incomplete);
+                sprintBoardRedisCache.evictSprint(nextId);
+            } else {
+                long rankBase = issueRepository.maxBacklogRankForProjectBacklog(project.getId());
+                long step = 0L;
+                for (Issue issue : incomplete) {
+                    issue.setSprint(null);
+                    issue.setStatus(IssueStatus.BACKLOG);
+                    issue.setBacklogRank(rankBase + (++step) * 1000L);
+                }
+                issueRepository.saveAll(incomplete);
+            }
+        }
+
         sprint.setStatus(SprintStatus.COMPLETED);
+        sprintBoardRedisCache.evictSprint(id);
         return SprintResponse.DetailDTO.of(sprint);
     }
 
     @Transactional
     public void delete(Long id) {
-        Sprint sprint = sprintRepository.findById(id)
+        Sprint sprint = sprintRepository.findByIdWithProject(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        if (sprint.getStatus() == SprintStatus.ACTIVE) {
+            throw new BusinessException(ErrorCode.SPRINT_DELETE_FORBIDDEN);
+        }
+        if (issueRepository.countBySprint_IdAndArchivedFalse(id) > 0) {
+            throw new BusinessException(ErrorCode.SPRINT_DELETE_FORBIDDEN);
+        }
+        sprintBoardRedisCache.evictSprint(id);
         sprintRepository.delete(sprint);
     }
 }

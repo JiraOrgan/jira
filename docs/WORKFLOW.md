@@ -1,39 +1,51 @@
 # Project Control Hub - 개발 워크플로우
 
-> **버전**: v1.0
+> **버전**: v1.5
 > **작성일**: 2026-03-22
-> **연결 문서**: [PHASE.md](PHASE.md) | [TASKS.md](TASKS.md) | [PRD.md](PRD.md)
+> **최종수정일**: 2026-04-14 (§6 Sprint와 DOR-DOD 연계)
+> **연결 문서**: [PHASE.md](PHASE.md) | [TASKS.md](TASKS.md) | [PRD.md](PRD.md) | [DOR-DOD.md](DOR-DOD.md)
+> **Git 정본**: `C:\workspace\phs-prj\documents\08-Git규칙정의서_v3.0.md` — 본 파일은 코드 저장소용 요약이며, 세부·예외는 해당 문서를 따른다.
+
+기능 완료·Task 상태·릴리즈 단위 진척은 **[TASKS.md](TASKS.md) 변경 이력** 및 Phase 로드맵의 **「일정 vs 저장소 진척」** 안내([PHASE.md](PHASE.md))를 본다.
 
 ---
 
 ## 1. Git 브랜치 전략
 
-### 1.1 브랜치 구조
+### 1.1 브랜치 구조 (Git 규칙 정의서 v3.0 정렬)
 
 ```
-master          ── 운영 배포 브랜치 (직접 커밋 금지)
-  └── dev       ── 개발 통합 브랜치
-       ├── feat/{task-id}-{설명}   ── 기능 개발
-       ├── fix/{task-id}-{설명}    ── 버그 수정
-       ├── hotfix/{설명}           ── 긴급 수정 (master에서 분기)
-       └── docs/{설명}             ── 문서 작업
+main            ── 운영 배포 (직접 커밋 금지)
+  └── develop   ── 개발 통합
+       ├── feature/{이슈키}-{설명}   ── 기능 개발
+       ├── bugfix/{이슈키}-{설명}    ── 버그 수정
+       ├── release/{버전}           ── 배포 준비
+       └── docs/{설명}              ── 문서 작업 (선택 규칙)
+
+hotfix/{이슈키}-{설명}  ── main에서 분기 → main·develop에 병합
 ```
+
+> **본 저장소**: GitHub 통합 브랜치는 **`develop`**이다. 타 문서·도구에서 `dev`를 쓰는 경우 역할은 동일하게 이해한다.
 
 ### 1.2 브랜치 네이밍 규칙
 
-| 접두사 | 용도 | 예시 |
-|--------|------|------|
-| feat/ | 기능 개발 | feat/T-300-jwt-auth |
-| fix/ | 버그 수정 | fix/T-706-login-error |
-| hotfix/ | 긴급 수정 | hotfix/security-patch |
+| 종류 | 용도 | 예시 |
+|------|------|------|
+| feature/ | 기능 개발 | feature/PROJ-23-login |
+| bugfix/ | 버그 수정 | bugfix/PROJ-45-wip-warning |
+| hotfix/ | 긴급 수정 | hotfix/PROJ-99-security |
+| release/ | 릴리즈 준비 | release/1.0 |
 | docs/ | 문서 | docs/api-spec-update |
-| refactor/ | 리팩토링 | refactor/issue-service |
+| refactor/ | 리팩토링 (로컬 합의 시) | refactor/issue-service |
+
+Task ID만 알려진 경우: `feature/T-300-jwt-auth` 형태도 허용(팀 합의 하에).
 
 ### 1.3 브랜치 규칙
 
-- master: 직접 push 금지, PR + 최소 1 Approve 필요
-- dev: 기능 브랜치 머지 대상, CI 통과 필수
-- 기능 브랜치: dev에서 분기, dev로 머지
+- **main**: 직접 push 금지, PR + 최소 1 Approve, 릴리즈·태그 정책은 `08-Git규칙정의서` §7
+- **develop**: 기능 브랜치 머지 대상, CI 통과 필수
+- **feature**/**bugfix**: develop에서 분기 → PR로 develop에 병합
+- **hotfix**: main에서 분기 → main + develop 동기화
 
 ---
 
@@ -46,8 +58,10 @@ master          ── 운영 배포 브랜치 (직접 커밋 금지)
 
 {body}
 
-Co-Authored-By: {author}
+Refs: PROJ-123
 ```
+
+Footer에 **이슈 키**(`Refs:` / `Closes:`)를 두는 방식은 `08-Git규칙정의서` §2.4와 동일하다. (Jira 미사용 시 Task ID로 대체 가능.)
 
 ### 2.2 타입
 
@@ -63,7 +77,7 @@ Co-Authored-By: {author}
 
 ### 2.3 스코프
 
-도메인명을 스코프로 사용: `user`, `project`, `issue`, `sprint`, `release`, `comment`, `dashboard`, `auth`, `global`
+`08-Git규칙정의서` §2.3 모듈 매핑을 권장: `issue`, `board`, `workflow`, `jql`, `auth`, `sprint`, `dashboard`, `audit`, `mobile` 등
 
 ---
 
@@ -81,9 +95,9 @@ TODO → IN_PROGRESS → REVIEW → DONE
 
 ```
 1. TASKS.md에서 할당된 Task 확인 (TODO → IN_PROGRESS)
-2. dev에서 기능 브랜치 생성
-   $ git checkout dev && git pull
-   $ git checkout -b feat/T-300-jwt-auth
+2. develop에서 기능 브랜치 생성
+   $ git checkout develop && git pull
+   $ git checkout -b feature/T-300-jwt-auth
 
 3. 코드 작성 (rules/ 규칙 준수)
    - Entity → Repository → DTO → Service → Controller 순서
@@ -93,7 +107,7 @@ TODO → IN_PROGRESS → REVIEW → DONE
    $ git commit -m "feat(auth): JWT 로그인 API 구현"
 
 5. Push 및 PR 생성
-   $ git push -u origin feat/T-300-jwt-auth
+   $ git push -u origin feature/T-300-jwt-auth
    - PR 제목: [T-300] JWT 로그인 API 구현
    - PR 본문: Task ID, 변경 사항, 테스트 방법
 
@@ -101,7 +115,7 @@ TODO → IN_PROGRESS → REVIEW → DONE
    - 최소 1인 Approve 필수
    - CI 통과 필수
 
-7. dev로 머지 (Squash Merge 권장)
+7. develop로 머지 (Squash Merge 권장)
 
 8. TASKS.md 상태 업데이트 (DONE)
 ```
@@ -112,24 +126,21 @@ TODO → IN_PROGRESS → REVIEW → DONE
 
 ### 4.1 PR 템플릿
 
+`08-Git규칙정의서` §3.1과 호환되도록 다음을 포함한다.
+
 ```markdown
-## Summary
-- [T-{id}] {Task 제목}
-- {변경 사항 1~3줄 요약}
+## 변경 사항
+-
 
-## Changes
-- [ ] {구체적 변경 내용 1}
-- [ ] {구체적 변경 내용 2}
+## 변경 사유
+- Issue: PROJ-{번호} 또는 Task: T-{id}
 
-## Test Plan
+## 테스트 결과
 - [ ] 단위 테스트 통과
-- [ ] API 수동 테스트 (Swagger)
-- [ ] 기존 기능 회귀 확인
+- [ ] 기능/API 수동 테스트
 
-## Related
-- Phase: {Phase N}
-- Task: T-{id}
-- Related PRs: #{PR 번호}
+## 관련 이슈
+- Closes PROJ-{번호}
 ```
 
 ### 4.2 PR 규칙
@@ -140,7 +151,7 @@ TODO → IN_PROGRESS → REVIEW → DONE
 | 리뷰어 | 최소 1명 지정 |
 | CI | 빌드 + 테스트 통과 필수 |
 | 크기 | 파일 변경 300줄 이하 권장 (초과 시 분리) |
-| 머지 | Squash Merge (dev), Merge Commit (master) |
+| 머지 | Squash Merge (develop), Merge Commit (main) — 팀 정책에 따름 |
 | 삭제 | 머지 후 기능 브랜치 자동 삭제 |
 
 ---
@@ -178,6 +189,8 @@ TODO → IN_PROGRESS → REVIEW → DONE
 ---
 
 ## 6. Sprint 운영
+
+스프린트 단위 **DoR·DoD 표준 체크리스트**(M1.1)는 [DOR-DOD.md](DOR-DOD.md)에 있다. 아래 §6.3·§6.4는 본 워크플로 문서 안에서의 요약이다.
 
 ### 6.1 Sprint 사이클 (2주)
 
@@ -217,7 +230,7 @@ Sprint에 이슈를 포함하기 위한 최소 조건:
 - [ ] 단위 테스트 통과 (커버리지 80%+)
 - [ ] QA 테스트 통과
 - [ ] 문서 업데이트 완료
-- [ ] dev 브랜치 머지 완료, 빌드 성공
+- [ ] develop 브랜치 머지 완료, 빌드 성공
 - [ ] 회귀 테스트 확인
 
 ---
@@ -237,23 +250,23 @@ Push/PR → GitHub Actions
 ### 7.2 CD (Continuous Deployment)
 
 ```
-dev 머지 → 스테이징 자동 배포
-  └── 수동 승인 → 운영 배포 (Blue-Green)
+develop 머지 → 스테이징 자동 배포
+  └── 수동 승인 → 운영 배포 (Canary 또는 Blue-Green — `12-배포가이드_v4.0` 기준)
 
-master 머지 → 운영 배포 트리거
+main 머지 → 운영 배포 트리거
   ├── Docker Build → ECR Push
   ├── ECS Task Definition 업데이트
   ├── Health Check 통과 확인
-  └── 배포 완료 Slack 알림
+  └── 배포 완료 알림
 ```
 
 ### 7.3 환경 구성
 
 | 환경 | 브랜치 | DB | URL |
 |------|--------|-----|-----|
-| Local | feat/* | localhost:3306 | localhost:8080 |
-| Staging | dev | RDS (staging) | staging.jira-pm.example.com |
-| Production | master | RDS (prod, Multi-AZ) | api.jira-pm.example.com |
+| Local | feature/* | localhost:5432 (PostgreSQL) | localhost:8080 |
+| Staging | develop | RDS (staging) | staging.example.com |
+| Production | main | RDS (prod, Multi-AZ) | api.example.com |
 
 ---
 
@@ -261,11 +274,11 @@ master 머지 → 운영 배포 트리거
 
 | Phase | 브랜치 전략 | 주요 워크플로우 |
 |-------|-----------|--------------|
-| Phase 0 | dev 직접 커밋 | 초기 설정, 규칙 없이 빠르게 진행 |
-| Phase 1-2 | docs/ 브랜치 | 문서 중심, 리뷰 간소화 |
-| Phase 3-6 | feat/T-{id} 브랜치 | 정규 Sprint 운영, PR 필수, 코드 리뷰 |
-| Phase 7 | fix/T-{id} 브랜치 | 버그 수정 집중, 회귀 테스트 |
-| Phase 8 | hotfix/ (필요 시) | 배포 체크리스트, 롤백 계획 |
+| Phase 0 | develop 직접 커밋(예외) | 초기 설정, 팀 합의 하 빠른 진행 |
+| Phase 1-2 | docs/ 또는 feature/docs-* | 문서 중심, 리뷰 간소화 |
+| Phase 3-6 | feature/* · bugfix/* | 정규 Sprint, PR 필수, 코드 리뷰 |
+| Phase 7 | bugfix/* | 버그 수정·회귀 테스트 |
+| Phase 8 | release/* · hotfix/* | 배포 체크리스트, 롤백 계획 (`12-배포가이드`) |
 
 ---
 
@@ -274,3 +287,7 @@ master 머지 → 운영 배포 트리거
 | 버전 | 날짜 | 변경 내용 |
 |------|------|-----------|
 | v1.0 | 2026-03-22 | 개발 워크플로우 초안 작성 |
+| v1.1 | 2026-04-09 | `08-Git규칙정의서_v3.0` 정렬(main/develop/feature/bugfix/release/hotfix), 커밋 Footer·스코프, CD·환경(PostgreSQL) 갱신 |
+| v1.3 | 2026-04-14 | 본 저장소 통합 브랜치 **`develop`** 명시(§1.1 주석·§1.3), `dev` 혼동 완화 |
+| v1.4 | 2026-04-14 | §3.2·DoD·§7.3 등 본문 잔여 **`develop(또는 dev)`** → **`develop`** 로 통일 |
+| v1.5 | 2026-04-14 | §6 Sprint 상단·헤더에 `DOR-DOD.md` 연계(표준 DoR/DoD 정본) |

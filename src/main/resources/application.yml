@@ -22,6 +22,11 @@ spring:
   jackson:
     time-zone: Asia/Seoul
 
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 21MB
+
 # Actuator
 management:
   endpoints:
@@ -31,6 +36,38 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+
+jwt:
+  secret: ${JWT_SECRET:dev-secret-key-must-be-at-least-32-characters-long}
+  access-expiration: 3600000
+  refresh-expiration: 604800000
+
+app:
+  jql:
+    max-results-cap: 100
+    default-max-results: 20
+  board:
+    cache:
+      enabled: true
+      ttl-seconds: 60
+  security:
+    cors:
+      # 쉼표 구분. 운영은 APP_CORS_ORIGINS 등 환경 변수로 덮어쓴다.
+      allowed-origins: ${APP_CORS_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+    login:
+      max-attempts: 5
+      lock-minutes: 30
+  storage:
+    # local: 개발·테스트 기본 / s3: 운영/스테이징 (버킷·자격 증명 필요)
+    type: local
+    local:
+      base-path: ./data/attachments
+    s3:
+      bucket: ${S3_BUCKET:}
+      region: ${AWS_REGION:ap-northeast-2}
+      endpoint: ${S3_ENDPOINT:}
+      access-key: ${AWS_ACCESS_KEY_ID:}
+      secret-key: ${AWS_SECRET_ACCESS_KEY:}
 
 # 공통 로깅
 logging:

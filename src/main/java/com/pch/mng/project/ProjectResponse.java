@@ -1,6 +1,7 @@
 package com.pch.mng.project;
 
 import com.pch.mng.global.enums.BoardType;
+import com.pch.mng.global.enums.IssueStatus;
 import com.pch.mng.global.enums.ProjectRole;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -38,6 +39,7 @@ public class ProjectResponse {
         private Long leadId;
         private String leadName;
         private boolean archived;
+        private Integer autoArchiveDoneAfterDays;
         private LocalDateTime createdAt;
 
         private DetailDTO() {}
@@ -50,6 +52,7 @@ public class ProjectResponse {
             dto.description = project.getDescription();
             dto.boardType = project.getBoardType();
             dto.archived = project.isArchived();
+            dto.autoArchiveDoneAfterDays = project.getAutoArchiveDoneAfterDays();
             dto.createdAt = project.getCreatedAt();
             if (project.getLead() != null) {
                 dto.leadId = project.getLead().getId();
@@ -80,6 +83,19 @@ public class ProjectResponse {
                 dto.userName = member.getUser().getName();
                 dto.userEmail = member.getUser().getEmail();
             }
+            return dto;
+        }
+    }
+
+    @Data
+    public static class WipLimitDTO {
+        private IssueStatus status;
+        private int maxIssues;
+
+        public static WipLimitDTO of(WipLimit entity) {
+            WipLimitDTO dto = new WipLimitDTO();
+            dto.status = entity.getStatus();
+            dto.maxIssues = entity.getMaxIssues();
             return dto;
         }
     }

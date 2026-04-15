@@ -18,10 +18,74 @@ public enum ErrorCode {
     FORBIDDEN(403, "접근 권한이 없습니다"),
     EXPIRED_TOKEN(401, "토큰이 만료되었습니다"),
     INVALID_TOKEN(401, "유효하지 않은 토큰입니다"),
+    INVALID_CREDENTIALS(401, "이메일 또는 비밀번호가 올바르지 않습니다"),
+    INVALID_REFRESH_TOKEN(401, "유효하지 않은 리프레시 토큰입니다"),
+    ACCOUNT_LOCKED(423, "로그인 시도 횟수 초과로 일시 잠금되었습니다. 30분 후 다시 시도해 주세요"),
 
     // User
     USER_NOT_FOUND(404, "사용자를 찾을 수 없습니다"),
-    EMAIL_ALREADY_EXISTS(409, "이미 사용 중인 이메일입니다");
+    EMAIL_ALREADY_EXISTS(409, "이미 사용 중인 이메일입니다"),
+
+    // Issue
+    INVALID_ISSUE_HIERARCHY(400, "이슈 타입과 부모 이슈 조합이 PRD 계층(Epic→Story/Task/Bug→Sub-task)에 맞지 않습니다"),
+    EPIC_DATE_NOT_ALLOWED(400, "Epic 기간(epicStartDate/epicEndDate)은 Epic 타입 이슈에만 설정할 수 있습니다"),
+    EPIC_DATE_RANGE_INVALID(400, "Epic 종료일은 시작일 이상이어야 합니다"),
+    ISSUE_PARENT_PROJECT_MISMATCH(400, "부모 이슈가 같은 프로젝트에 있어야 합니다"),
+    SPRINT_PROJECT_MISMATCH(400, "스프린트가 해당 프로젝트에 속하지 않습니다"),
+    COMPONENT_PROJECT_MISMATCH(400, "컴포넌트는 이슈와 같은 프로젝트에 속해야 합니다"),
+    WORKFLOW_VIOLATION(409, "허용되지 않는 워크플로 전환입니다"),
+    WIP_LIMIT_EXCEEDED(409, "해당 워크플로 상태 열의 WIP 한도를 초과했습니다"),
+    ISSUE_ARCHIVED(409, "아카이브된 이슈에서는 이 작업을 수행할 수 없습니다"),
+    AUTO_ARCHIVE_NOT_CONFIGURED(400, "DONE 자동 아카이브 일수가 프로젝트에 설정되지 않았습니다"),
+
+    // Sprint (FR-011)
+    SPRINT_INVALID_TRANSITION(409, "허용되지 않는 스프린트 상태 전환입니다"),
+    SPRINT_ACTIVE_ALREADY_EXISTS(409, "해당 프로젝트에 이미 진행 중인 스프린트가 있습니다"),
+    SPRINT_DELETE_FORBIDDEN(409, "진행 중이거나 이슈가 배정된 스프린트는 삭제할 수 없습니다"),
+    SPRINT_NOT_ASSIGNABLE(409, "완료된 스프린트에는 이슈를 배정할 수 없습니다"),
+    SPRINT_COMPLETE_NEXT_REQUIRED(400, "미완료 이슈를 다음 스프린트로 옮기려면 nextSprintId가 필요합니다"),
+    SPRINT_COMPLETE_NEXT_INVALID(400, "이관 대상 스프린트는 같은 프로젝트의 PLANNING 상태이며, 완료하려는 스프린트와 달라야 합니다"),
+
+    // Backlog (FR-010)
+    BACKLOG_REORDER_INVALID(400, "백로그 순서가 올바르지 않습니다. 스프린트에 미배정인 이슈 ID 집합과 일치해야 합니다"),
+
+    // Kanban / WIP (FR-009)
+    WIP_LIMITS_KANBAN_ONLY(400, "WIP 제한은 칸반(KANBAN) 프로젝트에서만 설정할 수 있습니다"),
+    ISSUE_LINK_SELF(400, "동일 이슈에는 링크를 걸 수 없습니다"),
+    ISSUE_LINK_PROJECT_MISMATCH(400, "링크 대상 이슈는 같은 프로젝트에 있어야 합니다"),
+    ISSUE_LINK_DUPLICATE(409, "동일한 이슈 링크가 이미 존재합니다"),
+    ISSUE_SECURITY_LEVEL_FORBIDDEN(403, "해당 역할로는 요청한 이슈 보안 레벨을 설정할 수 없습니다"),
+
+    // JQL (FR-016)
+    JQL_INVALID_VALUE(400, "JQL 값이 올바르지 않습니다"),
+    JQL_UNSUPPORTED_CLAUSE(400, "JQL에서 해당 필드와 연산 조합을 지원하지 않습니다"),
+    JQL_PROJECT_KEY_MISMATCH(400, "JQL의 project 조건이 현재 프로젝트와 일치하지 않습니다"),
+
+    // Dashboard (FR-021)
+    DASHBOARD_GADGET_MISMATCH(400, "해당 대시보드에 속하지 않는 가젯입니다"),
+
+    // Automation (FR-015)
+    AUTOMATION_INVALID_SPEC(400, "자동화 규칙의 조건·액션 JSON이 올바르지 않습니다"),
+
+    // VCS / Git 연동 (FR-033)
+    VCS_LINK_INVALID_URL(400, "http(s) URL 형식이 올바르지 않습니다"),
+    VCS_LINK_DUPLICATE(409, "동일 이슈에 같은 URL의 VCS 링크가 이미 있습니다"),
+
+    // GitHub OAuth / 웹훅 (FR-033 확장)
+    GITHUB_NOT_CONFIGURED(501, "GitHub OAuth 클라이언트가 서버에 설정되지 않았습니다"),
+    GITHUB_CRYPTO_NOT_CONFIGURED(501, "연동 토큰 암호화 키(app.integration.crypto.secret)가 설정되지 않았습니다"),
+    GITHUB_OAUTH_INVALID_STATE(400, "GitHub OAuth state가 유효하지 않거나 만료되었습니다"),
+    GITHUB_OAUTH_EXCHANGE_FAILED(502, "GitHub 토큰 교환에 실패했습니다"),
+    GITHUB_REPO_INVALID(400, "GitHub 저장소 이름은 owner/repo 형식이어야 합니다"),
+    GITHUB_WEBHOOK_SIGNATURE_INVALID(401, "GitHub 웹훅 서명이 올바르지 않습니다"),
+    GITHUB_WEBHOOK_UNKNOWN_REPO(404, "등록된 GitHub 저장소와 일치하지 않습니다"),
+    GITHUB_API_ERROR(502, "GitHub API 호출에 실패했습니다"),
+    GITHUB_OAUTH_INCOMPLETE(400, "GitHub OAuth 연결을 먼저 완료한 뒤 저장소를 등록하세요"),
+
+    // Attachment
+    FILE_REQUIRED(400, "업로드할 파일이 필요합니다"),
+    FILE_TOO_LARGE(413, "파일 크기 제한(20MB)을 초과했습니다"),
+    FILE_UPLOAD_FAILED(500, "파일 저장에 실패했습니다");
 
     private final int status;
     private final String message;

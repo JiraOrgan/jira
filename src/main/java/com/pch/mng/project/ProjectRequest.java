@@ -1,11 +1,16 @@
 package com.pch.mng.project;
 
 import com.pch.mng.global.enums.BoardType;
+import com.pch.mng.global.enums.IssueStatus;
 import com.pch.mng.global.enums.ProjectRole;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+
+import java.util.List;
 
 public class ProjectRequest {
 
@@ -27,6 +32,12 @@ public class ProjectRequest {
         private String name;
         private String description;
         private Long leadId;
+        /** null이면 아카이브 플래그는 변경하지 않음 */
+        private Boolean archived;
+        /**
+         * DONE 이슈 자동 아카이브 일수. null이면 유지. 0 이하이면 비활성(null 저장).
+         */
+        private Integer autoArchiveDoneAfterDays;
     }
 
     @Data
@@ -35,5 +46,20 @@ public class ProjectRequest {
         private Long userId;
         @NotNull
         private ProjectRole role;
+    }
+
+    @Data
+    public static class WipLimitItemDTO {
+        @NotNull
+        private IssueStatus status;
+        @NotNull
+        @Min(1)
+        private Integer maxIssues;
+    }
+
+    @Data
+    public static class WipLimitsReplaceDTO {
+        @NotNull
+        private List<@Valid WipLimitItemDTO> limits;
     }
 }

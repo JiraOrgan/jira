@@ -44,3 +44,15 @@ Thumbs.db
 ### AI Tools ###
 .omc/
 .claude/
+
+### Node (monorepo web) ###
+node_modules/
+apps/web/dist/
+*.tsbuildinfo
+
+### Flutter (monorepo mobile) ###
+apps/mobile/.dart_tool/
+apps/mobile/build/
+apps/mobile/.flutter-plugins
+apps/mobile/.flutter-plugins-dependencies
+apps/mobile/.fvm/flutter_sdk
