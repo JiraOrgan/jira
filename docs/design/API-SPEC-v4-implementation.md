@@ -1,7 +1,7 @@
 # API 정의서 v4 — 현재 구현 매핑
 
 > **작성일**: 2026-04-09  
-> **최종 갱신**: 2026-04-14 (JQL 검색·아카이브 동작 주석)  
+> **최종 갱신**: 2026-04-15 (FR-015 자동화 API)  
 > **Task**: T-201  
 > **OpenAPI**: 앱 기동 후 `/v3/api-docs`, Swagger UI `/swagger-ui.html`  
 > **외부 정본**: `04-API정의서_v4.0.md` (Jira 스타일 `/rest/api/3` 등) — 점진 정렬 예정
@@ -50,6 +50,21 @@
 | POST | `/api/v1/projects/{projectId}/members` | 멤버 추가 |
 | DELETE | `/api/v1/projects/{projectId}/members/{memberId}` | 멤버 제거 |
 | GET | `/api/v1/projects/{projectId}/roadmap/epics` | 로드맵 Epic 목록 (FR-012, `RoadmapEpicResponse`) |
+
+### 자동화 `AutomationApiController` (FR-015 MVP, 프로젝트 ADMIN)
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | `/api/v1/projects/{projectId}/automation/rules` | 규칙 목록 (`sortOrder`, `id` 오름차순) |
+| POST | `/api/v1/projects/{projectId}/automation/rules` | 규칙 생성 (`AutomationRuleRequest.SaveDTO`) |
+| PUT | `/api/v1/projects/{projectId}/automation/rules/{ruleId}` | 규칙 수정 (`UpdateDTO`, 부분 갱신) |
+| DELETE | `/api/v1/projects/{projectId}/automation/rules/{ruleId}` | 규칙 삭제(실행 로그 선삭제) |
+| GET | `/api/v1/projects/{projectId}/automation/execution-logs` | 실행 로그 페이징 (`AutomationExecutionLogResponse`) |
+
+**트리거** (`AutomationTriggerType`): `ISSUE_CREATED`, `ISSUE_STATUS_CHANGED`  
+**액션** (`AutomationActionType`): `SET_PRIORITY` (필수 `actionJson`: `{"priority":"HIGH"}` 등 `Priority` enum 이름), `ASSIGN_TO_REPORTER`, `UNASSIGN` (`actionJson` 생략 또는 `{}`)  
+**조건 JSON** (선택, 객체): `issueTypes` 문자열 배열; `ISSUE_STATUS_CHANGED`일 때 `fromStatus`·`toStatus`(`IssueStatus` 이름); `ISSUE_CREATED`일 때 `status`(초기 상태, 보통 `BACKLOG`).  
+규칙 검증 실패 시 `AUTOMATION_INVALID_SPEC`(400).
 
 ### 이슈 `IssueApiController`
 

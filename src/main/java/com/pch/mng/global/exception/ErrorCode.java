@@ -62,6 +62,9 @@ public enum ErrorCode {
     // Dashboard (FR-021)
     DASHBOARD_GADGET_MISMATCH(400, "해당 대시보드에 속하지 않는 가젯입니다"),
 
+    // Automation (FR-015)
+    AUTOMATION_INVALID_SPEC(400, "자동화 규칙의 조건·액션 JSON이 올바르지 않습니다"),
+
     // Attachment
     FILE_REQUIRED(400, "업로드할 파일이 필요합니다"),
     FILE_TOO_LARGE(413, "파일 크기 제한(20MB)을 초과했습니다"),
