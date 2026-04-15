@@ -4,12 +4,17 @@
   "workspaces": [
     "apps/web"
   ],
+  "overrides": {
+    "vite": "^6.3.5"
+  },
   "scripts": {
     "dev:web": "npm run dev -w web",
     "build:web": "npm run build -w web",
     "lint:web": "npm run lint -w web",
     "preview:web": "npm run preview -w web",
     "test:api": "node scripts/run-gradlew.cjs test",
+    "test:web": "npm run test -w web",
+    "test:load:k6": "k6 run scripts/load/k6-api-smoke.js",
     "build:api": "node scripts/run-gradlew.cjs bootJar",
     "boot:api": "node scripts/run-gradlew.cjs bootRun"
   }

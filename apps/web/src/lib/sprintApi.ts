@@ -35,9 +35,18 @@ export async function startSprint(id: number): Promise<SprintDetail> {
   return unwrapApi(data)
 }
 
-export async function completeSprint(id: number): Promise<SprintDetail> {
+export type SprintCompleteBody = {
+  disposition?: 'BACKLOG' | 'NEXT_SPRINT'
+  nextSprintId?: number
+}
+
+export async function completeSprint(
+  id: number,
+  body?: SprintCompleteBody,
+): Promise<SprintDetail> {
   const { data } = await api.post<ApiResponse<SprintDetail>>(
     `/api/v1/sprints/${id}/complete`,
+    body ?? {},
   )
   return unwrapApi(data)
 }

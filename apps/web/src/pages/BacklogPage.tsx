@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { BacklogBoard } from '../components/backlog/BacklogBoard'
 import { useProjectByKey } from '../hooks/useProjects'
+import { errorMessage } from '../lib/axiosErrors'
 import { fetchBacklog } from '../lib/issueApi'
 import { fetchSprintsByProject } from '../lib/sprintApi'
 import type { IssueMin, SprintMin } from '../types/domain'
@@ -31,7 +32,7 @@ export function BacklogPage() {
       setIssues(b)
       setSprints(sp)
     } catch (e) {
-      setLoadError(e instanceof Error ? e.message : '불러오기 실패')
+      setLoadError(errorMessage(e) || '불러오기 실패')
       setIssues([])
       setSprints([])
     } finally {

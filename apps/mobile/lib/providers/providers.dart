@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart' show StateProvider;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/api_client.dart';
+import '../core/offline_cache_interceptor.dart';
 import '../models/auth_token.dart';
 import '../models/issue.dart';
 import '../models/project_min.dart';
@@ -12,6 +14,13 @@ import '../services/auth_repository.dart';
 import '../services/issue_repository.dart';
 import '../services/project_repository.dart';
 import '../services/sprint_repository.dart';
+
+SharedPreferences? _pchSharedPreferences;
+
+/// [main]에서 초기화한 뒤 API Dio에 오프라인 캐시 인터셉터를 붙인다.
+void bindPchSharedPreferences(SharedPreferences prefs) {
+  _pchSharedPreferences = prefs;
+}
 
 final bareDioProvider = Provider<Dio>((ref) => createBaseDio());
 
@@ -63,6 +72,10 @@ final apiDioProvider = Provider<Dio>((ref) {
       },
     ),
   );
+  final prefs = _pchSharedPreferences;
+  if (prefs != null) {
+    dio.interceptors.add(OfflineResponseCacheInterceptor(prefs));
+  }
   return dio;
 });
 

@@ -20,6 +20,14 @@ export function SprintsPage() {
   const [actionError, setActionError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState<number | null>(null)
+  const [completeModal, setCompleteModal] = useState<{
+    sprintId: number
+    name: string
+  } | null>(null)
+  const [completeDisposition, setCompleteDisposition] = useState<
+    'BACKLOG' | 'NEXT_SPRINT'
+  >('BACKLOG')
+  const [completeNextId, setCompleteNextId] = useState<string>('')
 
   const [name, setName] = useState('')
   const [startDate, setStartDate] = useState('')
@@ -34,7 +42,7 @@ export function SprintsPage() {
       const list = await fetchSprintsByProject(project.id)
       setSprints(list)
     } catch (e) {
-      setLoadError(e instanceof Error ? e.message : '목록을 불러오지 못했습니다')
+      setLoadError(errorMessage(e) || '목록을 불러오지 못했습니다')
       setSprints([])
     } finally {
       setLoading(false)
@@ -80,6 +88,7 @@ export function SprintsPage() {
       await reload()
     } catch (err) {
       setActionError(errorMessage(err))
+      throw err
     } finally {
       setBusyId(null)
     }
@@ -172,6 +181,117 @@ export function SprintsPage() {
         <p className="text-sm text-red-300">{actionError}</p>
       ) : null}
 
+      {completeModal ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="sprint-complete-title"
+        >
+          <div className="w-full max-w-md rounded-xl border border-slate-700 bg-slate-950 p-5 shadow-xl">
+            <h2
+              id="sprint-complete-title"
+              className="text-base font-semibold text-white"
+            >
+              스프린트 완료
+            </h2>
+            <p className="mt-2 text-sm text-slate-400">
+              「{completeModal.name}」을(를) 완료합니다. DONE이 아닌 이슈를 어떻게
+              처리할까요?
+            </p>
+            <div className="mt-4 space-y-3 text-sm">
+              <label className="flex cursor-pointer items-start gap-2 text-slate-200">
+                <input
+                  type="radio"
+                  name="disp"
+                  checked={completeDisposition === 'BACKLOG'}
+                  onChange={() => setCompleteDisposition('BACKLOG')}
+                  className="mt-0.5"
+                />
+                <span>
+                  제품 백로그로 되돌리기 (스프린트 해제, 상태 BACKLOG)
+                </span>
+              </label>
+              <label className="flex cursor-pointer items-start gap-2 text-slate-200">
+                <input
+                  type="radio"
+                  name="disp"
+                  checked={completeDisposition === 'NEXT_SPRINT'}
+                  onChange={() => setCompleteDisposition('NEXT_SPRINT')}
+                  className="mt-0.5"
+                />
+                <span>다음 PLANNING 스프린트로 이관 (워크플로 상태 유지)</span>
+              </label>
+              {completeDisposition === 'NEXT_SPRINT' ? (
+                <label className="block text-xs text-slate-400">
+                  이관할 스프린트
+                  <select
+                    value={completeNextId}
+                    onChange={(e) => setCompleteNextId(e.target.value)}
+                    className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-white"
+                  >
+                    <option value="">선택…</option>
+                    {sprints
+                      .filter(
+                        (x) =>
+                          x.id !== completeModal.sprintId &&
+                          x.status === 'PLANNING',
+                      )
+                      .map((x) => (
+                        <option key={x.id} value={String(x.id)}>
+                          {x.name} (#{x.id})
+                        </option>
+                      ))}
+                  </select>
+                </label>
+              ) : null}
+            </div>
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                className="rounded-lg border border-slate-600 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-900"
+                onClick={() => setCompleteModal(null)}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className="rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-500"
+                onClick={() => {
+                  const id = completeModal.sprintId
+                  void (async () => {
+                    try {
+                      if (completeDisposition === 'NEXT_SPRINT') {
+                        const nid = Number(completeNextId)
+                        if (!Number.isFinite(nid) || nid <= 0) {
+                          setActionError('이관할 PLANNING 스프린트를 선택하세요.')
+                          return
+                        }
+                        await run(id, () =>
+                          completeSprint(id, {
+                            disposition: 'NEXT_SPRINT',
+                            nextSprintId: nid,
+                          }),
+                        )
+                      } else {
+                        await run(id, () =>
+                          completeSprint(id, { disposition: 'BACKLOG' }),
+                        )
+                      }
+                      setCompleteModal(null)
+                    } catch {
+                      /* run에서 메시지 설정 */
+                    }
+                  })()
+                }}
+              >
+                완료 처리
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {loading ? (
         <p className="text-sm text-slate-500">불러오는 중…</p>
       ) : loadError ? (
@@ -203,7 +323,9 @@ export function SprintsPage() {
                         type="button"
                         disabled={busyId === s.id}
                         onClick={() =>
-                          void run(s.id, () => startSprint(s.id))
+                          void run(s.id, () => startSprint(s.id)).catch(
+                            () => undefined,
+                          )
                         }
                         className="mr-2 text-xs text-indigo-400 hover:text-indigo-300 disabled:opacity-40"
                       >
@@ -216,13 +338,9 @@ export function SprintsPage() {
                         busyId === s.id || s.status !== 'ACTIVE'
                       }
                       onClick={() => {
-                        if (
-                          confirm(
-                            '스프린트를 완료 처리할까요?',
-                          )
-                        ) {
-                          void run(s.id, () => completeSprint(s.id))
-                        }
+                        setCompleteDisposition('BACKLOG')
+                        setCompleteNextId('')
+                        setCompleteModal({ sprintId: s.id, name: s.name })
                       }}
                       className="mr-2 text-xs text-amber-400/90 hover:text-amber-300 disabled:opacity-40"
                     >
@@ -237,7 +355,9 @@ export function SprintsPage() {
                             '스프린트를 삭제할까요? (이슈가 있거나 ACTIVE이면 실패할 수 있습니다.)',
                           )
                         ) {
-                          void run(s.id, () => deleteSprint(s.id))
+                          void run(s.id, () => deleteSprint(s.id)).catch(
+                            () => undefined,
+                          )
                         }
                       }}
                       className="text-xs text-red-400/90 hover:text-red-300 disabled:opacity-40"

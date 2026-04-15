@@ -56,8 +56,10 @@ public class SprintApiController {
 
     @PostMapping("/{id}/complete")
     @PreAuthorize("@projectSecurity.canManageSprint(#id)")
-    public ResponseEntity<ApiResponse<SprintResponse.DetailDTO>> complete(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.ok(sprintService.complete(id)));
+    public ResponseEntity<ApiResponse<SprintResponse.DetailDTO>> complete(
+            @PathVariable Long id,
+            @RequestBody(required = false) SprintRequest.CompleteDTO body) {
+        return ResponseEntity.ok(ApiResponse.ok(sprintService.complete(id, body)));
     }
 
     @DeleteMapping("/{id}")

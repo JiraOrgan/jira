@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { errorMessage } from '../lib/axiosErrors'
 import { loginRequest } from '../lib/authApi'
 import { useAuthStore } from '../stores/authStore'
 
@@ -33,7 +34,7 @@ export function LoginPage() {
       setTokens(tokens.accessToken, tokens.refreshToken)
       navigate(from, { replace: true })
     } catch (err) {
-      setError(err instanceof Error ? err.message : '로그인에 실패했습니다')
+      setError(errorMessage(err) || '로그인에 실패했습니다')
     } finally {
       setLoading(false)
     }

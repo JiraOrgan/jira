@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { ScrumBoard } from '../components/scrum/ScrumBoard'
 import { useProjectByKey } from '../hooks/useProjects'
 import { fetchSprintBoard } from '../lib/boardApi'
+import { errorMessage } from '../lib/axiosErrors'
 import { fetchSprintsByProject } from '../lib/sprintApi'
 import type { BoardSwimlane, SprintBoardData, SprintMin } from '../types/domain'
 
@@ -40,7 +41,7 @@ export function ScrumBoardPage() {
       })
     } catch (e) {
       setListError(
-        e instanceof Error ? e.message : '스프린트 목록을 불러오지 못했습니다',
+        errorMessage(e) || '스프린트 목록을 불러오지 못했습니다',
       )
       setSprints([])
       setSprintId(null)
@@ -69,7 +70,7 @@ export function ScrumBoardPage() {
       } catch (e) {
         if (!cancelled) {
           setBoardError(
-            e instanceof Error ? e.message : '보드를 불러오지 못했습니다',
+            errorMessage(e) || '보드를 불러오지 못했습니다',
           )
           setBoard(null)
         }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { errorMessage } from '../lib/axiosErrors'
 import {
   addDashboardGadget,
   deleteDashboard,
@@ -165,7 +166,7 @@ export function DashboardDetailPage() {
     } catch (e) {
       setDetail(null)
       setLoadError(
-        e instanceof Error ? e.message : '대시보드를 불러오지 못했습니다',
+        errorMessage(e) || '대시보드를 불러오지 못했습니다',
       )
     } finally {
       setLoading(false)
@@ -213,7 +214,7 @@ export function DashboardDetailPage() {
       setSettingsMsg('저장했습니다.')
     } catch (err) {
       setSettingsErr(
-        err instanceof Error ? err.message : '저장하지 못했습니다',
+        errorMessage(err) || '저장하지 못했습니다',
       )
     } finally {
       setSettingsBusy(false)
@@ -245,7 +246,7 @@ export function DashboardDetailPage() {
       setDetail(updated)
     } catch (err) {
       setGadgetErr(
-        err instanceof Error ? err.message : '가젯을 추가하지 못했습니다',
+        errorMessage(err) || '가젯을 추가하지 못했습니다',
       )
     } finally {
       setGadgetBusy(false)
@@ -262,7 +263,7 @@ export function DashboardDetailPage() {
       await load()
     } catch (err) {
       setGadgetErr(
-        err instanceof Error ? err.message : '가젯을 제거하지 못했습니다',
+        errorMessage(err) || '가젯을 제거하지 못했습니다',
       )
     } finally {
       setGadgetBusy(false)
@@ -283,11 +284,7 @@ export function DashboardDetailPage() {
       await deleteDashboard(detail.id)
       navigate('/', { replace: true })
     } catch (err) {
-      alert(
-        err instanceof Error
-          ? err.message
-          : '대시보드를 삭제하지 못했습니다',
-      )
+      alert(errorMessage(err) || '대시보드를 삭제하지 못했습니다')
     } finally {
       setDeleteBusy(false)
     }

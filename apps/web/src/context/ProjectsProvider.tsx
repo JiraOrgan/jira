@@ -5,6 +5,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { errorMessage } from '../lib/axiosErrors'
 import { fetchProjects } from '../lib/projectApi'
 import type { ProjectMin } from '../types/domain'
 import { ProjectsContext } from './projectsContext'
@@ -21,7 +22,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
       const list = await fetchProjects()
       setProjects(list.filter((p) => !p.archived))
     } catch (e) {
-      setError(e instanceof Error ? e.message : '프로젝트를 불러오지 못했습니다')
+      setError(errorMessage(e) || '프로젝트를 불러오지 못했습니다')
       setProjects([])
     } finally {
       setLoading(false)

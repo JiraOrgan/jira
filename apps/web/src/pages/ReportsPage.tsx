@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useProjectByKey } from '../hooks/useProjects'
+import { errorMessage } from '../lib/axiosErrors'
 import { fetchBurndown, fetchCfd, fetchVelocity } from '../lib/reportApi'
 import { fetchSprintsByProject } from '../lib/sprintApi'
 import type {
@@ -295,7 +296,7 @@ export function ReportsPage() {
       setBurndown(b)
     } catch (e) {
       setBurndown(null)
-      setErr(e instanceof Error ? e.message : '번다운을 불러오지 못했습니다')
+      setErr(errorMessage(e) || '번다운을 불러오지 못했습니다')
     } finally {
       setLoading(false)
     }
@@ -310,7 +311,7 @@ export function ReportsPage() {
       setVelocity(v)
     } catch (e) {
       setVelocity(null)
-      setErr(e instanceof Error ? e.message : '속도 차트를 불러오지 못했습니다')
+      setErr(errorMessage(e) || '속도 차트를 불러오지 못했습니다')
     } finally {
       setLoading(false)
     }
@@ -328,7 +329,7 @@ export function ReportsPage() {
       setCfd(c)
     } catch (e) {
       setCfd(null)
-      setErr(e instanceof Error ? e.message : 'CFD를 불러오지 못했습니다')
+      setErr(errorMessage(e) || 'CFD를 불러오지 못했습니다')
     } finally {
       setLoading(false)
     }
