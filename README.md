@@ -5,8 +5,9 @@
 ![Java](https://img.shields.io/badge/Java-21-007396?style=flat-square&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.3-6DB33F?style=flat-square&logo=springboot&logoColor=white)
 ![Spring Security](https://img.shields.io/badge/Spring_Security-JWT-6DB33F?style=flat-square&logo=springsecurity&logoColor=white)
-![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)
-![Flutter](https://img.shields.io/badge/Flutter-3.41-02569B?style=flat-square&logo=flutter&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=flat-square&logo=vite&logoColor=white)
+![Flutter](https://img.shields.io/badge/Flutter_SDK-3.10+-02569B?style=flat-square&logo=flutter&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat-square&logo=mysql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-7.x-DC382D?style=flat-square&logo=redis&logoColor=white)
 ![Gradle](https://img.shields.io/badge/Gradle-9.4-02303A?style=flat-square&logo=gradle&logoColor=white)
@@ -21,6 +22,8 @@
 - [시스템 아키텍처](#️-시스템-아키텍처)
 - [시작하기](#-시작하기)
 - [환경변수 설정](#-환경변수-설정)
+- [CORS (브라우저 통신)](#-cors-브라우저-통신)
+- [테스트 및 품질](#-테스트-및-품질)
 - [프로젝트 구조](#-프로젝트-구조)
 - [API 명세](#-api-명세)
 - [ERD](#️-erd)
@@ -46,11 +49,13 @@
 - **이슈 관리**: Epic/Story/Task/Bug/Sub-task 5가지 타입 CRUD, 이슈 간 링크, 레이블/컴포넌트 분류
 - **워크플로우**: 6단계 표준 워크플로우 (Backlog → Selected → In Progress → Code Review → QA → Done), 조건부 전환 규칙
 - **스크럼/칸반 보드**: 드래그앤드롭 상태 전환, WIP 제한, 스윔레인, 스프린트 번다운 차트
-- **스프린트 관리**: 생성/시작/완료 라이프사이클, 백로그 우선순위 관리, 스토리 포인트 산정
+- **스프린트 관리**: 생성/시작/완료 라이프사이클, 백로그 우선순위 관리, 스토리 포인트 산정; 완료 시 **미완료(DONE 아님) 이슈**는 제품 백로그로 되돌리거나 **동일 프로젝트의 PLANNING 스프린트**로 이관(API·웹 모달)
 - **대시보드**: 역할별 가젯 구성 (번다운/속도/CFD 차트), 커스터마이징 가능
 - **JQL 검색**: PCH Query Language 검색 엔진, 자동완성, 필터 저장
 - **릴리즈 관리**: Fix Version, 릴리즈 노트 자동 생성, Semantic Versioning
 - **RBAC 권한**: Admin/Developer/QA/Reporter/Viewer 5단계 역할 기반 접근 제어
+- **웹 UX**: API 오류 시 Axios 기본 문구 대신 서버 `ApiResponse.message`(및 `error.message`)를 우선 표시
+- **GitHub 연동**(선택): OAuth·웹훅·이슈 VCS 링크 (프로젝트 설정 / 이슈 상세)
 - **감사 로그**: 전체 필드 변경 추적, CSV/JSON 내보내기
 
 ---
@@ -74,20 +79,25 @@
 
 | 분류 | 기술 | 버전 |
 |------|------|------|
-| Framework | React | 18.x |
-| 상태관리 | Zustand | 최신 |
-| 스타일링 | Tailwind CSS | 최신 |
-| 빌드 | Vite | 최신 |
-| 차트 | Recharts | 최신 |
+| Framework | React | 19.x |
+| 라우팅 | React Router | 7.x |
+| 상태관리 | Zustand | 5.x |
+| 스타일링 | Tailwind CSS | 4.x |
+| 빌드 | Vite | 6.x (모노레포 `overrides`로 버전 정렬) |
+| HTTP | Axios | 1.x |
+| 테스트 | Vitest, React Testing Library, jsdom | 최신 |
+| 리포트 UI | SVG 기반 차트 (번다운·속도·CFD) | — |
 
 ### Frontend (Mobile)
 
 | 분류 | 기술 | 버전 |
 |------|------|------|
-| Framework | Flutter | 3.41.x |
-| 언어 | Dart | 3.11.x |
-| 상태관리 | Riverpod | 최신 |
-| HTTP | Dio | 최신 |
+| Framework | Flutter | `pubspec` SDK ≥ 3.10 |
+| 언어 | Dart | 3.10+ |
+| 상태관리 | Riverpod | 3.3.x |
+| HTTP | Dio | 5.x |
+| 로컬 저장 | shared_preferences | 2.x |
+| 테스트 | flutter_test, 위젯 테스트 | — |
 
 ### Infra
 
@@ -105,6 +115,7 @@
 ```
 [Browser / React SPA]     [Flutter Mobile App]
           │                       │
+          │    브라우저→API: CORS (허용 Origin은 APP_CORS_ORIGINS·application.yml)
           └───────┬───────────────┘
                   ▼
         [Route 53 → CloudFront / WAF]
@@ -136,13 +147,14 @@
 - MySQL 8.0
 - Redis 7.x
 - Gradle Wrapper (`./gradlew` / Windows `gradlew.bat`) — 백엔드는 **Maven(`pom.xml`) 미사용**, 별도 Maven 설치 불필요
-- Node.js 20 이상 (웹 앱)
+- Node.js 20 이상 권장 (웹 앱; LTS·CI와 맞춤)
+- [k6](https://k6.io/) (선택, 부하 스모크 `npm run test:load:k6`)
 - Flutter SDK 3.x (모바일 앱, 선택)
 
 ### 모노레포 레이아웃
 
 - **백엔드**: 저장소 루트 **Gradle 전용** Spring Boot (`build.gradle`, Wrapper만 사용)
-- **웹**: `apps/web` — React 19, Vite 8, Zustand, Tailwind CSS 4 (`npm` workspaces)
+- **웹**: `apps/web` — React 19, Vite 6, Zustand, Tailwind CSS 4, Vitest (`npm` workspaces)
 - **모바일**: `apps/mobile` — Flutter, `flutter_riverpod`, Dio
 
 ### 백엔드 실행
@@ -193,6 +205,29 @@ npm run boot:api    # bootRun (프로필 등 추가 인자는 아래 참고)
 Spring 프로필을 넘기려면 예:  
 `node scripts/run-gradlew.cjs bootRun --args='--spring.profiles.active=dev'`
 
+### 웹 테스트·프로덕션 빌드
+
+```bash
+npm run test:web     # Vitest (단위·컴포넌트)
+npm run build:web    # tsc + vite build
+npm run lint:web     # ESLint
+```
+
+### 부하 테스트 (k6)
+
+[k6](https://k6.io/) 설치 후, API 서버가 떠 있는 상태에서 저장소 루트에서:
+
+```bash
+# 기본 BASE_URL=http://localhost:8080, 매 VU마다 회원가입·로그인 후 프로젝트 생성·JQL 검색
+npm run test:load:k6
+
+# 또는
+BASE_URL=http://localhost:8080 k6 run scripts/load/k6-api-smoke.js
+
+# 시드 계정으로만 부하를 줄 때 (선택)
+EMAIL=admin@local.test PASSWORD=... BASE_URL=http://localhost:8080 k6 run scripts/load/k6-api-smoke.js
+```
+
 ### 모바일 앱 (Flutter)
 
 - **Dart SDK**: `apps/mobile/pubspec.yaml` 기준 **3.10+** (Riverpod 3.3·`riverpod_lint` 3.1과 맞춤).
@@ -219,6 +254,13 @@ FVM을 쓰는 경우에만 위 세 줄 앞에 `fvm`을 붙이면 됩니다 (`fvm
 
 에뮬레이터에서 호스트 백엔드 접근 시 기본 `API_BASE_URL`은 Android 에뮬 `10.0.2.2:8080` 입니다. 필요 시 `flutter run --dart-define=API_BASE_URL=http://...` 로 바꿉니다.
 
+**오프라인(스테일) 응답**: 모바일 Dio에 GET `/api/v1/**` 성공 본문을 `SharedPreferences`에 캐시하는 인터셉터가 있으며, 연결·타임아웃 오류 시 마지막 성공 응답을 반환할 수 있습니다(완전 오프라인 DB는 아님).
+
+```bash
+cd apps/mobile
+flutter test
+```
+
 ---
 
 ## 🔐 환경변수 설정
@@ -237,7 +279,31 @@ JWT_SECRET=dev-secret-key-must-be-at-least-32-characters-long
 
 # Spring
 SPRING_PROFILES_ACTIVE=dev
+
+# CORS: 브라우저에서 API와 다른 Origin일 때 (쉼표 구분, credentials 사용 시 * 불가)
+# APP_CORS_ORIGINS=https://app.example.com,https://admin.example.com
 ```
+
+---
+
+## 🌐 CORS (브라우저 통신)
+
+- Spring Security에 **`/api/**` CORS**가 등록되어 있으며, 허용 Origin은 설정으로만 지정합니다(와일드카드 Origin 미사용).
+- 기본값은 `application.yml`의 `app.security.cors.allowed-origins`이며, **`APP_CORS_ORIGINS` 환경 변수**로 덮어쓸 수 있습니다.
+- 로컬 웹(`http://localhost:5173`, `http://127.0.0.1:5173`)이 기본 포함됩니다. Vite 개발 서버는 `apps/web/vite.config.ts`에서 `/api`를 백엔드로 **프록시**하므로, 같은 Origin으로만 호출할 때는 CORS가 개입하지 않을 수 있습니다.
+
+---
+
+## ✅ 테스트 및 품질
+
+| 구분 | 명령 | 설명 |
+|------|------|------|
+| 백엔드 단위·통합 | `./gradlew test` 또는 `npm run test:api` | JUnit, `@SpringBootTest`, MockMvc 등 |
+| 웹 | `npm run test:web` | Vitest + Testing Library (`apps/web/src/**/*.test.ts(x)`) |
+| 모바일 | `cd apps/mobile && flutter test` | 위젯 테스트 등 |
+| 부하(k6) | `npm run test:load:k6` | `scripts/load/k6-api-smoke.js` 스모크 시나리오 |
+
+검증 시나리오·알려진 이슈 요약은 [docs/FINAL-TEST-SCENARIOS.md](docs/FINAL-TEST-SCENARIOS.md), [docs/TEST-ISSUES-REPORT.md](docs/TEST-ISSUES-REPORT.md)를 참고합니다.
 
 ---
 
@@ -246,15 +312,19 @@ SPRING_PROFILES_ACTIVE=dev
 ```
 phs/
 ├── apps/
-│   ├── web/                       # React SPA (Vite, Zustand, Tailwind)
+│   ├── web/                       # React SPA (Vite 6, Vitest, Zustand, Tailwind 4)
 │   └── mobile/                    # Flutter 앱 (Riverpod, Dio)
-├── package.json                   # npm workspaces (apps/web)
+├── package.json                   # npm workspaces + test:api / test:web / test:load:k6
+├── scripts/
+│   ├── run-gradlew.cjs            # npm에서 Gradle Wrapper 호출
+│   └── load/
+│       └── k6-api-smoke.js      # k6 부하 스모크
 ├── src/main/java/com/pch/mng/
 │   ├── global/                    # 공통 인프라
-│   │   ├── config/                #   Security, Redis, Swagger, Gson
+│   │   ├── config/                #   Security, CORS, Redis, Swagger, Gson
 │   │   ├── exception/             #   BusinessException, ErrorCode, Handler
 │   │   ├── response/              #   ApiResponse<T>
-│   │   ├── enums/                 #   9개 공유 Enum
+│   │   ├── enums/                 #   공유 Enum (스프린트 미완료 이슈 처리 방식 등)
 │   │   ├── filter/                #   MDC Logging Filter
 │   │   └── aop/                   #   Logging, ExecutionTime
 │   ├── user/                      # 사용자 도메인
@@ -269,12 +339,17 @@ phs/
 │   ├── workflow/                  # 워크플로우 전환 이력
 │   ├── audit/                     # 감사 로그
 │   ├── dashboard/                 # 대시보드 + 가젯
-│   └── label/                     # 레이블
+│   ├── label/                     # 레이블
+│   ├── integration/github/        # GitHub OAuth·웹훅 (FR-033)
+│   ├── automation/                # 자동화 규칙 엔진 (FR-015)
+│   └── notification/              # 멘션 등 알림 (FR-024)
 ├── src/main/resources/
 │   ├── application.yml            # 공통 설정
 │   ├── application-dev.yml        # 개발 환경
 │   └── application-prod.yml       # 운영 환경
 ├── docs/                          # 프로젝트 문서
+│   ├── FINAL-TEST-SCENARIOS.md    #   최종 테스트 시나리오
+│   ├── TEST-ISSUES-REPORT.md      #   검증 결과·이슈 보고
 │   ├── PRD.md                     #   제품 요구사항
 │   ├── PHASE.md                   #   Phase 로드맵
 │   ├── TASKS.md                   #   Task 목록 (89개)
@@ -285,7 +360,7 @@ phs/
 │   ├── WIREFRAME-SPEC.md          #   화면 와이어 사양
 │   ├── SPRINT-BACKLOG-DRAFT.md    #   스프린트 백로그 초안
 │   ├── DOR-DOD.md                 #   DoR/DoD
-│   └── spikes/                    #   기술 스파이크 (JQL, 워크플로)
+│   ├── spikes/                    #   기술 스파이크 (JQL, 워크플로)
 │   └── design/                    #   Phase 2 설계 (ERD, DDL, API, 인프라, CI/CD)
 ├── rules/                         # 개발 규칙
 │   ├── human/                     #   사람용 상세 규칙 (7개)
@@ -381,7 +456,7 @@ phs/
 | `GET` | `/api/v1/sprints/{id}` | 스프린트 상세 | ✅ |
 | `POST` | `/api/v1/sprints` | 스프린트 생성 (`PLANNING`) | ✅ |
 | `POST` | `/api/v1/sprints/{id}/start` | 스프린트 시작 (`PLANNING`→`ACTIVE`, 프로젝트당 `ACTIVE` 1개) | ✅ |
-| `POST` | `/api/v1/sprints/{id}/complete` | 스프린트 완료 (`ACTIVE`→`COMPLETED`) | ✅ |
+| `POST` | `/api/v1/sprints/{id}/complete` | 스프린트 완료 (`ACTIVE`→`COMPLETED`). 선택 JSON: `disposition`=`BACKLOG`\|`NEXT_SPRINT`, `NEXT_SPRINT` 시 `nextSprintId`(동일 프로젝트·`PLANNING`) | ✅ |
 | `DELETE` | `/api/v1/sprints/{id}` | 스프린트 삭제 (`ACTIVE`·이슈 배정 시 409) | ✅ |
 | `GET` | `/api/v1/sprints/{id}/board` | 스프린트 보드 (상태별 컬럼, `swimlane=NONE`\|`ASSIGNEE`) | ✅ |
 
@@ -436,11 +511,14 @@ DASHBOARD ──N:1── USER_ACCOUNT
 
 ```
 master           ← 운영 배포 (직접 push 금지)
-  └── develop    ← 개발 통합
+  └── develop    ← 개발 통합 (기본 PR 타깃)
+       ├── feature/{주제}       ← 기능·품질 묶음 (예: feature/test-issues-remediation)
        ├── feat/T-{id}-{설명}   ← 기능 개발
        ├── fix/T-{id}-{설명}    ← 버그 수정
        └── docs/{설명}          ← 문서 작업
 ```
+
+테스트 보고서·CORS·스프린트 완료 시 미완료 이슈 처리·Vitest·k6·모바일 오프라인 캐시 등은 **`feature/test-issues-remediation`** 등 기능 브랜치에서 작업한 뒤 `develop`으로 PR·머지합니다.
 
 ### 커밋 컨벤션
 
@@ -486,6 +564,8 @@ Cursor 등에서 Flutter·React 환경 작업 시 참고용 스킬이 `.cursor/s
 | [SPRINT-BACKLOG-DRAFT.md](docs/SPRINT-BACKLOG-DRAFT.md) | FR ↔ 개발 Phase 백로그 초안 |
 | [DOR-DOD.md](docs/DOR-DOD.md) | Definition of Ready / Done |
 | [E2E-LIFECYCLE-SCENARIOS.md](docs/E2E-LIFECYCLE-SCENARIOS.md) | 프로젝트 생성~관리 종료 E2E·수동 테스트 시나리오 |
+| [FINAL-TEST-SCENARIOS.md](docs/FINAL-TEST-SCENARIOS.md) | 최종 테스트 시나리오(Part A~E) |
+| [TEST-ISSUES-REPORT.md](docs/TEST-ISSUES-REPORT.md) | 검증 결과·이슈 목록 및 조치 요약 |
 | [docs/spikes/](docs/spikes/) | JQL·워크플로 기술 스파이크 |
 | [docs/design/](docs/design/) | Phase 2: ERD, DDL, API, 시퀀스, 인프라, CI/CD, UI 시스템 |
 | [rules/human/](rules/human/) | 사람용 Spring 개발 규칙 (7개) |
