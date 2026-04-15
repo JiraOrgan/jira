@@ -1,8 +1,8 @@
 # Project Control Hub - Task 목록
 
-> **버전**: v1.49
+> **버전**: v1.71
 > **작성일**: 2026-03-22
-> **최종수정일**: 2026-04-14 (JQL 검색 archived 안내 문구)
+> **최종수정일**: 2026-04-15 (T-606 자동화 MVP)
 > **연결 문서**: [PHASE.md](PHASE.md) | [WORKFLOW.md](WORKFLOW.md) | [PRD.md](PRD.md)
 > **스프린트·FR 정본**: `C:\workspace\phs-prj\documents\00-스케줄_v3.1.md`
 
@@ -189,7 +189,7 @@
 |----|------|------|------|---------|------|
 | T-405 | 댓글 CRUD + @멘션 파싱 | Backend | DONE | FR-023; `CommentMention`·`CommentMentionResolver`(프로젝트 멤버 매칭)·`DetailDTO.mentionedUsers`, 웹 멘션 요약 표시 | T-400 |
 | T-605 | 알림 서비스 (이메일/Slack) | Backend | DONE | FR-024; `NotificationService`·Slack Webhook·`JavaMailSender`(선택)·댓글 멘션 `AFTER_COMMIT` 비동기 | T-405 |
-| T-606 | 자동화 엔진 (Trigger→Condition→Action) | Backend | TODO | FR-015 | T-402 |
+| T-606 | 자동화 엔진 (Trigger→Condition→Action) | Backend | DONE | FR-015 MVP: `AutomationEngine`·규칙 CRUD·실행 로그·이슈 생성/상태전환 훅·`automation_*_tb`·`AUTOMATION_INVALID_SPEC` | T-402 |
 | T-617 | 아카이브·자동 아카이브 규칙 API | Backend | DONE | FR-026, FR-027; `Issue.archived`·집계/JQL 제외·`POST .../auto-archive-done`·`Project.autoArchiveDoneAfterDays` | T-400 |
 | T-625 | GitHub/GitLab 커밋·PR 연동 | Backend | TODO | FR-033 | T-400 |
 | T-607 | 단위 테스트 (JQL 통합, Notification, Automation) | Backend | TODO | - | T-606 |
@@ -321,3 +321,4 @@
 | v1.65 | 2026-04-14 | `E2E-LIFECYCLE-SCENARIOS.md`: 프로젝트 생성~관리 종료 E2E·수동 시나리오 — T-700 산출 |
 | v1.66 | 2026-04-14 | E2E 문서 v1.2 재검증·웹: 홈 프로젝트 생성·이슈 라우트 사이드바·스프린트 시작 버튼·본문 배경·대시보드명 길이 |
 | v1.67 | 2026-04-14 | CI: `backend-test` 잡에 `gradlew bootJar` 추가·`CICD.md` 반영 — T-801 진행 |
+| v1.70 | 2026-04-15 | T-606: `AutomationEngine`·규칙/실행로그 API·이슈 생성·상태전환 훅·DDL·`AutomationIntegrationTest`·`AUTOMATION_INVALID_SPEC` |

@@ -280,3 +280,33 @@ CREATE TABLE saved_jql_filter_tb (
 -- T-617: 이슈 아카이브·프로젝트 자동 아카이브 일수 (기존 DB 마이그레이션용)
 -- ALTER TABLE project_tb ADD COLUMN auto_archive_done_after_days INT NULL AFTER issue_sequence;
 -- ALTER TABLE issue_tb ADD COLUMN archived TINYINT(1) NOT NULL DEFAULT 0 AFTER epic_end_date;
+
+-- FR-015 자동화 규칙·실행 로그 (T-606 MVP)
+CREATE TABLE automation_rule_tb (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    project_id BIGINT NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    enabled TINYINT(1) NOT NULL DEFAULT 1,
+    trigger_type VARCHAR(40) NOT NULL,
+    condition_json TEXT NULL,
+    action_type VARCHAR(40) NOT NULL,
+    action_json TEXT NULL,
+    sort_order INT NOT NULL DEFAULT 0,
+    created_at DATETIME(6) NULL,
+    updated_at DATETIME(6) NULL,
+    CONSTRAINT fk_automation_rule_project FOREIGN KEY (project_id) REFERENCES project_tb (id),
+    KEY idx_automation_project_enabled (project_id, enabled, sort_order)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE automation_execution_log_tb (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    rule_id BIGINT NOT NULL,
+    issue_id BIGINT NOT NULL,
+    success TINYINT(1) NOT NULL,
+    message VARCHAR(2000) NULL,
+    executed_at DATETIME(6) NULL,
+    CONSTRAINT fk_automation_log_rule FOREIGN KEY (rule_id) REFERENCES automation_rule_tb (id),
+    CONSTRAINT fk_automation_log_issue FOREIGN KEY (issue_id) REFERENCES issue_tb (id),
+    KEY idx_automation_log_project_rule (rule_id),
+    KEY idx_automation_log_issue (issue_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

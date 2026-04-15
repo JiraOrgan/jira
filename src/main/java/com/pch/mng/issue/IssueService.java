@@ -26,6 +26,7 @@ import com.pch.mng.workflow.WorkflowTransition;
 import com.pch.mng.workflow.WorkflowTransitionRepository;
 import com.pch.mng.workflow.WorkflowTransitionResponse;
 import com.pch.mng.audit.IssueAuditService;
+import com.pch.mng.automation.AutomationEngine;
 import com.pch.mng.board.SprintBoardRedisCache;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -61,6 +62,7 @@ public class IssueService {
     private final IssueAuditService issueAuditService;
     private final IssueVisibilityEvaluator issueVisibilityEvaluator;
     private final ProjectMemberRepository projectMemberRepository;
+    private final AutomationEngine automationEngine;
 
     public Page<IssueResponse.MinDTO> findByProject(Long projectId, Pageable pageable) {
         var ctx = issueVisibilityEvaluator.requiredContextForProject(projectId);
@@ -183,6 +185,7 @@ public class IssueService {
         Issue issue = builder.build();
         issueRepository.save(issue);
         issueAuditService.logIssueCreated(issue, reporter);
+        automationEngine.onIssueCreated(issue, reporter);
         evictBoardForSprintOf(issue);
         return toDetail(issue);
     }
@@ -434,6 +437,8 @@ public class IssueService {
         log.setChangedBy(actor);
         log.setConditionNote(reqDTO.getConditionNote());
         workflowTransitionRepository.save(log);
+
+        automationEngine.onIssueStatusChanged(issue, from, to, actor);
 
         evictBoardForSprintOf(issue);
         return toDetail(issue);
