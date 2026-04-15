@@ -69,6 +69,17 @@ public enum ErrorCode {
     VCS_LINK_INVALID_URL(400, "http(s) URL 형식이 올바르지 않습니다"),
     VCS_LINK_DUPLICATE(409, "동일 이슈에 같은 URL의 VCS 링크가 이미 있습니다"),
 
+    // GitHub OAuth / 웹훅 (FR-033 확장)
+    GITHUB_NOT_CONFIGURED(501, "GitHub OAuth 클라이언트가 서버에 설정되지 않았습니다"),
+    GITHUB_CRYPTO_NOT_CONFIGURED(501, "연동 토큰 암호화 키(app.integration.crypto.secret)가 설정되지 않았습니다"),
+    GITHUB_OAUTH_INVALID_STATE(400, "GitHub OAuth state가 유효하지 않거나 만료되었습니다"),
+    GITHUB_OAUTH_EXCHANGE_FAILED(502, "GitHub 토큰 교환에 실패했습니다"),
+    GITHUB_REPO_INVALID(400, "GitHub 저장소 이름은 owner/repo 형식이어야 합니다"),
+    GITHUB_WEBHOOK_SIGNATURE_INVALID(401, "GitHub 웹훅 서명이 올바르지 않습니다"),
+    GITHUB_WEBHOOK_UNKNOWN_REPO(404, "등록된 GitHub 저장소와 일치하지 않습니다"),
+    GITHUB_API_ERROR(502, "GitHub API 호출에 실패했습니다"),
+    GITHUB_OAUTH_INCOMPLETE(400, "GitHub OAuth 연결을 먼저 완료한 뒤 저장소를 등록하세요"),
+
     // Attachment
     FILE_REQUIRED(400, "업로드할 파일이 필요합니다"),
     FILE_TOO_LARGE(413, "파일 크기 제한(20MB)을 초과했습니다"),

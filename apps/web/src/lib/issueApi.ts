@@ -5,9 +5,12 @@ import type {
   IssueMin,
   IssueSaveBody,
   IssueUpdateBody,
+  IssueVcsLinkItem,
   RoadmapEpicItem,
   SpringPage,
   TransitionBody,
+  VcsLinkKind,
+  VcsProvider,
   WorkflowTransitionItem,
 } from '../types/domain'
 import { unwrapApi } from '../types/domain'
@@ -158,4 +161,34 @@ export async function uploadAttachment(
     },
   )
   return unwrapApi(data)
+}
+
+export type IssueVcsLinkSaveBody = {
+  provider: VcsProvider
+  linkKind: VcsLinkKind
+  url: string
+  title?: string | null
+}
+
+export async function addIssueVcsLink(
+  issueKey: string,
+  body: IssueVcsLinkSaveBody,
+): Promise<IssueVcsLinkItem> {
+  const { data } = await api.post<ApiResponse<IssueVcsLinkItem>>(
+    `/api/v1/issues/${encodeURIComponent(issueKey)}/vcs-links`,
+    body,
+  )
+  return unwrapApi(data)
+}
+
+export async function deleteIssueVcsLink(
+  issueKey: string,
+  linkId: number,
+): Promise<void> {
+  const { data } = await api.delete<ApiResponse<unknown>>(
+    `/api/v1/issues/${encodeURIComponent(issueKey)}/vcs-links/${linkId}`,
+  )
+  if (!data.success) {
+    throw new Error(data.message || 'VCS 링크 삭제에 실패했습니다')
+  }
 }

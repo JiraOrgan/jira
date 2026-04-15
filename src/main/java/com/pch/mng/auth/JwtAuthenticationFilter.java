@@ -73,6 +73,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if ("/actuator/health".equals(uri)) {
             return true;
         }
+        if (uri.startsWith("/api/v1/integrations/github/callback")) {
+            return true;
+        }
+        if ("/api/v1/integrations/github/webhook".equals(uri)) {
+            return true;
+        }
         return "POST".equalsIgnoreCase(method) && "/api/v1/users".equals(uri);
     }
 }

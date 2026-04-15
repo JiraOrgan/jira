@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useProjects } from '../hooks/useProjects'
+import { errorMessage } from '../lib/axiosErrors'
+import {
+  connectGithubRepo,
+  disconnectGithub,
+  fetchGithubIntegrationStatus,
+  fetchGithubOAuthAuthorizeUrl,
+} from '../lib/githubIntegrationApi'
 import {
   addProjectMember,
   deleteProject,
@@ -12,6 +19,7 @@ import {
 } from '../lib/projectApi'
 import { fetchUsers } from '../lib/userApi'
 import type {
+  GithubIntegrationStatus,
   ProjectDetail,
   ProjectMember,
   ProjectRole,
@@ -34,6 +42,7 @@ function roleLabel(role: ProjectRole): string {
 export function ProjectSettingsPage() {
   const { projectKey: rawProjectKey } = useParams<{ projectKey: string }>()
   const projectKey = rawProjectKey ? decodeURIComponent(rawProjectKey) : ''
+  const [searchParams, setSearchParams] = useSearchParams()
   const { reload } = useProjects()
   const navigate = useNavigate()
 
@@ -62,6 +71,15 @@ export function ProjectSettingsPage() {
   const [archiveRunBusy, setArchiveRunBusy] = useState(false)
   const [archiveRunMsg, setArchiveRunMsg] = useState<string | null>(null)
 
+  const [githubStatus, setGithubStatus] = useState<GithubIntegrationStatus | null>(
+    null,
+  )
+  const [githubStatusError, setGithubStatusError] = useState<string | null>(null)
+  const [githubRepoInput, setGithubRepoInput] = useState('')
+  const [githubBusy, setGithubBusy] = useState(false)
+  const [githubMsg, setGithubMsg] = useState<string | null>(null)
+  const [githubErr, setGithubErr] = useState<string | null>(null)
+
   const load = useCallback(async () => {
     if (!projectKey) return
     setLoading(true)
@@ -83,6 +101,16 @@ export function ProjectSettingsPage() {
         d.autoArchiveDoneAfterDays != null ? String(d.autoArchiveDoneAfterDays) : '',
       )
       setArchiveRunMsg(null)
+      setGithubMsg(null)
+      setGithubErr(null)
+      setGithubStatusError(null)
+      try {
+        const gh = await fetchGithubIntegrationStatus(d.id)
+        setGithubStatus(gh)
+      } catch (e) {
+        setGithubStatus(null)
+        setGithubStatusError(errorMessage(e))
+      }
     } catch (e) {
       setDetail(null)
       setMembers([])
@@ -98,6 +126,16 @@ export function ProjectSettingsPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    const oauth = searchParams.get('github_oauth')
+    if (oauth === 'ok') {
+      setGithubErr(null)
+      setGithubMsg('GitHub OAuth 연결이 완료되었습니다. 저장소 이름을 등록하면 웹훅이 생성됩니다.')
+      searchParams.delete('github_oauth')
+      setSearchParams(searchParams, { replace: true })
+    }
+  }, [searchParams, setSearchParams])
 
   const memberUserIds = useMemo(
     () => new Set(members.map((m) => m.userId)),
@@ -224,6 +262,66 @@ export function ProjectSettingsPage() {
       )
     } finally {
       setMemberBusy(false)
+    }
+  }
+
+  async function handleGithubOAuthStart() {
+    if (!detail) return
+    setGithubMsg(null)
+    setGithubErr(null)
+    setGithubBusy(true)
+    try {
+      const url = await fetchGithubOAuthAuthorizeUrl(detail.id)
+      window.location.assign(url)
+    } catch (e) {
+      setGithubErr(errorMessage(e))
+    } finally {
+      setGithubBusy(false)
+    }
+  }
+
+  async function handleGithubConnectRepo(e: React.FormEvent) {
+    e.preventDefault()
+    if (!detail) return
+    const name = githubRepoInput.trim()
+    if (!name) {
+      setGithubErr('owner/repo 형식으로 입력하세요.')
+      return
+    }
+    setGithubMsg(null)
+    setGithubErr(null)
+    setGithubBusy(true)
+    try {
+      await connectGithubRepo(detail.id, name)
+      const st = await fetchGithubIntegrationStatus(detail.id)
+      setGithubStatus(st)
+      setGithubRepoInput('')
+      setGithubMsg('GitHub 저장소와 웹훅을 등록했습니다.')
+    } catch (e) {
+      setGithubErr(errorMessage(e))
+    } finally {
+      setGithubBusy(false)
+    }
+  }
+
+  async function handleGithubDisconnect() {
+    if (!detail) return
+    if (!confirm('GitHub 연동과 웹훅을 제거할까요?')) return
+    setGithubMsg(null)
+    setGithubErr(null)
+    setGithubBusy(true)
+    try {
+      await disconnectGithub(detail.id)
+      setGithubStatus({
+        oauthComplete: false,
+        githubRepoFullName: null,
+        githubWebhookId: null,
+      })
+      setGithubMsg('연동을 해제했습니다.')
+    } catch (e) {
+      setGithubErr(errorMessage(e))
+    } finally {
+      setGithubBusy(false)
     }
   }
 
@@ -437,13 +535,88 @@ export function ProjectSettingsPage() {
         </form>
       </section>
 
-      <section className="space-y-3 rounded-xl border border-slate-800 bg-slate-900/40 p-6">
+      <section className="space-y-4 rounded-xl border border-slate-800 bg-slate-900/40 p-6">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-          외부 연동
+          외부 연동 (GitHub)
         </h2>
         <p className="text-sm text-slate-500">
-          GitHub/GitLab 커밋·PR 연동 설정은 백엔드 T-625와 함께 제공될 예정입니다.
+          프로젝트 관리자만 설정할 수 있습니다. OAuth로 토큰을 받은 뒤 저장소
+          (owner/repo)를 등록하면 해당 저장소에 웹훅이 생성되고, 커밋·PR 메시지에
+          이슈 키가 포함되면 이슈 상세에 VCS 링크가 자동으로 쌓입니다.
         </p>
+        {githubStatusError ? (
+          <p className="text-sm text-amber-300/90">
+            연동 상태를 불러오지 못했습니다 (관리자만 조회 가능할 수 있습니다).{' '}
+            <span className="text-slate-500">{githubStatusError}</span>
+          </p>
+        ) : null}
+        {githubStatus ? (
+          <div className="space-y-3 text-sm text-slate-300">
+            <p>
+              OAuth:{' '}
+              <span className="font-medium text-white">
+                {githubStatus.oauthComplete ? '연결됨' : '미연결'}
+              </span>
+            </p>
+            {githubStatus.githubRepoFullName ? (
+              <p>
+                저장소:{' '}
+                <span className="font-mono text-indigo-300">
+                  {githubStatus.githubRepoFullName}
+                </span>
+              </p>
+            ) : null}
+            {githubErr ? (
+              <p className="text-sm text-red-400">{githubErr}</p>
+            ) : null}
+            {githubMsg ? (
+              <p className="text-sm text-emerald-400/90">{githubMsg}</p>
+            ) : null}
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={githubBusy}
+                onClick={() => void handleGithubOAuthStart()}
+                className="rounded-lg border border-slate-600 px-3 py-1.5 text-sm text-slate-200 hover:bg-slate-800 disabled:opacity-50"
+              >
+                GitHub OAuth 시작
+              </button>
+              {githubStatus.oauthComplete && githubStatus.githubRepoFullName ? (
+                <button
+                  type="button"
+                  disabled={githubBusy}
+                  onClick={() => void handleGithubDisconnect()}
+                  className="rounded-lg border border-red-800/60 px-3 py-1.5 text-sm text-red-300 hover:bg-red-950/30 disabled:opacity-50"
+                >
+                  연동 해제
+                </button>
+              ) : null}
+            </div>
+            <form
+              onSubmit={handleGithubConnectRepo}
+              className="flex flex-col gap-2 border-t border-slate-800 pt-4 sm:flex-row sm:items-end"
+            >
+              <div className="min-w-[200px] flex-1">
+                <label className="block text-xs font-medium text-slate-400">
+                  GitHub 저장소 (owner/repo)
+                </label>
+                <input
+                  value={githubRepoInput}
+                  onChange={(ev) => setGithubRepoInput(ev.target.value)}
+                  placeholder="예: octocat/Hello-World"
+                  className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm text-white outline-none focus:border-indigo-500"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={githubBusy || !githubStatus.oauthComplete}
+                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+              >
+                웹훅 등록
+              </button>
+            </form>
+          </div>
+        ) : null}
       </section>
 
       <section className="space-y-4 rounded-xl border border-slate-800 bg-slate-900/40 p-6">

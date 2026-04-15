@@ -33,6 +33,17 @@ app:
       enabled: false
   notification:
     enabled: false
+  integration:
+    crypto:
+      secret: test-integration-crypto-secret-min-32-characters-long
+  github:
+    public-base-url: http://localhost:8080
+    oauth:
+      client-id: test-github-client-id
+      client-secret: test-github-client-secret
+      state-hmac-secret: test-state-hmac-secret-32chars-minimum__
+      redirect-uri: http://localhost:8080/api/v1/integrations/github/callback
+      frontend-redirect-base: http://localhost:5173
   storage:
     type: local
     local:
