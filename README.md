@@ -14,21 +14,15 @@
 
 ---
 
-## 📋 목차
+## 목차
 
 - [프로젝트 소개](#-프로젝트-소개)
 - [주요 기능](#-주요-기능)
 - [기술 스택](#️-기술-스택)
-- [시스템 아키텍처](#️-시스템-아키텍처)
 - [시작하기](#-시작하기)
 - [환경변수 설정](#-환경변수-설정)
-- [CORS (브라우저 통신)](#-cors-브라우저-통신)
-- [테스트 및 품질](#-테스트-및-품질)
 - [프로젝트 구조](#-프로젝트-구조)
-- [API 명세](#-api-명세)
-- [ERD](#️-erd)
-- [기여 가이드](#-기여-가이드)
-- [프로젝트 문서](#-프로젝트-문서)
+- [더 보기 (부가 문서)](#-더-보기-부가-문서)
 
 ---
 
@@ -40,7 +34,7 @@
 |------|------|
 | 개발 기간 | 2026-04-01 ~ 2026-07-31 (18주) |
 | 팀 구성 | PM, 백엔드, 프론트엔드, QA, 디자이너 |
-| 문서 | [PRD](docs/PRD.md) &#124; [Phase 로드맵](docs/PHASE.md) &#124; [Task 목록](docs/TASKS.md) |
+| 문서 | [PRD](docs/PRD.md) · [Phase 로드맵](docs/PHASE.md) · [Task 목록](docs/TASKS.md) · [문서 색인](docs/documents-index.md) |
 
 ---
 
@@ -56,7 +50,7 @@
 - **RBAC 권한**: Admin/Developer/QA/Reporter/Viewer 5단계 역할 기반 접근 제어
 - **웹 UX**: API 오류 시 Axios 기본 문구 대신 서버 `ApiResponse.message`(및 `error.message`)를 우선 표시
 - **GitHub 연동**(선택): OAuth·웹훅·이슈 VCS 링크 (프로젝트 설정 / 이슈 상세)
-- **감사 로그**: 전체 필드 변경 추적, CSV/JSON 내보내기
+- **감사 로그**: 전체 필드 변경 추적, CSV 또는 JSON으로 보내기
 
 ---
 
@@ -107,35 +101,6 @@
 | CI/CD | GitHub Actions |
 | CDN | CloudFront |
 | 모니터링 | CloudWatch + Grafana |
-
----
-
-## 🏗️ 시스템 아키텍처
-
-```
-[Browser / React SPA]     [Flutter Mobile App]
-          │                       │
-          │    브라우저→API: CORS (허용 Origin은 APP_CORS_ORIGINS·application.yml)
-          └───────┬───────────────┘
-                  ▼
-        [Route 53 → CloudFront / WAF]
-                  │
-                  ▼
-       [ALB (HTTPS, Health Check)]
-                  │
-      ┌───────────┼───────────┐
-      ▼           ▼           ▼
- [ECS Task 1] [ECS Task 2] [ECS Task N]
- Spring Boot   Spring Boot   Auto Scaling
-      │           │           │
-      ├───────────┼───────────┤
-      ▼           ▼           ▼
-   [RDS MySQL]  [Redis]    [S3]
-   Multi-AZ     Cluster    첨부파일
-      │
-   [SQS]
-   알림/자동화 큐
-```
 
 ---
 
@@ -284,26 +249,7 @@ SPRING_PROFILES_ACTIVE=dev
 # APP_CORS_ORIGINS=https://app.example.com,https://admin.example.com
 ```
 
----
-
-## 🌐 CORS (브라우저 통신)
-
-- Spring Security에 **`/api/**` CORS**가 등록되어 있으며, 허용 Origin은 설정으로만 지정합니다(와일드카드 Origin 미사용).
-- 기본값은 `application.yml`의 `app.security.cors.allowed-origins`이며, **`APP_CORS_ORIGINS` 환경 변수**로 덮어쓸 수 있습니다.
-- 로컬 웹(`http://localhost:5173`, `http://127.0.0.1:5173`)이 기본 포함됩니다. Vite 개발 서버는 `apps/web/vite.config.ts`에서 `/api`를 백엔드로 **프록시**하므로, 같은 Origin으로만 호출할 때는 CORS가 개입하지 않을 수 있습니다.
-
----
-
-## ✅ 테스트 및 품질
-
-| 구분 | 명령 | 설명 |
-|------|------|------|
-| 백엔드 단위·통합 | `./gradlew test` 또는 `npm run test:api` | JUnit, `@SpringBootTest`, MockMvc 등 |
-| 웹 | `npm run test:web` | Vitest + Testing Library (`apps/web/src/**/*.test.ts(x)`) |
-| 모바일 | `cd apps/mobile && flutter test` | 위젯 테스트 등 |
-| 부하(k6) | `npm run test:load:k6` | `scripts/load/k6-api-smoke.js` 스모크 시나리오 |
-
-검증 시나리오·알려진 이슈 요약은 [docs/FINAL-TEST-SCENARIOS.md](docs/FINAL-TEST-SCENARIOS.md), [docs/TEST-ISSUES-REPORT.md](docs/TEST-ISSUES-REPORT.md)를 참고합니다.
+자세한 CORS 동작은 [docs/cors.md](docs/cors.md)를 참고하세요.
 
 ---
 
@@ -347,254 +293,50 @@ phs/
 │   ├── application.yml            # 공통 설정
 │   ├── application-dev.yml        # 개발 환경
 │   └── application-prod.yml       # 운영 환경
-├── docs/                          # 프로젝트 문서
-│   ├── FINAL-TEST-SCENARIOS.md    #   최종 테스트 시나리오
-│   ├── TEST-ISSUES-REPORT.md      #   검증 결과·이슈 보고
-│   ├── PRD.md                     #   제품 요구사항
-│   ├── PHASE.md                   #   Phase 로드맵
-│   ├── TASKS.md                   #   Task 목록 (89개)
-│   ├── WORKFLOW.md                #   개발 워크플로우
-│   ├── REQUIREMENTS-v2.md         #   FR 상세·RTM (Phase 1)
-│   ├── NFR-VERIFICATION.md        #   NFR 검증
-│   ├── STORY-MAP.md               #   스토리 맵
-│   ├── WIREFRAME-SPEC.md          #   화면 와이어 사양
-│   ├── SPRINT-BACKLOG-DRAFT.md    #   스프린트 백로그 초안
-│   ├── DOR-DOD.md                 #   DoR/DoD
-│   ├── spikes/                    #   기술 스파이크 (JQL, 워크플로)
-│   └── design/                    #   Phase 2 설계 (ERD, DDL, API, 인프라, CI/CD)
-├── rules/                         # 개발 규칙
-│   ├── human/                     #   사람용 상세 규칙 (7개)
-│   └── ai/                        #   AI용 간결 규칙 (7개)
-├── .ai/spring-conventions.json    # 코드 생성 컨벤션
+├── docs/                          # 프로젝트 문서 (PRD, 설계, 아래 부가 md)
+│   ├── architecture.md            # 시스템 아키텍처 (README에서 분리)
+│   ├── cors.md
+│   ├── testing.md
+│   ├── api-reference.md
+│   ├── erd-overview.md
+│   ├── contributing.md
+│   ├── documents-index.md         # PRD·TASKS 등 색인 + 외부 문서 링크
+│   ├── LICENSE-MIT.md
+│   ├── PRD.md
+│   ├── FINAL-TEST-SCENARIOS.md
+│   ├── TEST-ISSUES-REPORT.md
+│   ├── PHASE.md
+│   ├── TASKS.md
+│   ├── WORKFLOW.md
+│   ├── REQUIREMENTS-v2.md
+│   ├── NFR-VERIFICATION.md
+│   ├── STORY-MAP.md
+│   ├── WIREFRAME-SPEC.md
+│   ├── SPRINT-BACKLOG-DRAFT.md
+│   ├── DOR-DOD.md
+│   ├── spikes/
+│   └── design/
+├── rules/
+│   ├── human/
+│   └── ai/
+├── .ai/spring-conventions.json
 ├── build.gradle
 └── README.md
 ```
 
 ---
 
-## 📡 API 명세
+## 📎 더 보기 (부가 문서)
 
-> Swagger UI: `http://localhost:8080/swagger-ui.html`
-
-### 인증 API
-
-| Method | URL | 설명 | 인증 |
-|--------|-----|------|:----:|
-| `POST` | `/api/auth/register` | 회원가입 (JWT 없음) | - |
-| `POST` | `/api/auth/login` | 로그인 (Access + Refresh JWT) | - |
-| `POST` | `/api/auth/refresh` | 리프레시 토큰으로 재발급 (로테이션) | - |
-
-이후 API는 헤더 `Authorization: Bearer {accessToken}` 필요.
-
-### 사용자 API
-
-| Method | URL | 설명 | 인증 |
-|--------|-----|------|:----:|
-| `GET` | `/api/v1/users` | 사용자 목록 | ✅ |
-| `GET` | `/api/v1/users/{id}` | 사용자 상세 | ✅ |
-| `POST` | `/api/v1/users` | 회원가입 (레거시, `register`와 동일) | - |
-| `PUT` | `/api/v1/users/{id}` | 사용자 수정 | ✅ |
-| `DELETE` | `/api/v1/users/{id}` | 사용자 삭제 | ✅ |
-
-### 프로젝트 API
-
-| Method | URL | 설명 | 인증 |
-|--------|-----|------|:----:|
-| `GET` | `/api/v1/projects` | 내가 멤버인 프로젝트 목록 | ✅ |
-| `POST` | `/api/v1/projects` | 프로젝트 생성 | ✅ |
-| `GET` | `/api/v1/projects/{id}` | 프로젝트 상세 | ✅ |
-| `PUT` | `/api/v1/projects/{id}` | 프로젝트 수정 | ✅ |
-| `DELETE` | `/api/v1/projects/{id}` | 프로젝트 삭제 | ✅ |
-| `GET` | `/api/v1/projects/{id}/members` | 멤버 목록 | ✅ |
-| `POST` | `/api/v1/projects/{id}/members` | 멤버 추가 | ✅ |
-| `DELETE` | `/api/v1/projects/{id}/members/{memberId}` | 멤버 제거 | ✅ |
-| `GET` | `/api/v1/projects/{projectId}/roadmap/epics` | 로드맵용 Epic 목록 (`effectiveStart`/`effectiveEnd` 등, FR-012) | ✅ |
-| `GET` | `/api/v1/projects/{projectId}/wip-limits` | 칸반 WIP 한도 목록 | ✅ |
-| `PUT` | `/api/v1/projects/{projectId}/wip-limits` | WIP 한도 전체 교체 (`limits`: `[{status,maxIssues}]`, KANBAN만) | ✅ |
-
-### 이슈 API
-
-| Method | URL | 설명 | 인증 |
-|--------|-----|------|:----:|
-| `GET` | `/api/v1/issues/project/{projectId}` | 이슈 목록 (페이징) | ✅ |
-| `GET` | `/api/v1/issues/project/{projectId}/backlog` | 백로그 (`backlogRank` 오름차순) | ✅ |
-| `PUT` | `/api/v1/issues/project/{projectId}/backlog/order` | 백로그 순서 일괄 저장 (`orderedIssueIds`: 스프린트 미배정 이슈 전체) | ✅ |
-| `POST` | `/api/v1/issues/project/{projectId}/sprint-assignment` | 다수 이슈 스프린트 배정 (`issueIds`, `sprintId` null이면 백로그로) | ✅ |
-| `GET` | `/api/v1/issues/{issueKey}` | 이슈 상세 (`labels`·`components` 배열 포함) | ✅ |
-| `POST` | `/api/v1/issues` | 이슈 생성 (Epic만 `epicStartDate`·`epicEndDate` 선택, ISO 날짜) | ✅ |
-| `PUT` | `/api/v1/issues/{issueKey}` | 이슈 수정 (Epic: `patchEpicDates`·기간, `clearEpicDates`) | ✅ |
-| `DELETE` | `/api/v1/issues/{issueKey}` | 이슈 삭제 | ✅ |
-| `POST` | `/api/v1/issues/{issueKey}/transitions` | 상태 전환 (KANBAN + WIP 설정 시 한도 초과 시 409) | ✅ |
-| `GET` | `/api/v1/issues/{issueKey}/transitions` | 전환 이력 | ✅ |
-| `GET` | `/api/v1/issues/{issueKey}/links` | 이슈 링크 목록 | ✅ |
-| `POST` | `/api/v1/issues/{issueKey}/links` | 이슈 링크 생성 (`targetIssueKey`, `linkType`) | ✅ |
-| `PUT` | `/api/v1/issues/links/{linkId}` | 링크 유형 변경 | ✅ |
-| `DELETE` | `/api/v1/issues/links/{linkId}` | 링크 삭제 | ✅ |
-| `POST` | `/api/v1/issues/{issueKey}/labels` | 레이블 연결 (`labelId`) | ✅ |
-| `DELETE` | `/api/v1/issues/{issueKey}/labels/{labelId}` | 레이블 해제 | ✅ |
-| `POST` | `/api/v1/issues/{issueKey}/components` | 컴포넌트 연결 (`componentId`, 동일 프로젝트만) | ✅ |
-| `DELETE` | `/api/v1/issues/{issueKey}/components/{componentId}` | 컴포넌트 해제 | ✅ |
-| `GET` | `/api/v1/issues/{issueKey}/attachments` | 이슈 첨부 목록 | ✅ |
-| `POST` | `/api/v1/issues/{issueKey}/attachments` | 첨부 업로드 (`multipart/form-data`, 파트명 `file`, 최대 20MB) | ✅ |
-| `GET` | `/api/v1/attachments/{id}/file` | 첨부 파일 다운로드 (바이너리) | ✅ |
-| `DELETE` | `/api/v1/attachments/{id}` | 첨부 삭제 | ✅ |
-
-### JQL (FR-016)
-
-| Method | URL | 설명 | 인증 |
-|--------|-----|------|:----:|
-| `POST` | `/api/v1/projects/{projectId}/jql/search` | JQL 검색 (`jql`, `startAt`, `maxResults`; `app.jql.max-results-cap` 상한) | ✅ |
-| `POST` | `/api/v1/projects/{projectId}/jql/filters` | 저장 필터 생성 (`name`, `jql`) | ✅ |
-| `GET` | `/api/v1/projects/{projectId}/jql/filters` | 현재 사용자 저장 필터 목록 | ✅ |
-| `DELETE` | `/api/v1/projects/{projectId}/jql/filters/{filterId}` | 저장 필터 삭제 (소유자만) | ✅ |
-
-### 스프린트 API
-
-| Method | URL | 설명 | 인증 |
-|--------|-----|------|:----:|
-| `GET` | `/api/v1/sprints/project/{projectId}` | 스프린트 목록 | ✅ |
-| `GET` | `/api/v1/sprints/{id}` | 스프린트 상세 | ✅ |
-| `POST` | `/api/v1/sprints` | 스프린트 생성 (`PLANNING`) | ✅ |
-| `POST` | `/api/v1/sprints/{id}/start` | 스프린트 시작 (`PLANNING`→`ACTIVE`, 프로젝트당 `ACTIVE` 1개) | ✅ |
-| `POST` | `/api/v1/sprints/{id}/complete` | 스프린트 완료 (`ACTIVE`→`COMPLETED`). 선택 JSON: `disposition`=`BACKLOG`\|`NEXT_SPRINT`, `NEXT_SPRINT` 시 `nextSprintId`(동일 프로젝트·`PLANNING`) | ✅ |
-| `DELETE` | `/api/v1/sprints/{id}` | 스프린트 삭제 (`ACTIVE`·이슈 배정 시 409) | ✅ |
-| `GET` | `/api/v1/sprints/{id}/board` | 스프린트 보드 (상태별 컬럼, `swimlane=NONE`\|`ASSIGNEE`) | ✅ |
-
-**FR-008**: 보드는 `IssueStatus` 6단계 컬럼 + 스윔레인. 응답은 Redis에 JSON으로 캐시됨 (`app.board.cache.enabled` / `ttl-seconds`; 테스트 프로필에서는 기본 비활성). 이슈 생성·수정·전환·삭제·스프린트 배정 및 스프린트 시작·완료·삭제 시 해당 스프린트 캐시 무효화. **FR-011**: 잘못된 전환이나 동시 진행·삭제 제한 위반 시 HTTP 409 (`SPRINT_*` 오류 코드).
-
-### 릴리즈/댓글/대시보드/감사 API
-
-| Method | URL | 설명 | 인증 |
-|--------|-----|------|:----:|
-| `GET` | `/api/v1/versions/project/{projectId}` | 프로젝트별 버전 목록 | ✅ |
-| `GET` | `/api/v1/versions/{id}` | 버전 상세 | ✅ |
-| `POST` | `/api/v1/versions` | 버전 생성 | ✅ |
-| `POST` | `/api/v1/versions/{id}/release` | 릴리즈 | ✅ |
-| `DELETE` | `/api/v1/versions/{id}` | 버전 삭제 | ✅ |
-| `GET` | `/api/v1/comments/issue/{issueId}` | 댓글 목록 | ✅ |
-| `POST` | `/api/v1/comments` | 댓글 작성 | ✅ |
-| `GET` | `/api/v1/dashboards` | 대시보드 목록 | ✅ |
-| `GET` | `/api/v1/audit-logs/issue/{issueId}` | 감사 로그 | ✅ |
-
----
-
-## 🗃️ ERD
-
-주요 엔티티 20개, N:M 중간 테이블 4개로 구성됩니다.
-
-```
-PROJECT ──1:N── PROJECT_MEMBER ──N:1── USER_ACCOUNT
-   │                                       │
-   ├──1:N── SPRINT                         │
-   ├──1:N── RELEASE_VERSION                │
-   ├──1:N── COMPONENT                      │
-   └──1:N── WIP_LIMIT                     │
-                                           │
-ISSUE ──N:1── PROJECT          ISSUE ──N:1── USER_ACCOUNT (assignee/reporter)
-  │                               │
-  ├──1:N── COMMENT               ├──N:1── SPRINT
-  ├──1:N── ATTACHMENT            ├──N:1── ISSUE (parent, 자기참조)
-  ├──1:N── WORKFLOW_TRANSITION   │
-  ├──1:N── AUDIT_LOG             ├──N:M── LABEL (via ISSUE_LABEL)
-  ├──1:N── ISSUE_LINK            ├──N:M── COMPONENT (via ISSUE_COMPONENT)
-  └──1:N── ISSUE_WATCHER         └──N:M── RELEASE_VERSION (via ISSUE_FIX_VERSION)
-
-DASHBOARD ──N:1── USER_ACCOUNT
-  └──1:N── DASHBOARD_GADGET
-```
-
----
-
-## 🤝 기여 가이드
-
-### 브랜치 전략
-
-```
-master           ← 운영 배포 (직접 push 금지)
-  └── develop    ← 개발 통합 (기본 PR 타깃)
-       ├── feature/{주제}       ← 기능·품질 묶음 (예: feature/test-issues-remediation)
-       ├── feat/T-{id}-{설명}   ← 기능 개발
-       ├── fix/T-{id}-{설명}    ← 버그 수정
-       └── docs/{설명}          ← 문서 작업
-```
-
-테스트 보고서·CORS·스프린트 완료 시 미완료 이슈 처리·Vitest·k6·모바일 오프라인 캐시 등은 **`feature/test-issues-remediation`** 등 기능 브랜치에서 작업한 뒤 `develop`으로 PR·머지합니다.
-
-### 커밋 컨벤션
-
-```
-feat(issue): 이슈 CRUD API 구현
-fix(auth):   토큰 갱신 실패 수정
-docs:        PRD 문서 작성
-refactor:    서비스 로직 분리
-test:        회원가입 단위 테스트
-chore:       build.gradle 의존성 업데이트
-```
-
-### PR 규칙
-
-1. `develop` 브랜치로 PR 생성
-2. 제목: `[T-{id}] {요약}` 형식
-3. 리뷰어 1명 이상 승인 후 Squash Merge
-4. CI (빌드 + 테스트) 통과 필수
-5. 스프린트 단위 DoR/DoD는 [DOR-DOD.md](docs/DOR-DOD.md)를 본다 (Sprint 맥락은 [WORKFLOW.md](docs/WORKFLOW.md) §6)
-
-### Cursor 에이전트 스킬
-
-Cursor 등에서 Flutter·React 환경 작업 시 참고용 스킬이 `.cursor/skills/`에 있습니다 (`flutter-setup`, `react-setup`).
-
-자세한 내용은 [WORKFLOW.md](docs/WORKFLOW.md) 참조
-
----
-
-## 📚 프로젝트 문서
-
-### 내부 문서
-
-| 문서 | 설명 |
+| 문서 | 내용 |
 |------|------|
-| [PRD.md](docs/PRD.md) | 제품 요구사항 (기능/비기능, 데이터 모델, API) |
-| [PHASE.md](docs/PHASE.md) | Phase 0~8 개발 로드맵 |
-| [TASKS.md](docs/TASKS.md) | 89개 세부 Task 목록 (Phase별 분류) |
-| [WORKFLOW.md](docs/WORKFLOW.md) | Git, Sprint, CI/CD, 코드 리뷰 프로세스 |
-| [REQUIREMENTS-v2.md](docs/REQUIREMENTS-v2.md) | FR-001~033·모바일 RTM (Phase 1) |
-| [NFR-VERIFICATION.md](docs/NFR-VERIFICATION.md) | NFR-001~011 검증 보고 |
-| [STORY-MAP.md](docs/STORY-MAP.md) | Epic·사용자 스토리 맵 |
-| [WIREFRAME-SPEC.md](docs/WIREFRAME-SPEC.md) | 웹 14화면·모바일 흐름 사양 |
-| [SPRINT-BACKLOG-DRAFT.md](docs/SPRINT-BACKLOG-DRAFT.md) | FR ↔ 개발 Phase 백로그 초안 |
-| [DOR-DOD.md](docs/DOR-DOD.md) | Definition of Ready / Done |
-| [E2E-LIFECYCLE-SCENARIOS.md](docs/E2E-LIFECYCLE-SCENARIOS.md) | 프로젝트 생성~관리 종료 E2E·수동 테스트 시나리오 |
-| [FINAL-TEST-SCENARIOS.md](docs/FINAL-TEST-SCENARIOS.md) | 최종 테스트 시나리오(Part A~E) |
-| [TEST-ISSUES-REPORT.md](docs/TEST-ISSUES-REPORT.md) | 검증 결과·이슈 목록 및 조치 요약 |
-| [docs/spikes/](docs/spikes/) | JQL·워크플로 기술 스파이크 |
-| [docs/design/](docs/design/) | Phase 2: ERD, DDL, API, 시퀀스, 인프라, CI/CD, UI 시스템 |
-| [rules/human/](rules/human/) | 사람용 Spring 개발 규칙 (7개) |
-| [rules/ai/](rules/ai/) | AI용 간결 개발 규칙 (7개) |
+| [docs/documents-index.md](docs/documents-index.md) | PRD·Phase·Task 등 **내부 문서 색인** 및 외부(documents 레포) 목록 |
+| [docs/architecture.md](docs/architecture.md) | 운영 관점 시스템 아키텍처 다이어그램 |
+| [docs/cors.md](docs/cors.md) | 브라우저 CORS 설정 요약 |
+| [docs/testing.md](docs/testing.md) | 테스트 명령·품질 관련 링크 |
+| [docs/api-reference.md](docs/api-reference.md) | REST API 엔드포인트 표 (Swagger 보조) |
+| [docs/erd-overview.md](docs/erd-overview.md) | 엔티티 관계 요약 |
+| [docs/contributing.md](docs/contributing.md) | 브랜치·커밋·PR·Cursor 스킬 |
+| [docs/LICENSE-MIT.md](docs/LICENSE-MIT.md) | MIT 라이선스 전문 |
 
-### 외부 참고 문서
-
-본 프로젝트의 기획/설계 원본 문서는 별도 레포지토리에서 관리됩니다.
-
-> [Project-Control-Hub/documents](https://github.com/Project-Control-Hub/documents)
-
-| 문서 | 설명 |
-|------|------|
-| 00-스케줄 | 프로젝트 마일스톤 및 주차별 일정 (Gantt) |
-| 01-프로젝트계획서 | 배경, 목표, 팀 구성, 기술 스택, 리스크 관리 |
-| 02-ERD | 데이터베이스 ERD 및 테이블 명세 (20개 엔티티) |
-| 03-아키텍처정의서 | 레이어드/물리 배포/데이터 흐름 아키텍처 |
-| 04-API정의서 | REST API 엔드포인트 상세 스펙 (18개 도메인) |
-| 05-화면흐름시퀀스 | 로그인, 이슈 생성, 워크플로우 전환 시퀀스 다이어그램 |
-| 06-화면기능정의서 | 14개 화면 UI 요소, 기능 정의, 상태 처리 |
-| 07-요구사항정의서 | 기능(FR-001~033) / 비기능(NFR-001~009) 요구사항 |
-| 08-Git규칙정의서 | 브랜치 전략, 커밋 컨벤션, PR 규칙 |
-| 09-스토리보드 | 화면별 사용자 시나리오 스토리보드 |
-| 10-테스트전략서 | 단위/통합/E2E/성능/보안 테스트 전략 |
-| 11-코드리뷰규칙 | 리뷰 체크리스트, 응답 규칙 |
-| 12-배포가이드 | AWS 인프라, CI/CD, 모니터링 배포 절차 |
-
----
-
-## 📄 라이선스
-
-This project is licensed under the MIT License.
+This project is licensed under the MIT License — [전문](docs/LICENSE-MIT.md).
